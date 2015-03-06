@@ -1,0 +1,141 @@
+#!/usr/bin/env ruby
+
+require 'trollop'
+require 'js_base'
+require 'pathname'
+
+class UpdateAssetsApp
+
+  def initialize
+    @verbose = nil
+    @project_name = nil
+    @project_directory = nil
+    @project_test_directory = nil
+  end
+
+
+  def run(args = ARGV)
+
+    options = Trollop::options(args) do
+        opt :project, "specify test project directory", :type => :string
+        opt :verbose, "verbose"
+    end
+
+    @verbose = options[:verbose]
+    find_test_project(options[:project])
+    info "Project: #{@project_test_directory}"
+    update_project_assets
+  end
+
+
+  private
+
+
+  def remove_suffix(string,suffix,must_exist = false)
+    if string.end_with?(suffix)
+      string = string[0...-suffix.length]
+    else
+      die "string '#{string}' missing suffix '#{suffix}'" if must_exist
+    end
+    string
+  end
+
+  def info(msg)
+    puts msg if @verbose
+  end
+
+  # Find the Android test project directory given user-specified path; use some heuristics if the user was sloppy
+  #
+  def find_test_project(path)
+    path ||= Dir.pwd
+
+    success = false
+    once_only do
+      s = Pathname.new(path).cleanpath.to_s
+      break if !File.directory?(s)
+
+      # If it doesn't have the 'Test' suffix, see if such a sibling directory exists
+      if !s.end_with?('Test')
+        s = s+'Test'
+        break if !File.directory?(s)
+      end
+
+      s2 = remove_suffix(s,'Test')
+      break if s2.length == 0
+      pth2 = Pathname.new(s2)
+      break if !pth2.directory?
+      success = true
+
+      @project_test_directory = s
+      @project_directory = s2
+      @project_name = pth2.basename.to_s
+    end
+    die "No Android test project found near: #{path}" if !success
+  end
+
+  # Parse the output of the 'adb shell ls -aF xxxx/' command
+  #
+  # Returns an array of filenames relative to "xxxx/", each ending with '/' iff it's a directory
+  #
+  def parse_directory_listing(text)
+    contents = []
+    text.lines.each do |line|
+      line.chomp!
+      value = nil
+      if line.length > 2 && line[1] == ' '
+        name = line[2..-1]
+        type = line[0]
+        if type == 'd'
+          value = "#{name}/"
+        elsif type == '-'
+          if !name.end_with?('/')
+            value = name
+          end
+        end
+      end
+      if !value
+        die "Problem parsing directory listing line; '#{line}'"
+      end
+      contents << value
+    end
+    contents
+  end
+
+  # Copy assets folder from device to project
+  #
+  def update_project_assets
+    device_assets_directory = "sdcard/assets_#{@project_name.downcase}test"
+    project_assets_directory = File.join(@project_test_directory,'assets')
+    update_project_assets_aux(device_assets_directory,project_assets_directory,'')
+  end
+
+  def update_project_assets_aux(device_assets_dir,project_assets_dir,dir)
+    info "Updating assets directory: #{dir}"
+
+    # Construct directory in project, if it doesn't already exist
+    if !File.directory?(project_assets_dir)
+      FileUtils.mkdir_p(project_assets_dir)
+    end
+
+    directory_listing,_ = scall("adb shell ls -aF #{device_assets_dir}/#{dir}/")
+    entries = parse_directory_listing(directory_listing)
+    entries.each do |entry|
+      if entry.end_with?('/')
+        entry = remove_suffix(entry,'/')
+        fname = entry
+        fname = dir + '/' + fname if dir.length != 0
+        update_project_assets_aux(device_assets_dir,project_assets_dir,fname)
+      else
+        fname = dir + '/' + entry
+        info "Pulling #{project_assets_dir}/#{fname}"
+        scall("adb pull '#{device_assets_dir}/#{fname}' '#{project_assets_dir}/#{fname}'")
+      end
+    end
+  end
+
+
+end
+
+if __FILE__ == $0
+  UpdateAssetsApp.new.run()
+end
