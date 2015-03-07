@@ -61,6 +61,10 @@ public class GestActivity extends MyActivity {
 				mStrokeSet.addPoint(event.getEventTime() / 1000.0f, ptrId, pt);
 				sb.append("" + ptrId + d((int) pt.x, 4) + d((int) pt.y, 4));
 			}
+			
+			if (actionMasked == MotionEvent.ACTION_UP || actionMasked == MotionEvent.ACTION_POINTER_UP)
+				mStrokeSet.stopStroke(activeId);
+			
 			if (printFlag) {
 				pr(sb);
 				mPrevPrintedTime = event.getEventTime();
