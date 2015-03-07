@@ -2,7 +2,9 @@ package com.js.gestApp;
 
 import com.js.android.MyActivity;
 import com.js.basic.Point;
+import com.js.gest.Rect;
 import com.js.gest.Stroke;
+import com.js.gest.StrokeRegistrator;
 import com.js.gest.StrokeSet;
 
 import android.content.Context;
@@ -95,6 +97,7 @@ public class GestActivity extends MyActivity {
 
 		@Override
 		public void onDraw(Canvas canvas) {
+			mCanvas = canvas;
 			if (mStrokeSet != null) {
 				Paint p = mPaint;
 				p.setColor(Color.WHITE);
@@ -105,15 +108,26 @@ public class GestActivity extends MyActivity {
 					for (int i = 0; i < s.length(); i++) {
 						Point point = s.get(i).getPoint();
 						if (prevPoint != null) {
-							canvas.drawLine(prevPoint.x, prevPoint.y, point.x, point.y, p);
+							drawLine(prevPoint, point);
 						}
 						prevPoint = point;
 					}
 				}
+
+				p.setStrokeWidth(3);
+				Rect r = StrokeRegistrator.bounds(mStrokeSet);
+				for (int i = 0; i < 4; i++)
+					drawLine(r.corner(i), r.corner((i + 1) % 4));
 			}
+			mCanvas = null;
+		}
+
+		private void drawLine(Point p1, Point p2) {
+			mCanvas.drawLine(p1.x, p1.y, p2.x, p2.y, mPaint);
 		}
 
 		private Paint mPaint = new Paint();
+		private Canvas mCanvas;
 		private boolean mAlwaysFalse;
 		private long mPrevPrintedTime;
 		private StrokeSet mStrokeSet;
