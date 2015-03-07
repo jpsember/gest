@@ -1,4 +1,4 @@
-package com.js.gest;
+package com.js.gestApp;
 
 import com.js.android.MyActivity;
 
