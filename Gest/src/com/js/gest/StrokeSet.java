@@ -2,6 +2,7 @@ package com.js.gest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.js.basic.Point;
@@ -11,7 +12,7 @@ import static com.js.basic.Tools.*;
  * A collection of Strokes, which ultimately will be recognized as a touch
  * gesture
  */
-public class StrokeSet {
+public class StrokeSet implements Iterable<Stroke> {
 
 	/**
 	 * Add a point to a stroke within the set. Construct a stroke for this pointer
@@ -26,7 +27,6 @@ public class StrokeSet {
 			mInitialEventTime = eventTime;
 		Stroke s = strokeForId(pointerId);
 		s.addPoint(eventTime - mInitialEventTime, pt);
-		pr("Added point " + pt + " for id " + pointerId + ":\n" + this);
 	}
 
 	/**
@@ -38,7 +38,6 @@ public class StrokeSet {
 	 */
 	public void stopStroke(int pointerId) {
 		mStrokeIdToIndexMap.remove(pointerId);
-		pr("Stopped stroke with id " + pointerId + ":\n" + this);
 	}
 
 	private Stroke strokeForId(int pointerId) {
@@ -61,8 +60,8 @@ public class StrokeSet {
 		for (int strokeIndex = 0; strokeIndex < mStrokes.size(); strokeIndex++) {
 			Stroke stroke = mStrokes.get(strokeIndex);
 
-			// Display which current id corresponds to this stroke, or 'X' if none
-			String strokeIdString = "X";
+			// Display which current id corresponds to this stroke, or '-' if none
+			String strokeIdString = "-";
 			for (int mapStrokeId : mStrokeIdToIndexMap.keySet()) {
 				int mapStrokeIndex = mStrokeIdToIndexMap.get(mapStrokeId);
 				if (mapStrokeIndex == strokeIndex) {
@@ -82,6 +81,10 @@ public class StrokeSet {
 			sb.append("\n");
 		}
 		return sb.toString();
+	}
+
+	public Iterator<Stroke> iterator() {
+		return mStrokes.iterator();
 	}
 
 	private float mInitialEventTime;

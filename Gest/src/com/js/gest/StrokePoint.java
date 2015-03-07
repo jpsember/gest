@@ -6,7 +6,7 @@ import static com.js.basic.Tools.*;
 /**
  * A StrokePoint represents a discrete position along a Stroke
  */
-class StrokePoint {
+public class StrokePoint {
 
 	public StrokePoint(float time, Point point) {
 		mTime = time;

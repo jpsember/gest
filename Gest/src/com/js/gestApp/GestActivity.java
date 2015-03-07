@@ -2,10 +2,13 @@ package com.js.gestApp;
 
 import com.js.android.MyActivity;
 import com.js.basic.Point;
+import com.js.gest.Stroke;
 import com.js.gest.StrokeSet;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -61,16 +64,23 @@ public class GestActivity extends MyActivity {
 				mStrokeSet.addPoint(event.getEventTime() / 1000.0f, ptrId, pt);
 				sb.append("" + ptrId + d((int) pt.x, 4) + d((int) pt.y, 4));
 			}
-			
-			if (actionMasked == MotionEvent.ACTION_UP || actionMasked == MotionEvent.ACTION_POINTER_UP)
-				mStrokeSet.stopStroke(activeId);
-			
+
 			if (printFlag) {
 				pr(sb);
 				mPrevPrintedTime = event.getEventTime();
 			}
-			if (actionMasked == MotionEvent.ACTION_UP)
+
+			if (actionMasked == MotionEvent.ACTION_UP
+					|| actionMasked == MotionEvent.ACTION_POINTER_UP)
+				mStrokeSet.stopStroke(activeId);
+
+			if (actionMasked == MotionEvent.ACTION_UP) {
+				pr(mStrokeSet);
 				pr("");
+			}
+
+			// Invalidate the view so it is redrawn with the updated stroke set
+			invalidate();
 
 			if (event.getAction() == MotionEvent.ACTION_UP && mAlwaysFalse) {
 				return performClick();
@@ -83,6 +93,27 @@ public class GestActivity extends MyActivity {
 			return super.performClick();
 		}
 
+		@Override
+		public void onDraw(Canvas canvas) {
+			if (mStrokeSet != null) {
+				Paint p = mPaint;
+				p.setColor(Color.WHITE);
+				p.setStrokeWidth(8);
+
+				for (Stroke s : mStrokeSet) {
+					Point prevPoint = null;
+					for (int i = 0; i < s.length(); i++) {
+						Point point = s.get(i).getPoint();
+						if (prevPoint != null) {
+							canvas.drawLine(prevPoint.x, prevPoint.y, point.x, point.y, p);
+						}
+						prevPoint = point;
+					}
+				}
+			}
+		}
+
+		private Paint mPaint = new Paint();
 		private boolean mAlwaysFalse;
 		private long mPrevPrintedTime;
 		private StrokeSet mStrokeSet;
