@@ -1,7 +1,8 @@
 package com.js.gestApp;
 
 import com.js.android.MyActivity;
-import com.js.basic.IPoint;
+import com.js.basic.Point;
+import com.js.gest.StrokeSet;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -24,8 +25,6 @@ public class GestActivity extends MyActivity {
 		return mView;
 	}
 
-	private OurView mView;
-
 	private static class OurView extends View {
 
 		public OurView(Context context) {
@@ -38,38 +37,37 @@ public class GestActivity extends MyActivity {
 			int actionMasked = event.getActionMasked();
 			if (actionMasked == MotionEvent.ACTION_DOWN) {
 				pr("\nTouchEvent");
+				mStrokeSet = new StrokeSet();
 			}
 
-			int activeId = -1;
-			StringBuilder sb = null;
-			if (actionMasked == MotionEvent.ACTION_DOWN
+			boolean printFlag = (actionMasked == MotionEvent.ACTION_DOWN
 					|| actionMasked == MotionEvent.ACTION_UP
 					|| actionMasked == MotionEvent.ACTION_POINTER_DOWN
-					|| actionMasked == MotionEvent.ACTION_POINTER_UP
-					|| (System.currentTimeMillis() - mPrevTime > 200)) {
-				activeId = event.getPointerId(event.getActionIndex());
-				sb = new StringBuilder(" action=" + actionMasked);
-				mPrevTime = System.currentTimeMillis();
-			}
+					|| actionMasked == MotionEvent.ACTION_POINTER_UP || event
+					.getEventTime() - mPrevPrintedTime > 200);
 
-			if (sb != null) {
-				MotionEvent.PointerCoords mCoord = new MotionEvent.PointerCoords();
-				for (int i = 0; i < event.getPointerCount(); i++) {
-					int ptrId = event.getPointerId(i);
-					event.getPointerCoords(i, mCoord);
-					sb.append("     ");
-					if (activeId == ptrId)
-						sb.append("*");
-					else
-						sb.append(":");
-					IPoint pt = new IPoint(mCoord.x, mCoord.y);
-					sb.append("" + ptrId + d(pt.x, 4) + d(pt.y, 4));
-				}
+			int activeId = event.getPointerId(event.getActionIndex());
+			StringBuilder sb = new StringBuilder(" action=" + actionMasked);
+			MotionEvent.PointerCoords mCoord = new MotionEvent.PointerCoords();
+			for (int i = 0; i < event.getPointerCount(); i++) {
+				int ptrId = event.getPointerId(i);
+				event.getPointerCoords(i, mCoord);
+				sb.append("     ");
+				if (activeId == ptrId)
+					sb.append("*");
+				else
+					sb.append(":");
+				Point pt = new Point(mCoord.x, mCoord.y);
+				mStrokeSet.addPoint(event.getEventTime() / 1000.0f, ptrId, pt);
+				sb.append("" + ptrId + d((int) pt.x, 4) + d((int) pt.y, 4));
 			}
-			if (sb != null)
+			if (printFlag) {
 				pr(sb);
+				mPrevPrintedTime = event.getEventTime();
+			}
 			if (actionMasked == MotionEvent.ACTION_UP)
 				pr("");
+
 			if (event.getAction() == MotionEvent.ACTION_UP && mAlwaysFalse) {
 				return performClick();
 			}
@@ -82,8 +80,10 @@ public class GestActivity extends MyActivity {
 		}
 
 		private boolean mAlwaysFalse;
-		private long mPrevTime;
-
+		private long mPrevPrintedTime;
+		private StrokeSet mStrokeSet;
 	}
+
+	private OurView mView;
 
 }
