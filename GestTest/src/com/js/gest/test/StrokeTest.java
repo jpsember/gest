@@ -23,7 +23,7 @@ public class StrokeTest extends MyTestCase {
 			s.addPoint(time, pt);
 			time += random().nextFloat() * .05f + 0.01f;
 		}
-		if (true) {
+		if (false) {
 			// For verifying JSON appearance
 			try {
 				pr("built stroke " + s.toJSON());

@@ -95,7 +95,7 @@ public class Stroke implements Iterable<StrokePoint> {
 			a.put((int) pt.getPoint().y);
 		}
 		map.put(JSON_KEY_POINTS, a);
-		return map.toString(2);
+		return map.toString();
 	}
 
 	public static Stroke parseJSON(String script) throws JSONException {
