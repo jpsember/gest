@@ -3,6 +3,7 @@ package com.js.gest;
 import android.graphics.Matrix;
 
 import com.js.basic.Point;
+import static com.js.basic.Tools.*;
 
 public class StrokeRegistrator {
 
@@ -30,8 +31,15 @@ public class StrokeRegistrator {
 
 	public static StrokeSet fitToStandardRect(StrokeSet set) {
 		Rect origBounds = bounds(set);
-		Matrix m = transformToFitStandard(origBounds);
-		throw new UnsupportedOperationException();
+		Matrix transform = transformToFitStandard(origBounds);
+		StrokeSet standardizedSet = mutableCopyOf(set);
+		for (Stroke stroke : standardizedSet) {
+			for (StrokePoint strokePoint : stroke) {
+				strokePoint.getPoint().apply(transform);
+			}
+		}
+		standardizedSet.freeze();
+		return standardizedSet;
 	}
 
 }

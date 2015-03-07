@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.js.basic.Freezable;
 import com.js.basic.Point;
 import static com.js.basic.Tools.*;
 
@@ -12,7 +13,7 @@ import static com.js.basic.Tools.*;
  * A collection of Strokes, which ultimately will be recognized as a touch
  * gesture
  */
-public class StrokeSet implements Iterable<Stroke> {
+public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 
 	/**
 	 * Add a point to a stroke within the set. Construct a stroke for this pointer
@@ -23,6 +24,7 @@ public class StrokeSet implements Iterable<Stroke> {
 	 * @param pt
 	 */
 	public void addPoint(float eventTime, int pointerId, Point pt) {
+		mutate();
 		if (isEmpty())
 			mInitialEventTime = eventTime;
 		Stroke s = strokeForId(pointerId);
@@ -37,7 +39,15 @@ public class StrokeSet implements Iterable<Stroke> {
 	 * @param pointerId
 	 */
 	public void stopStroke(int pointerId) {
+		mutate();
 		mStrokeIdToIndexMap.remove(pointerId);
+	}
+
+	/**
+	 * Determine if all strokes in the set have been completed
+	 */
+	public boolean isComplete() {
+		return !isEmpty() && mStrokeIdToIndexMap.isEmpty();
 	}
 
 	private Stroke strokeForId(int pointerId) {
@@ -85,6 +95,16 @@ public class StrokeSet implements Iterable<Stroke> {
 
 	public Iterator<Stroke> iterator() {
 		return mStrokes.iterator();
+	}
+
+	@Override
+	public Freezable getMutableCopy() {
+		if (!isComplete()) throw new IllegalStateException();
+		StrokeSet s = new StrokeSet();
+		for (Stroke st : mStrokes) {
+			s.mStrokes.add(mutableCopyOf(st));
+		}
+		return s;
 	}
 
 	private float mInitialEventTime;

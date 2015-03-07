@@ -99,27 +99,36 @@ public class GestActivity extends MyActivity {
 		public void onDraw(Canvas canvas) {
 			mCanvas = canvas;
 			if (mStrokeSet != null) {
-				Paint p = mPaint;
-				p.setColor(Color.WHITE);
-				p.setStrokeWidth(8);
-
-				for (Stroke s : mStrokeSet) {
-					Point prevPoint = null;
-					for (int i = 0; i < s.length(); i++) {
-						Point point = s.get(i).getPoint();
-						if (prevPoint != null) {
-							drawLine(prevPoint, point);
-						}
-						prevPoint = point;
-					}
+				drawStrokeSet(mStrokeSet, 1.0f);
+				if (mStrokeSet.isComplete()) {
+					StrokeSet s2 = StrokeRegistrator.fitToStandardRect(mStrokeSet);
+					drawStrokeSet(s2, 0.5f);
 				}
-
-				p.setStrokeWidth(3);
-				Rect r = StrokeRegistrator.bounds(mStrokeSet);
-				for (int i = 0; i < 4; i++)
-					drawLine(r.corner(i), r.corner((i + 1) % 4));
 			}
 			mCanvas = null;
+		}
+
+		private void drawStrokeSet(StrokeSet mStrokeSet, float scaleFactor) {
+			Paint p = mPaint;
+			p.setColor(Color.WHITE);
+			p.setStrokeWidth(8 * scaleFactor);
+
+			for (Stroke s : mStrokeSet) {
+				Point prevPoint = null;
+				for (int i = 0; i < s.length(); i++) {
+					Point point = s.get(i).getPoint();
+					if (prevPoint != null) {
+						drawLine(prevPoint, point);
+					}
+					prevPoint = point;
+				}
+			}
+
+			p.setStrokeWidth(3 * scaleFactor);
+			Rect r = StrokeRegistrator.bounds(mStrokeSet);
+			for (int i = 0; i < 4; i++)
+				drawLine(r.corner(i), r.corner((i + 1) % 4));
+
 		}
 
 		private void drawLine(Point p1, Point p2) {

@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import com.js.basic.JSONTools;
 import com.js.basic.Point;
+import com.js.basic.Freezable;
 
 import android.graphics.Matrix;
 import static com.js.basic.Tools.*;
@@ -18,7 +19,7 @@ import static com.js.basic.Tools.*;
  * 
  * It represents a user's touch/drag/release action, for a single finger.
  */
-public class Stroke implements Iterable<StrokePoint> {
+public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 
 	public Stroke() {
 		mPoints = new ArrayList();
@@ -26,6 +27,7 @@ public class Stroke implements Iterable<StrokePoint> {
 	}
 
 	public void clear() {
+		mutate();
 		mPoints.clear();
 		mStartTime = -1;
 	}
@@ -59,6 +61,7 @@ public class Stroke implements Iterable<StrokePoint> {
 	}
 
 	public StrokePoint pop() {
+		mutate();
 		return com.js.basic.Tools.pop(mPoints);
 	}
 
@@ -67,6 +70,7 @@ public class Stroke implements Iterable<StrokePoint> {
 	}
 
 	public void addPoint(float time, Point location) {
+		mutate();
 		if (isEmpty()) {
 			mStartTime = time;
 		} else {
@@ -142,6 +146,16 @@ public class Stroke implements Iterable<StrokePoint> {
 
 	public Iterator<StrokePoint> iterator() {
 		return mPoints.iterator();
+	}
+
+	@Override
+	public Freezable getMutableCopy() {
+		Stroke s = new Stroke();
+		s.mStartTime = mStartTime;
+		for (StrokePoint pt : mPoints) {
+			s.mPoints.add(new StrokePoint(pt));
+		}
+		return s;
 	}
 
 	private ArrayList<StrokePoint> mPoints;
