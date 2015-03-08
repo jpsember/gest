@@ -3,9 +3,13 @@ package com.js.gest;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.js.basic.Point;
+
 import static com.js.basic.Tools.*;
 
 public class StrokeNormalizer {
+
+	private static final int DEFAULT_DESIRED_STROKE_LENGTH = 32;
 
 	/**
 	 * Construct a normalizer for a particular stroke set
@@ -14,7 +18,7 @@ public class StrokeNormalizer {
 	 */
 	public StrokeNormalizer(StrokeSet strokeSet) {
 		mSet = strokeSet;
-		mDesiredStrokeSize = 30;
+		mDesiredStrokeSize = DEFAULT_DESIRED_STROKE_LENGTH;
 	}
 
 	public void setDesiredStrokeSize(int size) {
@@ -41,24 +45,26 @@ public class StrokeNormalizer {
 	}
 
 	private void splitStrokeAtFeaturePoints(Stroke origStroke) {
-		unimp("splitStrokeAtFeaturePoints: determine which points are feature points");
 		mSplitStrokeList = new ArrayList();
+		if (true) {
+			unimp("splitStrokeAtFeaturePoints: cutting in two");
+			int q = origStroke.length() / 2;
+			mSplitStrokeList.add(origStroke.constructFragment(0, 1 + q));
+			mSplitStrokeList
+					.add(origStroke.constructFragment(q, origStroke.length()));
+			return;
+		}
+		unimp("splitStrokeAtFeaturePoints: determine which points are feature points");
 		mSplitStrokeList.add(origStroke);
 	}
 
-	private void calculateInterpolatedPointsCount() {
+	private int calculateInterpolatedPointsCount() {
 		int featurePointCount = mSplitStrokeList.size() + 1;
 		int interpPointCount = mDesiredStrokeSize - featurePointCount;
 		if (interpPointCount < 0)
 			throw new IllegalArgumentException("Too many feature points: "
 					+ featurePointCount);
-
-		mInterpPointsRemaining = interpPointCount;
-		float t = 0;
-		for (Stroke s : mSplitStrokeList) {
-			t += s.totalTime();
-		}
-		mInterpPolylineTimeRemaining = t;
+		return interpPointCount;
 	}
 
 	/**
@@ -67,22 +73,75 @@ public class StrokeNormalizer {
 	 * @param origStroke
 	 * @return normalized stroke
 	 */
-	private Stroke normalizeStroke(Stroke origStroke) {
-		splitStrokeAtFeaturePoints(origStroke);
-		calculateInterpolatedPointsCount();
+	private Stroke normalizeStroke(Stroke originalStroke) {
+		splitStrokeAtFeaturePoints(originalStroke);
+		int interpPointsTotal = calculateInterpolatedPointsCount();
+		int interpPointsGenerated = 0;
+		float strokeTimeRemaining = originalStroke.totalTime();
 
-		pr("# strokes in list: " + mSplitStrokeList.size()
-				+ "\ninterpPointsRemaining: " + mInterpPointsRemaining
-				+ "\ntimeRemaining: " + d(mInterpPolylineTimeRemaining));
+		Stroke normalizedStroke = new Stroke();
 
-		unimp("normalizeStroke returning orig stroke");
-		return origStroke;
+		for (Stroke fragment : mSplitStrokeList) {
+			int cursor = 0;
+			StrokePoint strokePoint = fragment.get(cursor);
+
+			// Add fragment's start point, if it's the first fragment
+			if (normalizedStroke.isEmpty())
+				normalizedStroke.addPoint(strokePoint);
+
+			// Determine number of interpolation points to distribute to this fragment
+			float fragmentProportionOfTotalTime = fragment.totalTime()
+					/ strokeTimeRemaining;
+			int fragInterpPointTotal = Math.round(fragmentProportionOfTotalTime
+					* (interpPointsTotal - interpPointsGenerated));
+			interpPointsGenerated += fragInterpPointTotal;
+
+			strokeTimeRemaining -= fragment.totalTime();
+
+			// Determine time interval between generated points
+			// (The fragment endpoints are NOT interpolated)
+			float timeStepWithinFragment = fragment.totalTime()
+					/ (1 + fragInterpPointTotal);
+			float currentTime = strokePoint.getTime();
+			float nextInterpolationTime = currentTime + timeStepWithinFragment;
+
+			int fragInterpPointCount = 0;
+			while (fragInterpPointCount < fragInterpPointTotal) {
+
+				// Advance to next interpolation point, or next source element,
+				// whichever is first
+				StrokePoint nextStrokePoint = fragment.get(cursor + 1);
+
+				if (nextInterpolationTime < nextStrokePoint.getTime()) {
+					// generate a new interpolation point
+					currentTime = nextInterpolationTime;
+					float timeAlongCurrentEdge = currentTime - strokePoint.getTime();
+					float currentEdgeTotalTime = nextStrokePoint.getTime()
+							- strokePoint.getTime();
+					if (currentEdgeTotalTime <= 0
+							|| timeAlongCurrentEdge > currentEdgeTotalTime)
+						throw new IllegalStateException("illegal values");
+					float t = timeAlongCurrentEdge / currentEdgeTotalTime;
+					Point position = MyMath.interpolateBetween(strokePoint.getPoint(),
+							nextStrokePoint.getPoint(), t);
+					normalizedStroke.addPoint(currentTime, position);
+					nextInterpolationTime += timeStepWithinFragment;
+					fragInterpPointCount++;
+				} else {
+					// Advance to next original point
+					currentTime = nextStrokePoint.getTime();
+					strokePoint = nextStrokePoint;
+					cursor += 1;
+				}
+			}
+			// Add fragment's end point
+			normalizedStroke.addPoint(fragment.last());
+		}
+		return normalizedStroke;
 	}
 
 	private StrokeSet mSet;
 	private StrokeSet mNormalized;
 	private int mDesiredStrokeSize;
 	private ArrayList<Stroke> mSplitStrokeList;
-	private float mInterpPolylineTimeRemaining;
-	private int mInterpPointsRemaining;
 }

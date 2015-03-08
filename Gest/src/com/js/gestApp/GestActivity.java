@@ -60,8 +60,10 @@ public class GestActivity extends MyActivity {
 				pr("\nTouchEvent");
 				mStrokeSet = new StrokeSet();
 				mRegisteredSet = null;
-				mSmoothedSet = null;
+				mAlgorithmSet1 = null;
+				mAlgorithmSet2 = null;
 				mSimulateCoarse ^= true;
+				if (true) {warning("always coarse");mSimulateCoarse=true;}
 			}
 
 			if (mSimulateCoarse) {
@@ -135,18 +137,24 @@ public class GestActivity extends MyActivity {
 
 			StrokeSmoother s = new StrokeSmoother(set);
 			set = s.getSmoothedSet();
+			StrokeSet smoothedSet = set;
 			StrokeNormalizer n = new StrokeNormalizer(set);
-			set = n.getNormalizedSet();
-			mRegisteredSet = set;
+			StrokeSet normalizedSet = n.getNormalizedSet();
+			mRegisteredSet = normalizedSet;
 
-			// Set smoothed set to registered version, scaled up to original's
+			// Set algorithm set #1 and #2 to smoothed and normalized sets
+			// respectively, scaled up to original's
 			// bounding rect, then translated a bit so it's just above the
 			// original
 			Rect originalBounds = StrokeRegistrator.bounds(mStrokeSet);
-			originalBounds.translate(0, -60);
+			float displacement =this.getWidth()/4;
 
-			mSmoothedSet = StrokeRegistrator
-					.fitToRect(mRegisteredSet, originalBounds);
+			originalBounds.translate(displacement,0);
+
+			mAlgorithmSet1 = StrokeRegistrator.fitToRect(smoothedSet, originalBounds);
+			originalBounds.translate(displacement,0);
+			mAlgorithmSet2 = StrokeRegistrator.fitToRect(normalizedSet,
+					originalBounds);
 		}
 
 		@Override
@@ -161,8 +169,10 @@ public class GestActivity extends MyActivity {
 			if (mStrokeSet != null) {
 				StrokeSet set = mStrokeSet;
 				drawStrokeSet(set, false, 1.0f);
-				if (mSmoothedSet != null)
-					drawStrokeSet(mSmoothedSet, false, 0.3f);
+				if (mAlgorithmSet1 != null)
+					drawStrokeSet(mAlgorithmSet1, false, 0.3f);
+				if (mAlgorithmSet2 != null)
+					drawStrokeSet(mAlgorithmSet2, false, 0.3f);
 
 				if (mRegisteredSet != null) {
 					set = mRegisteredSet;
@@ -206,7 +216,8 @@ public class GestActivity extends MyActivity {
 		private long mPrevPrintedTime;
 		private StrokeSet mStrokeSet;
 		private StrokeSet mRegisteredSet;
-		private StrokeSet mSmoothedSet;
+		private StrokeSet mAlgorithmSet1;
+		private StrokeSet mAlgorithmSet2;
 		private int mSkipCount;
 	}
 

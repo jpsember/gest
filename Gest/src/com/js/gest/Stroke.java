@@ -69,6 +69,10 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 		return mPoints.isEmpty();
 	}
 
+	public void addPoint(StrokePoint point) {
+		addPoint(point.getTime(), point.getPoint());
+	}
+
 	public void addPoint(float time, Point location) {
 		mutate();
 		if (isEmpty()) {
@@ -84,6 +88,21 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 		}
 		StrokePoint pt = new StrokePoint(time - mStartTime, location);
 		mPoints.add(pt);
+	}
+
+	/**
+	 * Construct stroke as a portion of this one
+	 * 
+	 * @param start
+	 *          index of first point to appear in fragment
+	 * @param end
+	 *          one plus index of last point to appear in fragment
+	 */
+	public Stroke constructFragment(int start, int end) {
+		Stroke fragment = new Stroke();
+		for (int i = start; i < end; i++)
+			fragment.addPoint(get(i));
+		return fragment;
 	}
 
 	private static final String JSON_KEY_POINTS = "pts";
