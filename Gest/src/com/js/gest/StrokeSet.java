@@ -3,6 +3,7 @@ package com.js.gest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.js.basic.Freezable;
@@ -29,6 +30,14 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 			mInitialEventTime = eventTime;
 		Stroke s = strokeForId(pointerId);
 		s.addPoint(eventTime - mInitialEventTime, pt);
+	}
+
+	public static StrokeSet buildFromStrokes(List<Stroke> strokes) {
+		StrokeSet s = new StrokeSet();
+		for (Stroke stroke : strokes) {
+			s.mStrokes.add(stroke);
+		}
+		return s;
 	}
 
 	/**
@@ -99,7 +108,8 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 
 	@Override
 	public Freezable getMutableCopy() {
-		if (!isComplete()) throw new IllegalStateException();
+		if (!isComplete())
+			throw new IllegalStateException();
 		StrokeSet s = new StrokeSet();
 		for (Stroke st : mStrokes) {
 			s.mStrokes.add(mutableCopyOf(st));

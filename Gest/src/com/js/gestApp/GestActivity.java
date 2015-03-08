@@ -33,6 +33,10 @@ public class GestActivity extends MyActivity {
 
 	private static class OurView extends View {
 
+		// If enabled, generates fewer points for test purposes (useful for
+		// debugging the smoothing algorithm)
+		private static final boolean SIMULATE_COARSE = false;
+
 		public OurView(Context context) {
 			super(context);
 			Paint p = new Paint();
@@ -55,6 +59,19 @@ public class GestActivity extends MyActivity {
 				pr("\nTouchEvent");
 				mStrokeSet = new StrokeSet();
 				mRegisteredSet = null;
+				mSmoothedSet = null;
+			}
+
+			if (SIMULATE_COARSE) {
+				if (actionMasked == MotionEvent.ACTION_MOVE) {
+					mSkipCount++;
+					if (mSkipCount == 4) {
+						mSkipCount = 0;
+					} else
+						return false;
+				} else {
+					mSkipCount = 0;
+				}
 			}
 
 			boolean printFlag = (actionMasked == MotionEvent.ACTION_DOWN
@@ -115,8 +132,17 @@ public class GestActivity extends MyActivity {
 			set = StrokeRegistrator.fitToRect(set, fitRect);
 
 			StrokeSmoother s = new StrokeSmoother(set);
-			set = s.perform();
+			set = s.getSmoothedSet();
 			mRegisteredSet = set;
+
+			// Set smoothed set to registered version, scaled up to original's
+			// bounding rect, then translated a bit so it's just above the
+			// original
+			Rect originalBounds = StrokeRegistrator.bounds(mStrokeSet);
+			originalBounds.translate(0, -60);
+
+			mSmoothedSet = StrokeRegistrator
+					.fitToRect(mRegisteredSet, originalBounds);
 		}
 
 		@Override
@@ -130,12 +156,14 @@ public class GestActivity extends MyActivity {
 
 			if (mStrokeSet != null) {
 				StrokeSet set = mStrokeSet;
+				drawStrokeSet(set, false, 1.0f);
+				if (mSmoothedSet != null)
+					drawStrokeSet(mSmoothedSet, false, 0.3f);
 
-				drawStrokeSet(set, false);
 				if (mRegisteredSet != null) {
 					set = mRegisteredSet;
 					mCanvas.translate(20, 20);
-					drawStrokeSet(set, true);
+					drawStrokeSet(set, true, 0);
 					Rect r = StrokeRegistrator.sStandardRect;
 					for (int i = 0; i < 4; i++)
 						drawLine(r.corner(i), r.corner((i + 1) % 4), mPaintOutline);
@@ -144,7 +172,8 @@ public class GestActivity extends MyActivity {
 			mCanvas = null;
 		}
 
-		private void drawStrokeSet(StrokeSet mStrokeSet, boolean small) {
+		private void drawStrokeSet(StrokeSet mStrokeSet, boolean small,
+				float circleScale) {
 			float scaleFactor = small ? 0.3f : 1.0f;
 
 			for (Stroke s : mStrokeSet) {
@@ -155,8 +184,8 @@ public class GestActivity extends MyActivity {
 						drawLine(prevPoint, point, mPaintFill);
 					}
 					if (!small)
-						mCanvas
-								.drawCircle(point.x, point.y, 8 * scaleFactor, mPaintOutline);
+						mCanvas.drawCircle(point.x, point.y, 8 * scaleFactor * circleScale,
+								mPaintOutline);
 					prevPoint = point;
 				}
 			}
@@ -173,6 +202,8 @@ public class GestActivity extends MyActivity {
 		private long mPrevPrintedTime;
 		private StrokeSet mStrokeSet;
 		private StrokeSet mRegisteredSet;
+		private StrokeSet mSmoothedSet;
+		private int mSkipCount;
 	}
 
 	private OurView mView;
