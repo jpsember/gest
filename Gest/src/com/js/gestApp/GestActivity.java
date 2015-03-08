@@ -2,6 +2,7 @@ package com.js.gestApp;
 
 import com.js.android.MyActivity;
 import com.js.basic.Point;
+import com.js.gest.StrokeMatcher;
 import com.js.gest.Rect;
 import com.js.gest.Stroke;
 import com.js.gest.StrokeNormalizer;
@@ -185,6 +186,8 @@ public class GestActivity extends MyActivity {
 				mAlgorithmSet2 = StrokeRegistrator.fitToRect(normalizedSet,
 						originalBounds);
 			}
+
+			performMatch();
 		}
 
 		@Override
@@ -239,6 +242,17 @@ public class GestActivity extends MyActivity {
 			mCanvas.drawLine(p1.x, p1.y, p2.x, p2.y, paint);
 		}
 
+		private void performMatch() {
+			Stroke s = mRegisteredSet.iterator().next();
+			if (mMatchStroke == null) {
+				mMatchStroke = s;
+				return;
+			}
+
+			StrokeMatcher m = new StrokeMatcher(mMatchStroke, s);
+			pr("Match similarity: " + d(m.similarity()));
+		}
+
 		private Paint mPaintFill;
 		private Paint mPaintOutline;
 		private Canvas mCanvas;
@@ -250,6 +264,7 @@ public class GestActivity extends MyActivity {
 		private StrokeSet mAlgorithmSet2;
 		private int mSkipCount;
 		private Long mStartEventTimeMillis;
+		private Stroke mMatchStroke;
 	}
 
 	private OurView mView;
