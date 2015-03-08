@@ -35,7 +35,7 @@ public class GestActivity extends MyActivity {
 
 		// If enabled, generates fewer points for test purposes (useful for
 		// debugging the smoothing algorithm)
-		private static final boolean SIMULATE_COARSE = false;
+		private boolean mSimulateCoarse = false;
 
 		public OurView(Context context) {
 			super(context);
@@ -60,9 +60,10 @@ public class GestActivity extends MyActivity {
 				mStrokeSet = new StrokeSet();
 				mRegisteredSet = null;
 				mSmoothedSet = null;
+				mSimulateCoarse ^= true;
 			}
 
-			if (SIMULATE_COARSE) {
+			if (mSimulateCoarse) {
 				if (actionMasked == MotionEvent.ACTION_MOVE) {
 					mSkipCount++;
 					if (mSkipCount == 4) {

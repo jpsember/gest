@@ -92,8 +92,11 @@ public class StrokeSmoother {
 				Point d1 = new Point(velocityPrev.x * tDiff, velocityPrev.y * tDiff);
 				Point d2 = new Point(velocity.x * tDiff, velocity.y * tDiff);
 
-				int kNumSteps = 4;
-				unimp("figure out appropriate number of steps");
+				// Determine how many steps to interpolate. We should oversample
+				// somewhat, so we induce a nice curve on the points, which can then be
+				// downsampled by the normalization process.
+
+				int kNumSteps = Math.max(2, (int) (tDiff * 120));
 
 				float t = 0.0f;
 				float tStep = 1.0f / kNumSteps;
