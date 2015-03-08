@@ -4,6 +4,7 @@ import com.js.android.MyActivity;
 import com.js.basic.Point;
 import com.js.gest.Rect;
 import com.js.gest.Stroke;
+import com.js.gest.StrokeNormalizer;
 import com.js.gest.StrokeRegistrator;
 import com.js.gest.StrokeSet;
 import com.js.gest.StrokeSmoother;
@@ -134,6 +135,8 @@ public class GestActivity extends MyActivity {
 
 			StrokeSmoother s = new StrokeSmoother(set);
 			set = s.getSmoothedSet();
+			StrokeNormalizer n = new StrokeNormalizer(set);
+			set = n.getNormalizedSet();
 			mRegisteredSet = set;
 
 			// Set smoothed set to registered version, scaled up to original's

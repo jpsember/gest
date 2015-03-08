@@ -158,6 +158,13 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 		return s;
 	}
 
+	public float totalTime() {
+		float time = 0;
+		if (!mPoints.isEmpty())
+			time = last().getTime();
+		return time;
+	}
+
 	private ArrayList<StrokePoint> mPoints;
 	private float mStartTime;
 
