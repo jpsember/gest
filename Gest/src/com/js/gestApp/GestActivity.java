@@ -34,6 +34,16 @@ public class GestActivity extends MyActivity {
 
 		public OurView(Context context) {
 			super(context);
+			Paint p = new Paint();
+			mPaintOutline = p;
+			p.setColor(Color.WHITE);
+			p.setStrokeWidth(1.2f);
+			p.setStyle(Paint.Style.STROKE);
+
+			p = new Paint();
+			mPaintFill = p;
+			p.setColor(Color.WHITE);
+
 		}
 
 		@Override
@@ -99,43 +109,49 @@ public class GestActivity extends MyActivity {
 		public void onDraw(Canvas canvas) {
 			mCanvas = canvas;
 			if (mStrokeSet != null) {
-				drawStrokeSet(mStrokeSet, 1.0f);
+				drawStrokeSet(mStrokeSet, false);
 				if (mStrokeSet.isComplete()) {
-					StrokeSet s2 = StrokeRegistrator.fitToStandardRect(mStrokeSet);
-					drawStrokeSet(s2, 0.5f);
+					mFitRect.setTo(StrokeRegistrator.sStandardRect);
+					mFitRect.translate(20, 20);
+					StrokeSet s2 = StrokeRegistrator.fitToRect(mStrokeSet, mFitRect);
+					drawStrokeSet(s2, true);
 				}
 			}
 			mCanvas = null;
 		}
 
-		private void drawStrokeSet(StrokeSet mStrokeSet, float scaleFactor) {
-			Paint p = mPaint;
-			p.setColor(Color.WHITE);
-			p.setStrokeWidth(8 * scaleFactor);
+		private void drawStrokeSet(StrokeSet mStrokeSet, boolean small) {
+			float scaleFactor = small ? 0.3f : 1.0f;
 
 			for (Stroke s : mStrokeSet) {
 				Point prevPoint = null;
 				for (int i = 0; i < s.length(); i++) {
 					Point point = s.get(i).getPoint();
 					if (prevPoint != null) {
-						drawLine(prevPoint, point);
+						drawLine(prevPoint, point, mPaintFill);
 					}
+					if (!small)
+						mCanvas
+								.drawCircle(point.x, point.y, 8 * scaleFactor, mPaintOutline);
 					prevPoint = point;
 				}
 			}
 
-			p.setStrokeWidth(3 * scaleFactor);
-			Rect r = StrokeRegistrator.bounds(mStrokeSet);
-			for (int i = 0; i < 4; i++)
-				drawLine(r.corner(i), r.corner((i + 1) % 4));
+			if (small) {
+				Rect r = mFitRect;
+				for (int i = 0; i < 4; i++)
+					drawLine(r.corner(i), r.corner((i + 1) % 4), mPaintOutline);
+			}
 
 		}
 
-		private void drawLine(Point p1, Point p2) {
-			mCanvas.drawLine(p1.x, p1.y, p2.x, p2.y, mPaint);
+		private void drawLine(Point p1, Point p2, Paint paint) {
+			mCanvas.drawLine(p1.x, p1.y, p2.x, p2.y, paint);
 		}
 
-		private Paint mPaint = new Paint();
+		private Paint mPaintFill;
+		private Paint mPaintOutline;
+		private Rect mFitRect = new Rect();
 		private Canvas mCanvas;
 		private boolean mAlwaysFalse;
 		private long mPrevPrintedTime;

@@ -22,16 +22,26 @@ public class StrokeRegistrator {
 
 	private static final float STANDARD_WIDTH = 255.0f;
 	private static final float STANDARD_ASPECT_RATIO = 1.0f;
-	private static final Rect sStandardRect = new Rect(0, 0, STANDARD_WIDTH,
+
+	public static final Rect sStandardRect = new Rect(0, 0, STANDARD_WIDTH,
 			STANDARD_WIDTH * STANDARD_ASPECT_RATIO);
 
-	public static Matrix transformToFitStandard(Rect rect) {
-		return MyMath.calcRectFitRectTransform(rect, sStandardRect);
-	}
-
-	public static StrokeSet fitToStandardRect(StrokeSet set) {
+	/**
+	 * Construct version of StrokeSet that has been fit within a rectangle,
+	 * preserving the aspect ratio
+	 * 
+	 * @param set
+	 *          StrokeSet to fit
+	 * @param destinationRect
+	 *          rectangle to fit within, or null to use standard rectangle
+	 * @return StrokeSet fitted to destinationRect
+	 */
+	public static StrokeSet fitToRect(StrokeSet set, Rect destinationRect) {
 		Rect origBounds = bounds(set);
-		Matrix transform = transformToFitStandard(origBounds);
+		if (destinationRect == null)
+			destinationRect = sStandardRect;
+		Matrix transform = MyMath.calcRectFitRectTransform(origBounds,
+				destinationRect);
 		StrokeSet standardizedSet = mutableCopyOf(set);
 		for (Stroke stroke : standardizedSet) {
 			for (StrokePoint strokePoint : stroke) {
