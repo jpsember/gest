@@ -1,7 +1,5 @@
 package com.js.gest;
 
-import static com.js.basic.Tools.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,10 +7,20 @@ import com.js.basic.Point;
 
 public class StrokeSmoother {
 
-	public StrokeSmoother(StrokeSet set) {
-		mSet = set;
+	/**
+	 * Construct a smoother for a particular stroke set
+	 * 
+	 * @param strokeSet
+	 */
+	public StrokeSmoother(StrokeSet strokeSet) {
+		mSet = strokeSet;
 	}
 
+	/**
+	 * Perform smoothing (if not already done)
+	 * 
+	 * @return smoothed stroke set
+	 */
 	public StrokeSet getSmoothedSet() {
 		if (mSmoothed == null) {
 			List<Stroke> smoothedList = new ArrayList();
@@ -25,6 +33,10 @@ public class StrokeSmoother {
 		return mSmoothed;
 	}
 
+	/**
+	 * Estimate the velocity of a point on the path as it passes a particular
+	 * vertex
+	 */
 	private Point calcStrokeVelocity(Stroke stroke, int index) {
 		if (index == 0 || index == stroke.length() - 1)
 			return Point.ZERO;
@@ -72,40 +84,48 @@ public class StrokeSmoother {
 		return new Point((va.x + vb.x) / 2, (va.y + vb.y) / 2);
 	}
 
-	private Stroke smoothStroke(Stroke sOrig) {
-		Stroke sNew = new Stroke();
-		StrokePoint prev = null;
-		Point velocityPrev = null;
-		for (int strokeIndex = 0; strokeIndex < sOrig.length(); strokeIndex++) {
-			StrokePoint pt = sOrig.get(strokeIndex);
-			Point velocity = calcStrokeVelocity(sOrig, strokeIndex);
+	/**
+	 * Construct a smoothed version of a stroke by performing cubic Hermite
+	 * interpolation
+	 * 
+	 * @param origStroke
+	 * @return smoothed stroke
+	 */
+	private Stroke smoothStroke(Stroke origStroke) {
+		Stroke newStroke = new Stroke();
+		StrokePoint prevPoint = null;
+		Point prevVelocity = null;
+		for (int strokeIndex = 0; strokeIndex < origStroke.length(); strokeIndex++) {
+			StrokePoint currentPoint = origStroke.get(strokeIndex);
+			Point currentVelocity = calcStrokeVelocity(origStroke, strokeIndex);
 
-			if (prev == null) {
-				sNew.addPoint(pt.getTime(), pt.getPoint());
+			if (prevPoint == null) {
+				newStroke.addPoint(currentPoint.getTime(), currentPoint.getPoint());
 
 			} else {
 
-				float tDiff = pt.getTime() - prev.getTime();
-				Point p1 = prev.getPoint();
-				Point p2 = pt.getPoint();
+				float tDiff = currentPoint.getTime() - prevPoint.getTime();
 
-				Point d1 = new Point(velocityPrev.x * tDiff, velocityPrev.y * tDiff);
-				Point d2 = new Point(velocity.x * tDiff, velocity.y * tDiff);
+				Point d1 = new Point(prevVelocity.x * tDiff, prevVelocity.y * tDiff);
+				Point d2 = new Point(currentVelocity.x * tDiff, currentVelocity.y
+						* tDiff);
 
 				// Determine how many steps to interpolate. We should oversample
 				// somewhat, so we induce a nice curve on the points, which can then be
 				// downsampled by the normalization process.
 
-				int kNumSteps = Math.max(2, (int) (tDiff * 120));
+				int numberOfSteps = Math.max(2, (int) (tDiff * 120));
 
 				float t = 0.0f;
-				float tStep = 1.0f / kNumSteps;
+				float tStep = 1.0f / numberOfSteps;
 
-				int totalSteps = kNumSteps;
+				Point p1 = prevPoint.getPoint();
+				Point p2 = currentPoint.getPoint();
 
-				for (int i = 0; i < totalSteps; i++) {
+				for (int i = 0; i < numberOfSteps; i++) {
 					t += tStep;
 
+					// Calculate the cubic Hermite spline
 					float t2 = t * t;
 					float t3 = t2 * t;
 
@@ -117,18 +137,17 @@ public class StrokeSmoother {
 					float x = m1 * p1.x + m2 * p2.x + m3 * d1.x + m4 * d2.x;
 					float y = m1 * p1.y + m2 * p2.y + m3 * d1.y + m4 * d2.y;
 
-					float time = t * pt.getTime() + (1 - t) * prev.getTime();
+					float time = t * currentPoint.getTime() + (1 - t)
+							* prevPoint.getTime();
 
-					Point curr = new Point(x, y);
-					sNew.addPoint(time, curr);
+					newStroke.addPoint(time, new Point(x, y));
 				}
 
 			}
-			velocityPrev = velocity;
-			prev = pt;
-
+			prevVelocity = currentVelocity;
+			prevPoint = currentPoint;
 		}
-		return sNew;
+		return newStroke;
 	}
 
 	private StrokeSet mSet;
