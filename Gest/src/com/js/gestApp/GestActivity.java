@@ -63,7 +63,14 @@ public class GestActivity extends MyActivity {
 				mAlgorithmSet1 = null;
 				mAlgorithmSet2 = null;
 				mSimulateCoarse ^= true;
-				if (true) {warning("always coarse");mSimulateCoarse=true;}
+				if (false) {
+					warning("always coarse");
+					mSimulateCoarse = true;
+				}
+				if (true) {
+					warning("always fine");
+					mSimulateCoarse = false;
+				}
 			}
 
 			if (mSimulateCoarse) {
@@ -131,6 +138,8 @@ public class GestActivity extends MyActivity {
 		}
 
 		private void constructRegisteredSet() {
+			final boolean SKIP_NORMALIZE = true;
+
 			StrokeSet set = mStrokeSet;
 			Rect fitRect = StrokeRegistrator.sStandardRect;
 			set = StrokeRegistrator.fitToRect(set, fitRect);
@@ -138,23 +147,32 @@ public class GestActivity extends MyActivity {
 			StrokeSmoother s = new StrokeSmoother(set);
 			set = s.getSmoothedSet();
 			StrokeSet smoothedSet = set;
-			StrokeNormalizer n = new StrokeNormalizer(set);
-			StrokeSet normalizedSet = n.getNormalizedSet();
-			mRegisteredSet = normalizedSet;
+			StrokeSet normalizedSet = null;
+			if (SKIP_NORMALIZE) {
+				mRegisteredSet = smoothedSet;
+				warning("not normalizing");
+			} else {
+				StrokeNormalizer n = new StrokeNormalizer(set);
+				normalizedSet = n.getNormalizedSet();
+				mRegisteredSet = normalizedSet;
+			}
 
 			// Set algorithm set #1 and #2 to smoothed and normalized sets
 			// respectively, scaled up to original's
 			// bounding rect, then translated a bit so it's just above the
 			// original
 			Rect originalBounds = StrokeRegistrator.bounds(mStrokeSet);
-			float displacement =this.getWidth()/4;
-
-			originalBounds.translate(displacement,0);
+			float displacement = this.getWidth() / 4;
+			if (SKIP_NORMALIZE) displacement *= 1.5f;
+			
+			originalBounds.translate(displacement, 0);
 
 			mAlgorithmSet1 = StrokeRegistrator.fitToRect(smoothedSet, originalBounds);
-			originalBounds.translate(displacement,0);
+			if (!SKIP_NORMALIZE) {
+			originalBounds.translate(displacement, 0);
 			mAlgorithmSet2 = StrokeRegistrator.fitToRect(normalizedSet,
 					originalBounds);
+			}
 		}
 
 		@Override
