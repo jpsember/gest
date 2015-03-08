@@ -58,6 +58,7 @@ public class GestActivity extends MyActivity {
 			int actionMasked = event.getActionMasked();
 			if (actionMasked == MotionEvent.ACTION_DOWN) {
 				pr("\nTouchEvent");
+				mStartEventTimeMillis = event.getEventTime();
 				mStrokeSet = new StrokeSet();
 				mRegisteredSet = null;
 				mAlgorithmSet1 = null;
@@ -85,11 +86,14 @@ public class GestActivity extends MyActivity {
 				}
 			}
 
-			boolean printFlag = (actionMasked == MotionEvent.ACTION_DOWN
+			float eventTime = ((event.getEventTime() - mStartEventTimeMillis) / 1000.0f);
+
+			boolean printFlag = (//
+			actionMasked == MotionEvent.ACTION_DOWN
 					|| actionMasked == MotionEvent.ACTION_UP
 					|| actionMasked == MotionEvent.ACTION_POINTER_DOWN
-					|| actionMasked == MotionEvent.ACTION_POINTER_UP || event
-					.getEventTime() - mPrevPrintedTime > 200);
+					|| actionMasked == MotionEvent.ACTION_POINTER_UP //
+			|| eventTime - mPrevPrintedTime > 0.2f);
 
 			int activeId = event.getPointerId(event.getActionIndex());
 			StringBuilder sb = new StringBuilder(" action=" + actionMasked);
@@ -103,13 +107,14 @@ public class GestActivity extends MyActivity {
 				else
 					sb.append(":");
 				Point pt = new Point(mCoord.x, mCoord.y);
-				mStrokeSet.addPoint(event.getEventTime() / 1000.0f, ptrId, pt);
+				mStrokeSet.addPoint(eventTime, ptrId, pt);
 				sb.append("" + ptrId + d((int) pt.x, 4) + d((int) pt.y, 4));
+				sb.append(" t:" + d(eventTime));
 			}
 
 			if (printFlag) {
 				pr(sb);
-				mPrevPrintedTime = event.getEventTime();
+				mPrevPrintedTime = eventTime;
 			}
 
 			if (actionMasked == MotionEvent.ACTION_UP
@@ -126,6 +131,7 @@ public class GestActivity extends MyActivity {
 			if (actionMasked == MotionEvent.ACTION_UP) {
 				pr(mStrokeSet);
 				pr("");
+				mStartEventTimeMillis = null;
 			}
 
 			// Invalidate the view so it is redrawn with the updated stroke set
@@ -138,40 +144,46 @@ public class GestActivity extends MyActivity {
 		}
 
 		private void constructRegisteredSet() {
-			final boolean SKIP_NORMALIZE = true;
 
 			StrokeSet set = mStrokeSet;
 			Rect fitRect = StrokeRegistrator.sStandardRect;
 			set = StrokeRegistrator.fitToRect(set, fitRect);
 
-			StrokeSmoother s = new StrokeSmoother(set);
-			set = s.getSmoothedSet();
+			boolean withSmoothing = true;
+			boolean withNormalizing = true;
+
 			StrokeSet smoothedSet = set;
-			StrokeSet normalizedSet = null;
-			if (SKIP_NORMALIZE) {
-				mRegisteredSet = smoothedSet;
-				warning("not normalizing");
-			} else {
+			if (withSmoothing) {
+				StrokeSmoother s = new StrokeSmoother(set);
+				set = s.getSmoothedSet();
+				smoothedSet = set;
+			}
+
+			StrokeSet normalizedSet = smoothedSet;
+			if (withNormalizing) {
 				StrokeNormalizer n = new StrokeNormalizer(set);
 				normalizedSet = n.getNormalizedSet();
-				mRegisteredSet = normalizedSet;
 			}
+
+			mRegisteredSet = normalizedSet;
 
 			// Set algorithm set #1 and #2 to smoothed and normalized sets
 			// respectively, scaled up to original's
 			// bounding rect, then translated a bit so it's just above the
 			// original
 			Rect originalBounds = StrokeRegistrator.bounds(mStrokeSet);
-			float displacement = this.getWidth() / 4;
-			if (SKIP_NORMALIZE) displacement *= 1.5f;
-			
-			originalBounds.translate(displacement, 0);
+			float displacement = this.getWidth()
+					/ (withSmoothing && withNormalizing ? 4 : 3);
 
-			mAlgorithmSet1 = StrokeRegistrator.fitToRect(smoothedSet, originalBounds);
-			if (!SKIP_NORMALIZE) {
-			originalBounds.translate(displacement, 0);
-			mAlgorithmSet2 = StrokeRegistrator.fitToRect(normalizedSet,
-					originalBounds);
+			if (withSmoothing) {
+				originalBounds.translate(displacement, 0);
+				mAlgorithmSet1 = StrokeRegistrator.fitToRect(smoothedSet,
+						originalBounds);
+			}
+			if (withNormalizing) {
+				originalBounds.translate(displacement, 0);
+				mAlgorithmSet2 = StrokeRegistrator.fitToRect(normalizedSet,
+						originalBounds);
 			}
 		}
 
@@ -231,12 +243,13 @@ public class GestActivity extends MyActivity {
 		private Paint mPaintOutline;
 		private Canvas mCanvas;
 		private boolean mAlwaysFalse;
-		private long mPrevPrintedTime;
+		private float mPrevPrintedTime;
 		private StrokeSet mStrokeSet;
 		private StrokeSet mRegisteredSet;
 		private StrokeSet mAlgorithmSet1;
 		private StrokeSet mAlgorithmSet2;
 		private int mSkipCount;
+		private Long mStartEventTimeMillis;
 	}
 
 	private OurView mView;

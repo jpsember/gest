@@ -46,7 +46,7 @@ public class StrokeNormalizer {
 
 	private void splitStrokeAtFeaturePoints(Stroke origStroke) {
 		mSplitStrokeList = new ArrayList();
-		if (true) {
+		if (false) {
 			unimp("splitStrokeAtFeaturePoints: cutting in two");
 			int q = origStroke.length() / 2;
 			mSplitStrokeList.add(origStroke.constructFragment(0, 1 + q));
