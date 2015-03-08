@@ -68,7 +68,7 @@ public class GestActivity extends MyActivity {
 					warning("always coarse");
 					mSimulateCoarse = true;
 				}
-				if (true) {
+				if (false) {
 					warning("always fine");
 					mSimulateCoarse = false;
 				}

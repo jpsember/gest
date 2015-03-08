@@ -9,6 +9,11 @@ import static com.js.basic.Tools.*;
 
 public class StrokeNormalizer {
 
+	// Feature point detection is probably unnecessary; I can't produce
+	// any examples (on my Samsung tablet) where I think it would make a
+	// difference (although that may change if we allow strokes separated in time)
+	private static final boolean DETECT_FEATURE_POINTS = false;
+
 	private static final int DEFAULT_DESIRED_STROKE_LENGTH = 32;
 
 	/**
@@ -45,21 +50,22 @@ public class StrokeNormalizer {
 	}
 
 	private void splitStrokeAtFeaturePoints(Stroke origStroke) {
-		mSplitStrokeList = new ArrayList();
-		if (false) {
-			unimp("splitStrokeAtFeaturePoints: cutting in two");
-			int q = origStroke.length() / 2;
-			mSplitStrokeList.add(origStroke.constructFragment(0, 1 + q));
-			mSplitStrokeList
-					.add(origStroke.constructFragment(q, origStroke.length()));
-			return;
+		mFragmentList = new ArrayList();
+		if (DETECT_FEATURE_POINTS) {
+			if (false) {
+				unimp("splitStrokeAtFeaturePoints: cutting in two");
+				int q = origStroke.length() / 2;
+				mFragmentList.add(origStroke.constructFragment(0, 1 + q));
+				mFragmentList.add(origStroke.constructFragment(q, origStroke.length()));
+				return;
+			}
+			throw new UnsupportedOperationException();
 		}
-		unimp("splitStrokeAtFeaturePoints: determine which points are feature points");
-		mSplitStrokeList.add(origStroke);
+		mFragmentList.add(origStroke);
 	}
 
 	private int calculateInterpolatedPointsCount() {
-		int featurePointCount = mSplitStrokeList.size() + 1;
+		int featurePointCount = mFragmentList.size() + 1;
 		int interpPointCount = mDesiredStrokeSize - featurePointCount;
 		if (interpPointCount < 0)
 			throw new IllegalArgumentException("Too many feature points: "
@@ -81,7 +87,7 @@ public class StrokeNormalizer {
 
 		Stroke normalizedStroke = new Stroke();
 
-		for (Stroke fragment : mSplitStrokeList) {
+		for (Stroke fragment : mFragmentList) {
 			int cursor = 0;
 			StrokePoint strokePoint = fragment.get(cursor);
 
@@ -143,5 +149,5 @@ public class StrokeNormalizer {
 	private StrokeSet mSet;
 	private StrokeSet mNormalized;
 	private int mDesiredStrokeSize;
-	private ArrayList<Stroke> mSplitStrokeList;
+	private ArrayList<Stroke> mFragmentList;
 }
