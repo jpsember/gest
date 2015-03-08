@@ -6,6 +6,7 @@ import com.js.gest.Rect;
 import com.js.gest.Stroke;
 import com.js.gest.StrokeRegistrator;
 import com.js.gest.StrokeSet;
+import com.js.gest.StrokeSmoother;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -53,6 +54,7 @@ public class GestActivity extends MyActivity {
 			if (actionMasked == MotionEvent.ACTION_DOWN) {
 				pr("\nTouchEvent");
 				mStrokeSet = new StrokeSet();
+				mRegisteredSet = null;
 			}
 
 			boolean printFlag = (actionMasked == MotionEvent.ACTION_DOWN
@@ -83,8 +85,15 @@ public class GestActivity extends MyActivity {
 			}
 
 			if (actionMasked == MotionEvent.ACTION_UP
-					|| actionMasked == MotionEvent.ACTION_POINTER_UP)
+					|| actionMasked == MotionEvent.ACTION_POINTER_UP) {
 				mStrokeSet.stopStroke(activeId);
+				if (mStrokeSet.isComplete()) {
+					if (mStrokeSet.isMutable()) {
+						mStrokeSet.freeze();
+						constructRegisteredSet();
+					}
+				}
+			}
 
 			if (actionMasked == MotionEvent.ACTION_UP) {
 				pr(mStrokeSet);
@@ -100,6 +109,16 @@ public class GestActivity extends MyActivity {
 			return true;
 		}
 
+		private void constructRegisteredSet() {
+			StrokeSet set = mStrokeSet;
+			Rect fitRect = StrokeRegistrator.sStandardRect;
+			set = StrokeRegistrator.fitToRect(set, fitRect);
+
+			StrokeSmoother s = new StrokeSmoother(set);
+			set = s.perform();
+			mRegisteredSet = set;
+		}
+
 		@Override
 		public boolean performClick() {
 			return super.performClick();
@@ -108,13 +127,18 @@ public class GestActivity extends MyActivity {
 		@Override
 		public void onDraw(Canvas canvas) {
 			mCanvas = canvas;
+
 			if (mStrokeSet != null) {
-				drawStrokeSet(mStrokeSet, false);
-				if (mStrokeSet.isComplete()) {
-					mFitRect.setTo(StrokeRegistrator.sStandardRect);
-					mFitRect.translate(20, 20);
-					StrokeSet s2 = StrokeRegistrator.fitToRect(mStrokeSet, mFitRect);
-					drawStrokeSet(s2, true);
+				StrokeSet set = mStrokeSet;
+
+				drawStrokeSet(set, false);
+				if (mRegisteredSet != null) {
+					set = mRegisteredSet;
+					mCanvas.translate(20, 20);
+					drawStrokeSet(set, true);
+					Rect r = StrokeRegistrator.sStandardRect;
+					for (int i = 0; i < 4; i++)
+						drawLine(r.corner(i), r.corner((i + 1) % 4), mPaintOutline);
 				}
 			}
 			mCanvas = null;
@@ -136,13 +160,6 @@ public class GestActivity extends MyActivity {
 					prevPoint = point;
 				}
 			}
-
-			if (small) {
-				Rect r = mFitRect;
-				for (int i = 0; i < 4; i++)
-					drawLine(r.corner(i), r.corner((i + 1) % 4), mPaintOutline);
-			}
-
 		}
 
 		private void drawLine(Point p1, Point p2, Paint paint) {
@@ -151,11 +168,11 @@ public class GestActivity extends MyActivity {
 
 		private Paint mPaintFill;
 		private Paint mPaintOutline;
-		private Rect mFitRect = new Rect();
 		private Canvas mCanvas;
 		private boolean mAlwaysFalse;
 		private long mPrevPrintedTime;
 		private StrokeSet mStrokeSet;
+		private StrokeSet mRegisteredSet;
 	}
 
 	private OurView mView;
