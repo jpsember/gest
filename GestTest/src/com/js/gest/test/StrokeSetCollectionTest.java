@@ -55,4 +55,8 @@ public class StrokeSetCollectionTest extends MyTestCase {
 		}
 	}
 
+	public void testJSONSource() throws JSONException {
+		String json = readJSON("strokes3.txt");
+		StrokeSetCollection.parseJSON(json);
+	}
 }

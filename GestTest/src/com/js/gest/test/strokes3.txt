@@ -1,0 +1,10 @@
+[
+  
+  {"name":"undo", 
+    "strokes": [[0,1,0, 1,0,1]] 
+  }
+   
+  ,{"name":"redo",
+    "source":["undo","reverse"]
+ 	}
+]
