@@ -1,7 +1,10 @@
 package com.js.gestApp;
 
+import java.util.ArrayList;
+
 import com.js.android.MyActivity;
 import com.js.basic.Point;
+import com.js.gest.Cell;
 import com.js.gest.StrokeMatcher;
 import com.js.gest.Rect;
 import com.js.gest.Stroke;
@@ -251,6 +254,14 @@ public class GestActivity extends MyActivity {
 
 			StrokeMatcher m = new StrokeMatcher(mMatchStroke, s);
 			pr("Match similarity: " + d(m.similarity()));
+
+			ArrayList<Cell> path = m.optimalPath();
+			float prevCost = 0;
+			for (Cell c : path) {
+				float diff = c.cost() - prevCost;
+				pr(" " + c + " " + d(diff));
+				prevCost = c.cost();
+			}
 		}
 
 		private Paint mPaintFill;
