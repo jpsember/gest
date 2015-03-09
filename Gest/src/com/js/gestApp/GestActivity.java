@@ -150,6 +150,12 @@ public class GestActivity extends MyActivity {
 		private void constructRegisteredSet() {
 
 			StrokeSet set = mStrokeSet;
+			if (set.iterator().next().length() < 3) {
+				mMatchStroke = null;
+				mStrokeSet = null;
+				mRegisteredSet = null;
+				return;
+			}
 			
 			boolean withSmoothing = true;
 			boolean withNormalizing = true;
@@ -162,7 +168,7 @@ public class GestActivity extends MyActivity {
 			}
 			Rect fitRect = StrokeRegistrator.sStandardRect;
 			smoothedSet = StrokeRegistrator.fitToRect(smoothedSet, fitRect);
-			
+
 			StrokeSet normalizedSet = smoothedSet;
 			if (withNormalizing) {
 				StrokeNormalizer n = new StrokeNormalizer(normalizedSet);
@@ -210,9 +216,16 @@ public class GestActivity extends MyActivity {
 				if (mAlgorithmSet2 != null)
 					drawStrokeSet(mAlgorithmSet2, false, 0.3f);
 
+				mCanvas.translate(20, 20);
+
+				if (mMatchStroke != null) {
+					mPaintFill.setColor(Color.LTGRAY);
+					drawStroke(mMatchStroke, true, 0);
+					mPaintFill.setColor(Color.WHITE);
+				}
+
 				if (mRegisteredSet != null) {
 					set = mRegisteredSet;
-					mCanvas.translate(20, 20);
 					drawStrokeSet(set, true, 0);
 					Rect r = StrokeRegistrator.sStandardRect;
 					for (int i = 0; i < 4; i++)
@@ -224,21 +237,26 @@ public class GestActivity extends MyActivity {
 
 		private void drawStrokeSet(StrokeSet mStrokeSet, boolean small,
 				float circleScale) {
+			for (Stroke s : mStrokeSet) {
+				drawStroke(s, small, circleScale);
+			}
+		}
+
+		private void drawStroke(Stroke s, boolean small, float circleScale) {
 			float scaleFactor = small ? 0.3f : 1.0f;
 
-			for (Stroke s : mStrokeSet) {
-				Point prevPoint = null;
-				for (int i = 0; i < s.length(); i++) {
-					Point point = s.get(i).getPoint();
-					if (prevPoint != null) {
-						drawLine(prevPoint, point, mPaintFill);
-					}
-					if (!small)
-						mCanvas.drawCircle(point.x, point.y, 8 * scaleFactor * circleScale,
-								mPaintOutline);
-					prevPoint = point;
+			Point prevPoint = null;
+			for (int i = 0; i < s.length(); i++) {
+				Point point = s.get(i).getPoint();
+				if (prevPoint != null) {
+					drawLine(prevPoint, point, mPaintFill);
 				}
+				if (!small)
+					mCanvas.drawCircle(point.x, point.y, 8 * scaleFactor * circleScale,
+							mPaintOutline);
+				prevPoint = point;
 			}
+
 		}
 
 		private void drawLine(Point p1, Point p2, Paint paint) {
@@ -253,7 +271,7 @@ public class GestActivity extends MyActivity {
 			}
 
 			StrokeMatcher m = new StrokeMatcher(mMatchStroke, s);
-			pr("Match similarity: " + d(m.similarity()));
+			m.similarity();
 
 			ArrayList<Cell> path = m.optimalPath();
 			float prevCost = 0;
@@ -261,6 +279,14 @@ public class GestActivity extends MyActivity {
 				float diff = c.cost() - prevCost;
 				pr(" " + c + " " + d(diff));
 				prevCost = c.cost();
+			}
+			pr("Match similarity: " + d(m.similarity()));
+
+			float ff[] = { 0, .01f, .02f, .05f, .06f, .07f, .08f, .1f };
+			for (float factor : ff) {
+				m = new StrokeMatcher(mMatchStroke, s);
+				m.setDistanceThreshold(factor);
+				pr("Factor " + d(factor) + " similiarity: " + d(m.similarity()));
 			}
 		}
 

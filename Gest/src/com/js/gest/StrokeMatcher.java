@@ -15,6 +15,18 @@ public class StrokeMatcher {
 	public StrokeMatcher(Stroke a, Stroke b) {
 		mStrokeA = frozen(a);
 		mStrokeB = frozen(b);
+		setDistanceThreshold(.01f);
+	}
+
+	public void setDistanceThreshold(float factor) {
+		if (matched())
+			throw new IllegalStateException();
+		mZeroThreshold = (float) Math.pow(
+				StrokeRegistrator.STANDARD_WIDTH * factor, 2);
+	}
+
+	private boolean matched() {
+		return mSimilarity != null;
 	}
 
 	public float similarity() {
@@ -29,8 +41,7 @@ public class StrokeMatcher {
 	 * @return an array of cells leading from the bottom left to the top right
 	 */
 	public ArrayList<Cell> optimalPath() {
-		similarity();
-		if (mBestCell == null)
+		if (!matched())
 			throw new IllegalStateException();
 		ArrayList<Cell> list = new ArrayList();
 
@@ -173,7 +184,7 @@ public class StrokeMatcher {
 	private float cost() {
 		if (mBestCell == null)
 			throw new IllegalStateException();
-		return mBestCell.cost();
+		return mBestCell.cost() / pathLength();
 	}
 
 	private int pathLength() {
@@ -190,7 +201,6 @@ public class StrokeMatcher {
 		mColumnSize = 1 + 2 * mWindowSize;
 		buildColumns();
 
-		mZeroThreshold = 10.0f;
 		mBestCell = null;
 	}
 
@@ -211,7 +221,7 @@ public class StrokeMatcher {
 		Point pos_a = elem_a.getPoint();
 		Point pos_b = elem_b.getPoint();
 
-		float dist = MyMath.distanceBetween(pos_a, pos_b);
+		float dist = MyMath.squaredDistanceBetween(pos_a, pos_b);
 		if (dist < mZeroThreshold)
 			dist = 0;
 		return dist;

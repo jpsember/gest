@@ -20,11 +20,11 @@ public class StrokeRegistrator {
 		return r;
 	}
 
-	private static final float STANDARD_WIDTH = 255.0f;
+	public static final int STANDARD_WIDTH = 256;
 	private static final float STANDARD_ASPECT_RATIO = 1.0f;
 
-	public static final Rect sStandardRect = new Rect(0, 0, STANDARD_WIDTH,
-			STANDARD_WIDTH * STANDARD_ASPECT_RATIO);
+	public static final Rect sStandardRect = new Rect(0, 0, STANDARD_WIDTH - 1,
+			(STANDARD_WIDTH - 1) * STANDARD_ASPECT_RATIO);
 
 	/**
 	 * Construct version of StrokeSet that has been fit within a rectangle,
