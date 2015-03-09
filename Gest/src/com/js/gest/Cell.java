@@ -1,8 +1,8 @@
 package com.js.gest;
+
 import static com.js.basic.Tools.*;
 
-
-public class Cell {
+class Cell {
 
 	public Cell(int aIndex, int bIndex) {
 		mIndexA = aIndex;
@@ -42,6 +42,7 @@ public class Cell {
 		sb.append(d(cost()));
 		return sb.toString();
 	}
+
 	private int mIndexA;
 	private int mIndexB;
 	private float mCost;

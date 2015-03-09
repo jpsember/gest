@@ -1,16 +1,13 @@
 package com.js.gestApp;
 
-import java.util.ArrayList;
-
 import com.js.android.MyActivity;
 import com.js.basic.Point;
-import com.js.gest.Cell;
-import com.js.gest.StrokeMatcher;
 import com.js.gest.Rect;
 import com.js.gest.Stroke;
 import com.js.gest.StrokeNormalizer;
 import com.js.gest.StrokeRegistrator;
 import com.js.gest.StrokeSet;
+import com.js.gest.StrokeSetMatcher;
 import com.js.gest.StrokeSmoother;
 
 import android.content.Context;
@@ -151,12 +148,12 @@ public class GestActivity extends MyActivity {
 
 			StrokeSet set = mStrokeSet;
 			if (set.iterator().next().length() < 3) {
-				mMatchStroke = null;
+				mMatchStrokeSet = null;
 				mStrokeSet = null;
 				mRegisteredSet = null;
 				return;
 			}
-			
+
 			boolean withSmoothing = true;
 			boolean withNormalizing = true;
 
@@ -218,9 +215,9 @@ public class GestActivity extends MyActivity {
 
 				mCanvas.translate(20, 20);
 
-				if (mMatchStroke != null) {
+				if (mMatchStrokeSet != null) {
 					mPaintFill.setColor(Color.LTGRAY);
-					drawStroke(mMatchStroke, true, 0);
+					drawStrokeSet(mMatchStrokeSet, true, 0);
 					mPaintFill.setColor(Color.WHITE);
 				}
 
@@ -264,27 +261,24 @@ public class GestActivity extends MyActivity {
 		}
 
 		private void performMatch() {
-			Stroke s = mRegisteredSet.iterator().next();
-			if (mMatchStroke == null) {
-				mMatchStroke = s;
+			// Stroke s = mRegisteredSet.iterator().next();
+			if (mMatchStrokeSet == null) {
+				mMatchStrokeSet = mRegisteredSet;
+				return;
+			}
+			if (mMatchStrokeSet.size() != mRegisteredSet.size()) {
+				pr("...different number of strokes in each set");
 				return;
 			}
 
-			StrokeMatcher m = new StrokeMatcher(mMatchStroke, s);
+			StrokeSetMatcher m = new StrokeSetMatcher(mMatchStrokeSet, mRegisteredSet);
 			m.similarity();
 
-			ArrayList<Cell> path = m.optimalPath();
-			float prevCost = 0;
-			for (Cell c : path) {
-				float diff = c.cost() - prevCost;
-				pr(" " + c + " " + d(diff));
-				prevCost = c.cost();
-			}
 			pr("Match similarity: " + d(m.similarity()));
 
 			float ff[] = { 0, .01f, .02f, .05f, .06f, .07f, .08f, .1f };
 			for (float factor : ff) {
-				m = new StrokeMatcher(mMatchStroke, s);
+				m = new StrokeSetMatcher(mMatchStrokeSet, mRegisteredSet);
 				m.setDistanceThreshold(factor);
 				pr("Factor " + d(factor) + " similiarity: " + d(m.similarity()));
 			}
@@ -301,7 +295,7 @@ public class GestActivity extends MyActivity {
 		private StrokeSet mAlgorithmSet2;
 		private int mSkipCount;
 		private Long mStartEventTimeMillis;
-		private Stroke mMatchStroke;
+		private StrokeSet mMatchStrokeSet;
 	}
 
 	private OurView mView;
