@@ -150,9 +150,7 @@ public class GestActivity extends MyActivity {
 		private void constructRegisteredSet() {
 
 			StrokeSet set = mStrokeSet;
-			Rect fitRect = StrokeRegistrator.sStandardRect;
-			set = StrokeRegistrator.fitToRect(set, fitRect);
-
+			
 			boolean withSmoothing = true;
 			boolean withNormalizing = true;
 
@@ -162,10 +160,12 @@ public class GestActivity extends MyActivity {
 				set = s.getSmoothedSet();
 				smoothedSet = set;
 			}
-
+			Rect fitRect = StrokeRegistrator.sStandardRect;
+			smoothedSet = StrokeRegistrator.fitToRect(smoothedSet, fitRect);
+			
 			StrokeSet normalizedSet = smoothedSet;
 			if (withNormalizing) {
-				StrokeNormalizer n = new StrokeNormalizer(set);
+				StrokeNormalizer n = new StrokeNormalizer(normalizedSet);
 				normalizedSet = n.getNormalizedSet();
 			}
 
