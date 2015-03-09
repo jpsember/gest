@@ -105,31 +105,28 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 		return fragment;
 	}
 
-	private static final String JSON_KEY_POINTS = "pts";
-
 	private static final float FLOAT_TIME_SCALE = 120.0f;
 
+	@Deprecated
 	public String toJSON() throws JSONException {
-		JSONObject map = new JSONObject();
+		return toJSONArray().toString();
+	}
+
+	public JSONArray toJSONArray() throws JSONException {
 		JSONArray a = new JSONArray();
 		for (StrokePoint pt : mPoints) {
 			a.put((int) (pt.getTime() * FLOAT_TIME_SCALE));
 			a.put((int) pt.getPoint().x);
 			a.put((int) pt.getPoint().y);
 		}
-		map.put(JSON_KEY_POINTS, a);
-		return map.toString();
+		return a;
 	}
 
-	public static Stroke parseJSON(String script) throws JSONException {
-		JSONObject map = JSONTools.parseMap(script);
-		if (!map.has(JSON_KEY_POINTS)) {
-			throw new JSONException(JSON_KEY_POINTS + " key missing");
-		}
-
+	public static Stroke parseJSONArray(JSONArray array) throws JSONException {
 		Stroke s = new Stroke();
 
-		JSONArray array = map.getJSONArray(JSON_KEY_POINTS);
+		if (array.length() % 3 != 0)
+			throw new JSONException("malformed stroke array");
 		int nPoints = array.length() / 3;
 
 		for (int i = 0; i < nPoints; i++) {
@@ -140,6 +137,16 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 			s.addPoint(time, new Point(x, y));
 		}
 		return s;
+	}
+
+	@Deprecated
+	public static Stroke parseJSON(String script) throws JSONException {
+	 final String JSON_KEY_POINTS = "pts";
+	 	JSONObject map = JSONTools.parseMap(script);
+		if (!map.has(JSON_KEY_POINTS)) {
+			throw new JSONException(JSON_KEY_POINTS + " key missing");
+		}
+		return parseJSONArray(map.getJSONArray(JSON_KEY_POINTS));
 	}
 
 	/**
