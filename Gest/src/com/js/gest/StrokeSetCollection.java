@@ -29,6 +29,17 @@ public class StrokeSetCollection {
 		return collection;
 	}
 
+	public Map<String, StrokeSetEntry> map() {
+		return mEntriesMap;
+	}
+
+	/**
+	 * Convenience method for map().get()
+	 */
+	public StrokeSetEntry get(String name) {
+		return map().get(name);
+	}
+
 	private Map<String, StrokeSetEntry> mEntriesMap = new HashMap();
 
 	private static class Parser {
@@ -61,7 +72,7 @@ public class StrokeSetCollection {
 				verifyLegality(map);
 				ParseEntry parseEntry = new ParseEntry(name, map);
 				mNamedSets.put(name, parseEntry);
-				mStrokeSetCollection.add(parseEntry.strokeSetEntry());
+				mStrokeSetCollection.map().put(name, parseEntry.strokeSetEntry());
 			}
 		}
 
@@ -221,17 +232,5 @@ public class StrokeSetCollection {
 		private StrokeSetEntry mAlias;
 		private String mName;
 		private StrokeSet mStrokeSet;
-	}
-
-	public StrokeSetEntry get(String name) {
-		StrokeSetEntry entry = mEntriesMap.get(name);
-		return entry;
-	}
-
-	public void add(StrokeSetEntry strokeSetEntry) {
-		if (mEntriesMap.containsKey(strokeSetEntry.name()))
-			throw new IllegalArgumentException("name already used: "
-					+ strokeSetEntry.name());
-		mEntriesMap.put(strokeSetEntry.name(), strokeSetEntry);
 	}
 }
