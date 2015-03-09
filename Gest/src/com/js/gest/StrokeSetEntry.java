@@ -19,6 +19,10 @@ public class StrokeSetEntry {
 		return mAlias;
 	}
 
+	public boolean hasAlias() {
+		return mAlias != null;
+	}
+
 	StrokeSetEntry(String name) {
 		mName = name;
 	}

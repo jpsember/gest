@@ -1,0 +1,13 @@
+[
+  
+  {"name":"undo", 
+    "strokes": [[0,1,0, 1,0,1]] 
+  } 
+  ,{"name":"undo2",
+    "alias":"undo",
+    "strokes": [[0,0,10, 1,0,2]]
+   }
+
+  ,{"name":"beta","alias":"gamma","strokes":[[0,0,0,1,10,0]]}
+  
+]
