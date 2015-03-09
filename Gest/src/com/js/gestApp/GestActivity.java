@@ -151,6 +151,7 @@ public class GestActivity extends MyActivity {
 				mMatchStrokeSet = null;
 				mStrokeSet = null;
 				mRegisteredSet = null;
+				mDisplayedSimilarity = null;
 				return;
 			}
 
@@ -227,6 +228,13 @@ public class GestActivity extends MyActivity {
 					Rect r = StrokeRegistrator.sStandardRect;
 					for (int i = 0; i < 4; i++)
 						drawLine(r.corner(i), r.corner((i + 1) % 4), mPaintOutline);
+					if (mDisplayedSimilarity != null) {
+						int TEXT_SIZE = 35;
+						mPaintFill.setTextSize(TEXT_SIZE);
+
+						canvas.drawText("Match: " + mDisplayedSimilarity.intValue(), r.x,
+								r.endY() + TEXT_SIZE * 1.2f, mPaintFill);
+					}
 				}
 			}
 			mCanvas = null;
@@ -268,6 +276,7 @@ public class GestActivity extends MyActivity {
 			}
 			if (mMatchStrokeSet.size() != mRegisteredSet.size()) {
 				pr("...different number of strokes in each set");
+				mDisplayedSimilarity = null;
 				return;
 			}
 
@@ -275,6 +284,7 @@ public class GestActivity extends MyActivity {
 			m.similarity();
 
 			pr("Match similarity: " + d(m.similarity()));
+			mDisplayedSimilarity = m.similarity();
 
 			float ff[] = { 0, .01f, .02f, .05f, .06f, .07f, .08f, .1f };
 			for (float factor : ff) {
@@ -296,6 +306,7 @@ public class GestActivity extends MyActivity {
 		private int mSkipCount;
 		private Long mStartEventTimeMillis;
 		private StrokeSet mMatchStrokeSet;
+		private Float mDisplayedSimilarity;
 	}
 
 	private OurView mView;
