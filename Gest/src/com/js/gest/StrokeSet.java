@@ -110,6 +110,12 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 		return mStrokes.size();
 	}
 
+	public int length() {
+		if (isEmpty())
+			throw new IllegalStateException();
+		return mStrokes.get(0).length();
+	}
+
 	public Stroke get(int index) {
 		return mStrokes.get(index);
 	}
