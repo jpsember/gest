@@ -153,9 +153,14 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			@Override
 			public void run() {
 				String name = mNameWidget.getText().toString().trim();
-				if (name.isEmpty()) return;
-				if (mRegisteredSet == null) return;
-				pr("saving set as name '"+name+"'");
+				if (name.isEmpty())
+					return;
+				if (mRegisteredSet == null)
+					return;
+				mMatchStrokeSet = mRegisteredSet;
+				clearRegisteredSet();
+				setConsoleText("saving set as name '" + name + "'");
+				mNameWidget.setText("");
 			}
 		});
 		EditText name = new EditText(this);
@@ -167,7 +172,6 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		p.weight = 1;
 		ctrlView.addView(name, p);
 		mNameWidget = name;
-		name.setText("name here");
 	}
 
 	private View buildContentView() {
@@ -185,7 +189,6 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	}
 
 	private void clearRegisteredSet() {
-		mMatchStrokeSet = null;
 		mRegisteredSet = null;
 		mDisplayedSimilarity = null;
 		mMatchView.setStrokeSet(null);
@@ -194,7 +197,6 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 
 	private void performMatch() {
 		if (mMatchStrokeSet == null) {
-			mMatchStrokeSet = mRegisteredSet;
 			return;
 		}
 		if (mMatchStrokeSet.size() != mRegisteredSet.size()) {
