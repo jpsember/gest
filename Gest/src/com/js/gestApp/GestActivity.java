@@ -14,7 +14,10 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import static com.js.basic.Tools.*;
@@ -24,6 +27,9 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		// To address issue #6:
+		getWindow().setSoftInputMode(
+				WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 		setContentView(buildContentView());
 	}
 
@@ -38,11 +44,6 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	public void processTouchSet(StrokeSet set) {
 
 		mTouchStrokeSet = set;
-		if (set.iterator().next().length() < 3) {
-			clearRegisteredSet();
-			mTouchStrokeSet = null;
-			return;
-		}
 
 		boolean withSmoothing = true;
 		boolean withNormalizing = true;
@@ -123,10 +124,50 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		mConsole.setText(text);
 	}
 
-	private LinearLayout buildControlView() {
+	private void addButton(String label, final Runnable handler) {
+		Button b = new Button(this);
+		b.setText(label);
+		mControlView.addView(b, UITools.layoutParams(mControlView));
+		if (handler != null)
+			b.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					handler.run();
+				}
+			});
+	}
+
+	private void buildControlView() {
 		LinearLayout ctrlView = UITools.linearLayout(this, false);
-		ctrlView.setBackgroundColor(Color.RED);
-		return ctrlView;
+		mControlView = ctrlView;
+
+		addButton("Clear (deprecated)", new Runnable() {
+			@Override
+			public void run() {
+				clearRegisteredSet();
+				mTouchStrokeSet = null;
+				mView.setDisplayStrokeSet(null);
+			}
+		});
+		addButton("Save", new Runnable() {
+			@Override
+			public void run() {
+				String name = mNameWidget.getText().toString().trim();
+				if (name.isEmpty()) return;
+				if (mRegisteredSet == null) return;
+				pr("saving set as name '"+name+"'");
+			}
+		});
+		EditText name = new EditText(this);
+		name.setSingleLine();
+		name.setTypeface(Typeface.MONOSPACE);
+		name.setTextSize(24);
+		name.setCursorVisible(false); // Until issue #6 is dealt with
+		LinearLayout.LayoutParams p = UITools.layoutParams(ctrlView);
+		p.weight = 1;
+		ctrlView.addView(name, p);
+		mNameWidget = name;
+		name.setText("name here");
 	}
 
 	private View buildContentView() {
@@ -136,15 +177,10 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		p.weight = 1.0f;
 		contentView.addView(buildUpperViews(), p);
 
-		LinearLayout ctrlView = buildControlView();
+		buildControlView();
 		p = UITools.layoutParams(contentView);
-		if (false) {
-			Button b = new Button(this);
-			b.setText("Hey");
-			ctrlView.addView(b, UITools.layoutParams(ctrlView));
-		}
 
-		contentView.addView(ctrlView, p);
+		contentView.addView(mControlView, p);
 		return contentView;
 	}
 
@@ -152,6 +188,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		mMatchStrokeSet = null;
 		mRegisteredSet = null;
 		mDisplayedSimilarity = null;
+		mMatchView.setStrokeSet(null);
 		setConsoleText(null);
 	}
 
@@ -191,4 +228,6 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	private StrokeSet mMatchStrokeSet;
 	private MatchView mMatchView;
 	private TextView mConsole;
+	private LinearLayout mControlView;
+	private EditText mNameWidget;
 }

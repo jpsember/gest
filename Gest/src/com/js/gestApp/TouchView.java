@@ -116,8 +116,12 @@ public class TouchView extends UITools.OurBaseView {
 	}
 
 	public void setDisplayStrokeSet(StrokeSet set) {
-		mDisplayStrokeSet = set;
+		if (set != mDisplayStrokeSet) {
+			mDisplayStrokeSet = set;
+			invalidate();
+		}
 	}
+
 
 	// Stroke set from user touch event
 	private StrokeSet mTouchStrokeSet;
