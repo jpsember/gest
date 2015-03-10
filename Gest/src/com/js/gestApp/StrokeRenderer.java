@@ -47,6 +47,7 @@ public class StrokeRenderer {
 		Point prevPoint = null;
 		for (int i = 0; i < s.length(); i++) {
 			Point point = s.get(i).getPoint();
+			point = new Point(point.x, mCanvas.getHeight() - point.y);
 			if (prevPoint != null) {
 				drawLine(prevPoint, point, mPaintFill);
 			}

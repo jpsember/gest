@@ -71,6 +71,7 @@ public class TouchView extends UITools.OurBaseView {
 			int ptrId = event.getPointerId(i);
 			event.getPointerCoords(i, mCoord);
 			Point pt = new Point(mCoord.x, mCoord.y);
+			pt.y = getHeight() - mCoord.y;
 			mTouchStrokeSet.addPoint(eventTime, ptrId, pt);
 		}
 
