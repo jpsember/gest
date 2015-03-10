@@ -46,12 +46,16 @@ public final class UITools {
 	 * 
 	 * @param context
 	 * @param vertical
-	 *            true if it is to have a vertical orientation
+	 *          true if it is to have a vertical orientation
 	 */
 	public static LinearLayout linearLayout(Context context, boolean vertical) {
 		LinearLayout view = new LinearLayout(context);
 		view.setOrientation(vertical ? LinearLayout.VERTICAL
 				: LinearLayout.HORIZONTAL);
+		// Give view a minimum size in each dimension, so we are more likely to
+		// detect problems with the layout (e.g. views not showing up)
+		view.setMinimumWidth(15);
+		view.setMinimumHeight(15);
 		UITools.applyDebugColors(view);
 		return view;
 	}
@@ -61,10 +65,10 @@ public final class UITools {
 	 * particular orientation
 	 * 
 	 * @param forHorizontalLayout
-	 *            if true, constructs params for a containing LinearLayout with
-	 *            horizontal orientation: width wraps content, height matches
-	 *            container's. If false, width matches container's, height wraps
-	 *            content
+	 *          if true, constructs params for a containing LinearLayout with
+	 *          horizontal orientation: width wraps content, height matches
+	 *          container's. If false, width matches container's, height wraps
+	 *          content
 	 */
 	public static LinearLayout.LayoutParams layoutParams(
 			boolean forHorizontalLayout) {
@@ -86,6 +90,62 @@ public final class UITools {
 	 */
 	public static LinearLayout.LayoutParams layoutParams(LinearLayout container) {
 		return layoutParams(container.getOrientation() == LinearLayout.HORIZONTAL);
+	}
+
+	/**
+	 * A subclass of View that doesn't try to take over its container if
+	 * LayoutParams.WRAP_CONTENT is given (see issue #5)
+	 */
+	public static class OurBaseView extends View {
+
+		public OurBaseView(Context context) {
+			super(context);
+			UITools.applyDebugColors(this);
+		}
+
+		@Override
+		protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+			// Get the width measurement
+			int widthSize = getMeasurement(widthMeasureSpec, 0);
+			// Get the height measurement
+			int heightSize = getMeasurement(heightMeasureSpec, 0);
+			// MUST call this to store the measurements
+			setMeasuredDimension(widthSize, heightSize);
+		}
+
+		/**
+		 * Utility to return a view's standard measurement. Uses the supplied size
+		 * when constraints are given. Attempts to hold to the desired size unless
+		 * it conflicts with provided constraints.
+		 * 
+		 * @param measureSpec
+		 *          Constraints imposed by the parent
+		 * @param contentSize
+		 *          Desired size for the view
+		 * @return The size the view should be.
+		 */
+		public static int getMeasurement(int measureSpec, int contentSize) {
+			int specMode = View.MeasureSpec.getMode(measureSpec);
+			int specSize = View.MeasureSpec.getSize(measureSpec);
+			int resultSize = 0;
+			switch (specMode) {
+			case View.MeasureSpec.UNSPECIFIED:
+				// Big as we want to be
+				resultSize = contentSize;
+				break;
+			case View.MeasureSpec.AT_MOST:
+				// Big as we want to be, up to the spec
+				resultSize = Math.min(contentSize, specSize);
+				break;
+			case View.MeasureSpec.EXACTLY:
+				// Must be the spec size
+				resultSize = specSize;
+				break;
+			}
+
+			return resultSize;
+		}
+
 	}
 
 	private static int sDebugColorIndex;
