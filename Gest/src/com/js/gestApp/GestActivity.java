@@ -1,12 +1,16 @@
 package com.js.gestApp;
 
+import java.io.InputStream;
+
 import com.js.android.MyActivity;
 import com.js.android.UITools;
+import com.js.basic.Files;
 import com.js.gest.Rect;
 import com.js.gest.StrokeNormalizer;
 import com.js.gest.StrokeRegistrator;
 import com.js.gest.StrokeSet;
-import com.js.gest.StrokeSetMatcher;
+import com.js.gest.StrokeSetCollection;
+import com.js.gest.StrokeSetEntry;
 import com.js.gest.StrokeSmoother;
 
 import android.graphics.Color;
@@ -31,6 +35,8 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		getWindow().setSoftInputMode(
 				WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 		setContentView(buildContentView());
+
+		prepareGestureLibrary();
 	}
 
 	@Override
@@ -141,14 +147,6 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		LinearLayout ctrlView = UITools.linearLayout(this, false);
 		mControlView = ctrlView;
 
-		addButton("Clear (deprecated)", new Runnable() {
-			@Override
-			public void run() {
-				clearRegisteredSet();
-				mTouchStrokeSet = null;
-				mView.setDisplayStrokeSet(null);
-			}
-		});
 		addButton("Save", new Runnable() {
 			@Override
 			public void run() {
@@ -157,7 +155,8 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 					return;
 				if (mRegisteredSet == null)
 					return;
-				mMatchStrokeSet = mRegisteredSet;
+
+				mGestureLibrary.set(name, mRegisteredSet);
 				clearRegisteredSet();
 				setConsoleText("saving set as name '" + name + "'");
 				mNameWidget.setText("");
@@ -190,44 +189,39 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 
 	private void clearRegisteredSet() {
 		mRegisteredSet = null;
-		mDisplayedSimilarity = null;
 		mMatchView.setStrokeSet(null);
 		setConsoleText(null);
 	}
 
 	private void performMatch() {
-		if (mMatchStrokeSet == null) {
+		StrokeSetCollection.Match match = mGestureLibrary.findMatch(mRegisteredSet);
+		if (match == null) {
+			setConsoleText("No match found");
 			return;
 		}
-		if (mMatchStrokeSet.size() != mRegisteredSet.size()) {
-			clearRegisteredSet();
-			return;
-		}
+		StrokeSetEntry ent = match.set();
+		mMatchView.setStrokeSet(ent.strokeSet());
+		setConsoleText(match.toString());
+	}
 
-		StrokeSetMatcher m = new StrokeSetMatcher(mMatchStrokeSet, mRegisteredSet);
-		m.similarity();
+	private void prepareGestureLibrary() {
 
-		mDisplayedSimilarity = m.similarity();
-		mMatchView.setStrokeSet(mRegisteredSet);
-		setConsoleText("Match: " + Math.round(mDisplayedSimilarity));
-
-		if (false) {
-			float ff[] = { 0, .01f, .02f, .05f, .06f, .07f, .08f, .1f };
-			for (float factor : ff) {
-				m = new StrokeSetMatcher(mMatchStrokeSet, mRegisteredSet);
-				m.setDistanceThreshold(factor);
-				pr("Factor " + d(factor) + " similiarity: " + d(m.similarity()));
-			}
+		try {
+			InputStream stream = getClass()
+					.getResourceAsStream("basic_gestures.json");
+			String json = Files.readString(stream);
+			mGestureLibrary = StrokeSetCollection.parseJSON(json);
+		} catch (Exception e) {
+			die(e);
 		}
 	}
 
+	private StrokeSetCollection mGestureLibrary;
 	private TouchView mView;
 	// Stroke set from user touch event
 	private StrokeSet mTouchStrokeSet;
 	// Normalized stroke set (suitable for comparison)
 	private StrokeSet mRegisteredSet;
-	private Float mDisplayedSimilarity;
-	private StrokeSet mMatchStrokeSet;
 	private MatchView mMatchView;
 	private TextView mConsole;
 	private LinearLayout mControlView;

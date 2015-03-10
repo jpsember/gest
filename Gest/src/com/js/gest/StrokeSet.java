@@ -106,6 +106,9 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 		return mStrokes.iterator();
 	}
 
+	/**
+	 * Get the number of strokes in this set
+	 */
 	public int size() {
 		return mStrokes.size();
 	}

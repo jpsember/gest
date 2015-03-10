@@ -1,0 +1,38 @@
+[
+
+  {"name":"nw",
+    "strokes": [[0,1,0, 1,0,1]]
+  }
+
+  ,{"name":"se",
+    "source":["nw","fliphorz","flipvert"]
+ 	}
+
+ 	, {"name":"ne",
+    "source":["nw","fliphorz"]
+  }
+
+  ,{"name":"sw",
+    "source":["nw","flipvert"]
+  }
+
+
+ 	,{"name":"up",
+    "strokes": [[0,0,0, 1,0,1]]
+ 	}
+ 	 	  ,{"name":"down",
+    "source":["up","reverse"]
+ 	}
+
+ 	  ,{"name":"left",
+    "strokes": [[0,1,0, 1,0,0]]
+ 	}
+ 	,{"name":"right",
+    "source":["left","reverse"]
+ 	}
+
+ 	,{"name":"v",
+    "strokes": [[0,0,2, 1,1,0, 2,2,2]]
+  }
+
+]
