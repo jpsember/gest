@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
+
 import com.js.basic.Freezable;
 import com.js.basic.Point;
 import static com.js.basic.Tools.*;
@@ -71,6 +73,10 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 
 	private boolean isEmpty() {
 		return mStrokes.isEmpty();
+	}
+
+	public String toJSON(String name) throws JSONException {
+		return StrokeSetCollectionParser.strokeSetToJSON(this, name);
 	}
 
 	@Override

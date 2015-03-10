@@ -112,6 +112,8 @@ public class StrokeSetCollection {
 			sb.append(d(Math.round(cost())));
 			sb.append(' ');
 			sb.append(setEntry().name());
+			if (setEntry().hasAlias())
+				sb.append(" --> "+setEntry().alias().name());
 			return sb.toString();
 		}
 

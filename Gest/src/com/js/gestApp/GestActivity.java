@@ -3,6 +3,8 @@ package com.js.gestApp;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.json.JSONException;
+
 import com.js.android.MyActivity;
 import com.js.android.UITools;
 import com.js.basic.Files;
@@ -158,9 +160,10 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 					return;
 
 				mGestureLibrary.set(name, mRegisteredSet);
-				clearRegisteredSet();
 				setConsoleText("saving set as name '" + name + "'");
 				mNameWidget.setText("");
+				dumpStrokeSet(mRegisteredSet, name);
+				clearRegisteredSet();
 			}
 		});
 		EditText name = new EditText(this);
@@ -172,6 +175,18 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		p.weight = 1;
 		ctrlView.addView(name, p);
 		mNameWidget = name;
+	}
+
+	private void dumpStrokeSet(StrokeSet set, String name) {
+		StrokeNormalizer n = new StrokeNormalizer(set);
+		n.setDesiredStrokeSize(8);
+		StrokeSet set2 = n.getNormalizedSet();
+		try {
+			String s = set2.toJSON(name);
+			pr("\n"+s);
+		} catch (JSONException e) {
+			die(e);
+		}
 	}
 
 	private View buildContentView() {

@@ -1,38 +1,28 @@
 [
-
-  {"name":"nw",
-    "strokes": [[0,1,0, 1,0,1]]
-  }
-
-  ,{"name":"se",
-    "source":["nw","fliphorz","flipvert"]
- 	}
-
- 	, {"name":"ne",
-    "source":["nw","fliphorz"]
-  }
-
-  ,{"name":"sw",
-    "source":["nw","flipvert"]
-  }
-
-
- 	,{"name":"up",
-    "strokes": [[0,0,0, 1,0,1]]
- 	}
- 	 	  ,{"name":"down",
-    "source":["up","reverse"]
- 	}
-
- 	  ,{"name":"left",
-    "strokes": [[0,1,0, 1,0,0]]
- 	}
- 	,{"name":"right",
-    "source":["left","reverse"]
- 	}
-
- 	,{"name":"v",
-    "strokes": [[0,0,2, 1,1,0, 2,2,2]]
-  }
+ {"name":"nw","strokes": [[0,1,0, 1,0,1]]}
+,{"name":"se","source":["nw","fliphorz","flipvert"]}
+,{"name":"ne","source":["nw","fliphorz"]}
+,{"name":"sw","source":["nw","flipvert"]}
+,{"name":"up","strokes": [[0,0,0, 1,0,1]]}
+,{"name":"down","source":["up","reverse"]}
+,{"name":"left","strokes": [[0,1,0, 1,0,0]]}
+,{"name":"right","source":["left","reverse"]}
+,{"name":"d_right","strokes":[[0,116,142,13,255,152],[0,0,102,13,171,126]]}
+,{"name":"d_left","strokes":[[0,255,157,1,244,157,3,218,158,5,188,158,7,162,159,9,141,160,11,123,162,13,115,162],[0,158,94,2,145,93,4,117,92,6,84,92,8,55,92,10,21,92,13,1,93,15,0,93]]}
+,{"name":"d_down","strokes":[[0,17,152,1,17,147,3,17,137,5,17,117,6,19,79,8,19,2,10,19,0,11,19,0],[0,237,255,1,237,251,2,237,246,4,235,233,5,232,198,7,229,150,8,230,163,10,230,163]]}
+,{"name":"d_up","strokes":[[0,212,46,1,213,48,3,215,64,5,218,94,7,224,156,9,228,217,11,229,234,13,229,235],[0,25,0,2,26,3,4,30,36,6,39,82,8,48,147,11,57,210,13,65,255,15,65,255]]}
+,{"name":"up_right","strokes":[[0,0,0, 1,0,1, 2,1,1]]}
+,{"name":"up_left","source":["up_right","fliphorz"]}
+,{"name":"down_right","source":["up_right","flipvert"]}
+,{"name":"down_left","source":["up_right","fliphorz","flipvert"]}
+,{"name":"v","strokes": [[0,0,2, 1,1,0, 2,2,2]]}
+,{"name":"v_2","reverse_alias":"v"}
+,{"name":"carat","source":["v","flipvert"]}
+,{"name":"carat_2","alias":"carat","source":["v","flipvert","reverse"]}
+,{"name":"c", "strokes":[[0,254,194,4,247,200,8,231,210,12,210,219,16,164,228,20,111,225,24,63,202,28,26,169,32,4,129,36,4,89,40,31,51,44,76,28,48,140,25,52,197,39,56,241,72,60,246,77]]}
+,{"name":"p","strokes":[[0,86,0,6,69,31,12,58,122,19,87,220,25,151,250,32,196,195,38,144,141,45,111,125]]}
+,{"name":"p_2","reverse_alias":"p"}
+,{"name":"d","strokes":[[0,152,113,5,110,105,11,59,78,17,49,19,22,103,0,28,175,49,34,202,184,39,205,255]]}
+,{"name":"d_2","reverse_alias":"d"}
 
 ]
