@@ -1,6 +1,7 @@
 package com.js.gest;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.js.basic.JSONTools;
+import com.js.basic.Point;
 
 class StrokeSetCollectionParser {
 
@@ -147,9 +149,51 @@ class StrokeSetCollectionParser {
 		return normalizedSet;
 	}
 
+	/**
+	 * Modify an existing stroke set according to some options
+	 * 
+	 * Options can include:
+	 * 
+	 * 'reverse' : reverse the time sequence of the stroke points
+	 * 
+	 * 'fliphorz' : flip around y axis
+	 * 
+	 * 'flipvert' : flip around x axis
+	 * 
+	 * @param sourceSet
+	 * @param options
+	 * 
+	 */
 	private StrokeSet modifyExistingStrokeSet(StrokeSet sourceSet,
 			Set<String> options) {
-		throw new UnsupportedOperationException();
+		boolean reverse = options.contains("reverse");
+		boolean flipHorz = options.contains("flipHorz");
+		boolean flipVert = options.contains("flipVert");
+
+		List<Stroke> modifiedStrokes = new ArrayList();
+		List<StrokePoint> workList = new ArrayList();
+		for (Stroke s : sourceSet) {
+			Stroke modifiedStroke = new Stroke();
+			modifiedStrokes.add(modifiedStroke);
+			workList.clear();
+			float totalTime = s.totalTime();
+			for (StrokePoint spt : s) {
+				float time = spt.getTime();
+				Point pt = new Point(spt.getPoint());
+				if (reverse)
+					time = totalTime - time;
+				if (flipHorz)
+					pt.x = StrokeRegistrator.sStandardRect.width - pt.x;
+				if (flipVert)
+					pt.y = StrokeRegistrator.sStandardRect.height - pt.y;
+				workList.add(new StrokePoint(time, pt));
+			}
+			if (reverse)
+				Collections.reverse(workList);
+			for (StrokePoint pt : workList)
+				modifiedStroke.addPoint(pt);
+		}
+		return StrokeSet.buildFromStrokes(modifiedStrokes);
 	}
 
 	private static String getName(JSONObject strokeSetMap) throws JSONException {
