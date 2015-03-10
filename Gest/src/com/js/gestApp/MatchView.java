@@ -1,7 +1,5 @@
 package com.js.gestApp;
 
-import static com.js.basic.Tools.*;
-
 import android.content.Context;
 import android.graphics.Canvas;
 
@@ -22,28 +20,17 @@ public class MatchView extends UITools.OurBaseView {
 		if (mRegisteredSet != null) {
 			mRenderer.drawStrokeSet(mRegisteredSet, true, 0);
 			mRenderer.drawRect(StrokeRegistrator.sStandardRect);
-
-			{
-				unimp("display score in text view");
-				// int TEXT_SIZE = 35;
-				// mPaintFill.setTextSize(TEXT_SIZE);
-				//
-				// canvas.drawText("Match: " + Math.round(mDisplayedSimilarity), r.x,
-				// r.endY() + TEXT_SIZE * 1.2f, mPaintFill);
-			}
 		}
 		mRenderer.stopRender();
 	}
 
-	public void setStrokeSet(StrokeSet set, float score) {
+	public void setStrokeSet(StrokeSet set) {
 		if (set != mRegisteredSet) {
 			mRegisteredSet = set;
-			mDisplayedSimilarity = score;
 			invalidate();
 		}
 	}
 
 	private StrokeRenderer mRenderer;
 	private StrokeSet mRegisteredSet;
-	/* private */float mDisplayedSimilarity;
 }

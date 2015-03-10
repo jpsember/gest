@@ -10,11 +10,13 @@ import com.js.gest.StrokeSetMatcher;
 import com.js.gest.StrokeSmoother;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import static com.js.basic.Tools.*;
 
 public class GestActivity extends MyActivity implements TouchView.Listener {
@@ -84,8 +86,20 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			View mAuxView = new UITools.OurBaseView(this);
 			mAuxView.setBackgroundColor(Color.GRAY);
 			p = UITools.layoutParams(layout2);
-			p.weight = 1.0f;
+			p.weight = 0;
 			layout2.addView(mAuxView, p);
+		}
+
+		{
+			TextView tv = new TextView(this);
+			tv.setTypeface(Typeface.MONOSPACE);
+			tv.setTextSize(24);
+			mConsole = tv;
+
+			LinearLayout.LayoutParams p = UITools.layoutParams(layout2);
+			p.setMargins(10, 10, 10, 10);
+			p.weight = 1;
+			layout2.addView(mConsole, p);
 		}
 
 		LinearLayout.LayoutParams p = UITools.layoutParams(horzLayout);
@@ -99,6 +113,14 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		p.weight = .7f;
 		horzLayout.addView(mView, p);
 		return horzLayout;
+	}
+
+	private void setConsoleText(String text) {
+		if (mConsole == null)
+			return;
+		if (text == null)
+			text = "";
+		mConsole.setText(text);
 	}
 
 	private LinearLayout buildControlView() {
@@ -130,6 +152,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		mMatchStrokeSet = null;
 		mRegisteredSet = null;
 		mDisplayedSimilarity = null;
+		setConsoleText(null);
 	}
 
 	private void performMatch() {
@@ -146,7 +169,8 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		m.similarity();
 
 		mDisplayedSimilarity = m.similarity();
-		mMatchView.setStrokeSet(mRegisteredSet, mDisplayedSimilarity);
+		mMatchView.setStrokeSet(mRegisteredSet);
+		setConsoleText("Match: " + Math.round(mDisplayedSimilarity));
 
 		if (false) {
 			float ff[] = { 0, .01f, .02f, .05f, .06f, .07f, .08f, .1f };
@@ -166,4 +190,5 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	private Float mDisplayedSimilarity;
 	private StrokeSet mMatchStrokeSet;
 	private MatchView mMatchView;
+	private TextView mConsole;
 }
