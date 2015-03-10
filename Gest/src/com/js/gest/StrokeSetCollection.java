@@ -1,10 +1,12 @@
 package com.js.gest;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
 import org.json.JSONException;
+
 import static com.js.basic.Tools.*;
 
 public class StrokeSetCollection {
@@ -42,8 +44,12 @@ public class StrokeSetCollection {
 	}
 
 	public Match findMatch(StrokeSet inputSet) {
+		return findMatch(inputSet, null);
+	}
 
-		pr("\nfindMatch");
+	public Match findMatch(StrokeSet inputSet, List<Match> resultsList) {
+		if (resultsList != null)
+			resultsList.clear();
 		TreeSet<Match> results = new TreeSet();
 		for (String setName : mEntriesMap.keySet()) {
 			StrokeSetEntry entry = mEntriesMap.get(setName);
@@ -54,48 +60,63 @@ public class StrokeSetCollection {
 			StrokeSetMatcher m = new StrokeSetMatcher(set2, inputSet);
 			Match match = new Match(entry, m.similarity());
 			results.add(match);
-			pr("  match= " + match);
 			// Throw out all but top three
 			while (results.size() > 3)
 				results.pollLast();
 		}
 		if (results.isEmpty())
 			return null;
+
+		if (resultsList != null) {
+			resultsList.addAll(results);
+		}
+
 		return results.first();
 	}
 
 	public static class Match implements Comparable {
-		public Match(StrokeSetEntry set, float score) {
+		public Match(StrokeSetEntry set, float cost) {
 			mStrokeSetEntry = set;
-			mScore = score;
+			mCost = cost;
 		}
 
-		public float score() {
-			return mScore;
+		public float cost() {
+			return mCost;
 		}
 
-		public StrokeSetEntry set() {
+		public StrokeSetEntry setEntry() {
 			return mStrokeSetEntry;
 		}
 
 		@Override
 		public int compareTo(Object another) {
 			Match m = (Match) another;
-			int diff = (int) Math.signum(this.score() - m.score());
+			int diff = (int) Math.signum(this.cost() - m.cost());
 			if (diff == 0) {
-				diff = String.CASE_INSENSITIVE_ORDER.compare(this.set().name(), m.set()
-						.name());
+				diff = String.CASE_INSENSITIVE_ORDER.compare(this.setEntry().name(), m
+						.setEntry().name());
+				if (diff != 0) {
+					warning("comparisons matched exactly, this is unlikely: "
+							+ this.setEntry().name()
+							+ " / "
+							+ m.setEntry().name()
+							+ "\n and may be indicative of a spelling mistake in the 'source' options");
+				}
 			}
 			return diff;
 		}
 
 		@Override
 		public String toString() {
-			return "Match '" + set().name() + "' score=" + Math.round(score());
+			StringBuilder sb = new StringBuilder();
+			sb.append(d(Math.round(cost())));
+			sb.append(' ');
+			sb.append(setEntry().name());
+			return sb.toString();
 		}
 
 		private StrokeSetEntry mStrokeSetEntry;
-		private float mScore;
+		private float mCost;
 
 	}
 

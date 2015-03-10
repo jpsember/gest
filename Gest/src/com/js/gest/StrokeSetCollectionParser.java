@@ -167,8 +167,8 @@ class StrokeSetCollectionParser {
 	private StrokeSet modifyExistingStrokeSet(StrokeSet sourceSet,
 			Set<String> options) {
 		boolean reverse = options.contains("reverse");
-		boolean flipHorz = options.contains("flipHorz");
-		boolean flipVert = options.contains("flipVert");
+		boolean flipHorz = options.contains("fliphorz");
+		boolean flipVert = options.contains("flipvert");
 
 		List<Stroke> modifiedStrokes = new ArrayList();
 		List<StrokePoint> workList = new ArrayList();

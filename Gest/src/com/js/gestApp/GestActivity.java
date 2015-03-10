@@ -1,6 +1,7 @@
 package com.js.gestApp;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import com.js.android.MyActivity;
 import com.js.android.UITools;
@@ -194,14 +195,22 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	}
 
 	private void performMatch() {
-		StrokeSetCollection.Match match = mGestureLibrary.findMatch(mRegisteredSet);
+		ArrayList<StrokeSetCollection.Match> matches = new ArrayList();
+		StrokeSetCollection.Match match = mGestureLibrary.findMatch(mRegisteredSet,
+				matches);
 		if (match == null) {
 			setConsoleText("No match found");
 			return;
 		}
-		StrokeSetEntry ent = match.set();
+
+		StrokeSetEntry ent = match.setEntry();
 		mMatchView.setStrokeSet(ent.strokeSet());
-		setConsoleText(match.toString());
+		StringBuilder sb = new StringBuilder();
+		for (StrokeSetCollection.Match m : matches) {
+			sb.append(m);
+			sb.append("\n");
+		}
+		setConsoleText(sb.toString());
 	}
 
 	private void prepareGestureLibrary() {
