@@ -5,6 +5,10 @@ import java.util.List;
 
 import com.js.basic.Point;
 
+/**
+ * Constructs a smoothed version of a stroke set by performing cubic Hermite
+ * interpolation on each of its strokes
+ */
 public class StrokeSmoother {
 
 	/**

@@ -56,26 +56,19 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			throw new IllegalArgumentException();
 		mTouchStrokeSet = set;
 
-		boolean withSmoothing = mSmoothingCheckBox.isChecked();
-		boolean withNormalizing = true;
-
 		StrokeSet smoothedSet = set;
-		if (withSmoothing) {
+		if (mSmoothingCheckBox.isChecked()) {
 			StrokeSmoother s = new StrokeSmoother(set);
 			set = s.getSmoothedSet();
 			smoothedSet = set;
 		}
 		smoothedSet = smoothedSet.fitToRect(null);
 
-		StrokeSet normalizedSet = smoothedSet;
-		if (withNormalizing) {
-			StrokeNormalizer n = new StrokeNormalizer(normalizedSet);
-			normalizedSet = n.getNormalizedSet();
-		}
-		mNormalizedStrokeSet = normalizedSet;
-		StrokeSet mDisplayStrokeSet = mNormalizedStrokeSet
-				.fitToRect(mTouchStrokeSet.getBounds());
-		mTouchView.setDisplayStrokeSet(mDisplayStrokeSet);
+		StrokeNormalizer n = new StrokeNormalizer(smoothedSet);
+		mNormalizedStrokeSet = n.getNormalizedSet();
+		StrokeSet displayedSet = mNormalizedStrokeSet.fitToRect(mTouchStrokeSet
+				.getBounds());
+		mTouchView.setDisplayStrokeSet(displayedSet);
 
 		performMatch();
 	}
@@ -198,12 +191,12 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		});
 	}
 
-	private void dumpStrokeSet(StrokeSet set, String name) {
-		StrokeNormalizer n = new StrokeNormalizer(set);
+	private void dumpStrokeSet(StrokeSet originalSet, String name) {
+		StrokeNormalizer n = new StrokeNormalizer(originalSet);
 		n.setDesiredStrokeSize(8);
-		StrokeSet set2 = n.getNormalizedSet();
+		StrokeSet set = n.getNormalizedSet();
 		try {
-			String s = set2.toJSON(name);
+			String s = set.toJSON(name);
 			pr("\n" + s);
 		} catch (JSONException e) {
 			die(e);

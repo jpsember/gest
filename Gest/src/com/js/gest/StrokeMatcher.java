@@ -10,7 +10,7 @@ import com.js.basic.Point;
 /**
  * Determines how closely two strokes match
  */
-public class StrokeMatcher {
+class StrokeMatcher {
 
 	public StrokeMatcher(Stroke a, Stroke b) {
 		mStrokeA = frozen(a);
