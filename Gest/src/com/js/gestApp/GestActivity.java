@@ -47,8 +47,8 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	@Override
 	public void startTouchSequence() {
 		mTouchStrokeSet = new StrokeSet();
-		mRegisteredSet = null;
-		mView.setDisplayStrokeSet(null);
+		mNormalizedStrokeSet = null;
+		mTouchView.setDisplayStrokeSet(null);
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 
 		mTouchStrokeSet = set;
 
-		boolean withSmoothing = true;
+		boolean withSmoothing = mSmoothingCheckBox.isChecked();
 		boolean withNormalizing = true;
 
 		StrokeSet smoothedSet = set;
@@ -73,11 +73,11 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			StrokeNormalizer n = new StrokeNormalizer(normalizedSet);
 			normalizedSet = n.getNormalizedSet();
 		}
-		mRegisteredSet = normalizedSet;
+		mNormalizedStrokeSet = normalizedSet;
 		Rect originalBounds = StrokeRegistrator.bounds(mTouchStrokeSet);
-		StrokeSet mDisplayStrokeSet = StrokeRegistrator.fitToRect(mRegisteredSet,
-				originalBounds);
-		mView.setDisplayStrokeSet(mDisplayStrokeSet);
+		StrokeSet mDisplayStrokeSet = StrokeRegistrator.fitToRect(
+				mNormalizedStrokeSet, originalBounds);
+		mTouchView.setDisplayStrokeSet(mDisplayStrokeSet);
 
 		performMatch();
 	}
@@ -119,12 +119,12 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		p.weight = .2f;
 		horzLayout.addView(layout2, p);
 
-		mView = new TouchView(this, this);
+		mTouchView = new TouchView(this, this);
 
-		mView.setBackgroundColor(Color.BLUE);
+		mTouchView.setBackgroundColor(Color.BLUE);
 		p = UITools.layoutParams(horzLayout);
 		p.weight = .7f;
-		horzLayout.addView(mView, p);
+		horzLayout.addView(mTouchView, p);
 		return horzLayout;
 	}
 
@@ -144,12 +144,13 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			b.setOnClickListener(listener);
 	}
 
-	private void addCheckBox(String label, OnClickListener listener) {
+	private CheckBox addCheckBox(String label, OnClickListener listener) {
 		CheckBox checkBox = new CheckBox(this);
 		checkBox.setText(label);
 		mControlView.addView(checkBox, UITools.layoutParams(mControlView));
 		if (listener != null)
 			checkBox.setOnClickListener(listener);
+		return checkBox;
 	}
 
 	private void buildControlView() {
@@ -162,13 +163,13 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 				String name = mNameWidget.getText().toString().trim();
 				if (name.isEmpty())
 					return;
-				if (mRegisteredSet == null)
+				if (mNormalizedStrokeSet == null)
 					return;
 
-				mGestureLibrary.set(name, mRegisteredSet);
+				mGestureLibrary.set(name, mNormalizedStrokeSet);
 				setConsoleText("saving set as name '" + name + "'");
 				mNameWidget.setText("");
-				dumpStrokeSet(mRegisteredSet, name);
+				dumpStrokeSet(mNormalizedStrokeSet, name);
 				clearRegisteredSet();
 			}
 		});
@@ -182,10 +183,19 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		ctrlView.addView(name, p);
 		mNameWidget = name;
 
-		addCheckBox("Smoothing", new OnClickListener() {
+		mSmoothingCheckBox = addCheckBox("Smoothing", new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				unimp("onclick");
+				if (mTouchStrokeSet == null)
+					return;
+				processTouchSet(mTouchStrokeSet);
+			}
+		});
+
+		addCheckBox("Coarse", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mTouchView.setCoarseFlag(((CheckBox) v).isChecked());
 			}
 		});
 	}
@@ -217,14 +227,14 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	}
 
 	private void clearRegisteredSet() {
-		mRegisteredSet = null;
+		mNormalizedStrokeSet = null;
 		mMatchView.setStrokeSet(null);
 		setConsoleText(null);
 	}
 
 	private void performMatch() {
 		ArrayList<StrokeSetCollection.Match> matches = new ArrayList();
-		Match match = mGestureLibrary.findMatch(mRegisteredSet, matches);
+		Match match = mGestureLibrary.findMatch(mNormalizedStrokeSet, matches);
 		if (match == null) {
 			setConsoleText("No match found");
 			return;
@@ -268,13 +278,14 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	}
 
 	private StrokeSetCollection mGestureLibrary;
-	private TouchView mView;
+	private TouchView mTouchView;
 	// Stroke set from user touch event
 	private StrokeSet mTouchStrokeSet;
-	// Normalized stroke set (suitable for comparison)
-	private StrokeSet mRegisteredSet;
+	// Stroke set after registering / smoothing / normalizing
+	private StrokeSet mNormalizedStrokeSet;
 	private MatchView mMatchView;
 	private TextView mConsole;
 	private LinearLayout mControlView;
 	private EditText mNameWidget;
+	private CheckBox mSmoothingCheckBox;
 }

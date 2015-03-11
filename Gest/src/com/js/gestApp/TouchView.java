@@ -1,7 +1,5 @@
 package com.js.gestApp;
 
-import static com.js.basic.Tools.*;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
@@ -21,9 +19,13 @@ public class TouchView extends UITools.OurBaseView {
 		void processTouchSet(StrokeSet mTouchStrokeSet);
 	}
 
-	// If enabled, generates fewer points for test purposes (useful for
-	// debugging the smoothing algorithm)
-	private boolean mSimulateCoarse = false;
+	/**
+	 * Set 'coarse mode' status. Off by default, if enabled, it generates fewer
+	 * points per second (for test purposes) by ignoring certain TouchEvents
+	 */
+	public void setCoarseFlag(boolean f) {
+		mCoarseMode = f;
+	}
 
 	public TouchView(Context context, Listener listener) {
 		super(context);
@@ -40,18 +42,9 @@ public class TouchView extends UITools.OurBaseView {
 			mListener.startTouchSequence();
 			mTouchStrokeSet = new StrokeSet();
 			mDisplayStrokeSet = null;
-			mSimulateCoarse ^= true;
-			if (false) {
-				warning("always coarse");
-				mSimulateCoarse = true;
-			}
-			if (false) {
-				warning("always fine");
-				mSimulateCoarse = false;
-			}
 		}
 
-		if (mSimulateCoarse) {
+		if (mCoarseMode) {
 			if (actionMasked == MotionEvent.ACTION_MOVE) {
 				mSkipCount++;
 				if (mSkipCount == 4) {
@@ -123,7 +116,6 @@ public class TouchView extends UITools.OurBaseView {
 		}
 	}
 
-
 	// Stroke set from user touch event
 	private StrokeSet mTouchStrokeSet;
 	private StrokeSet mDisplayStrokeSet;
@@ -132,4 +124,5 @@ public class TouchView extends UITools.OurBaseView {
 	private boolean mAlwaysFalse;
 	private int mSkipCount;
 	private Long mStartEventTimeMillis;
+	private boolean mCoarseMode;
 }
