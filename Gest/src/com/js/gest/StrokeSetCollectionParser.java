@@ -144,7 +144,6 @@ class StrokeSetCollectionParser {
 			String aliasName = entry.map().optString(KEY_ALIAS);
 			if (aliasName.isEmpty())
 				aliasName = entry.map().optString(KEY_REVERSE_ALIAS);
-//			pr(" processAliases, name "+name+", map "+d(entry.map())+", aliasName "+aliasName);
 			if (aliasName.isEmpty())
 				continue;
 			ParseEntry targetEntry = mNamedSets.get(aliasName);

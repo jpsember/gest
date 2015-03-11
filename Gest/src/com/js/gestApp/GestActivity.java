@@ -13,6 +13,7 @@ import com.js.gest.StrokeNormalizer;
 import com.js.gest.StrokeRegistrator;
 import com.js.gest.StrokeSet;
 import com.js.gest.StrokeSetCollection;
+import com.js.gest.StrokeSetCollection.Match;
 import com.js.gest.StrokeSetEntry;
 import com.js.gest.StrokeSmoother;
 
@@ -102,8 +103,9 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 
 		{
 			TextView tv = new TextView(this);
+			tv.setBackgroundColor(Color.LTGRAY);
 			tv.setTypeface(Typeface.MONOSPACE);
-			tv.setTextSize(24);
+			tv.setTextSize(18);
 			mConsole = tv;
 
 			LinearLayout.LayoutParams p = UITools.layoutParams(layout2);
@@ -183,7 +185,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		StrokeSet set2 = n.getNormalizedSet();
 		try {
 			String s = set2.toJSON(name);
-			pr("\n"+s);
+			pr("\n" + s);
 		} catch (JSONException e) {
 			die(e);
 		}
@@ -211,8 +213,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 
 	private void performMatch() {
 		ArrayList<StrokeSetCollection.Match> matches = new ArrayList();
-		StrokeSetCollection.Match match = mGestureLibrary.findMatch(mRegisteredSet,
-				matches);
+		Match match = mGestureLibrary.findMatch(mRegisteredSet, matches);
 		if (match == null) {
 			setConsoleText("No match found");
 			return;
@@ -221,7 +222,22 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		StrokeSetEntry ent = match.setEntry();
 		mMatchView.setStrokeSet(ent.strokeSet());
 		StringBuilder sb = new StringBuilder();
-		for (StrokeSetCollection.Match m : matches) {
+		for (int i = 0; i < matches.size(); i++) {
+			Match m = matches.get(i);
+			boolean goodFit = false;
+			if (i == 0) {
+				if (matches.size() < 2)
+					goodFit = true;
+				else {
+					// If second best match is an alias to ours, or its cost is
+					// substantially more, set good fit prefix
+					Match m2 = matches.get(i + 1);
+					if (m2.setEntry().alias() == m.setEntry().alias()
+							|| m.cost() * 3 < m2.cost())
+						goodFit = true;
+				}
+			}
+			sb.append(goodFit ? "***" : "   ");
 			sb.append(m);
 			sb.append("\n");
 		}
