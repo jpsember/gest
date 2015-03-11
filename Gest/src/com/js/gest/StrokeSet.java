@@ -23,8 +23,11 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 	 * id, if none currently exists
 	 * 
 	 * @param eventTime
+	 *          time, in seconds, associated with point
 	 * @param pointerId
+	 *          id of pointer (i.e. finger) generating point
 	 * @param pt
+	 *          location of point
 	 */
 	public void addPoint(float eventTime, int pointerId, Point pt) {
 		mutate();
@@ -39,6 +42,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 		for (Stroke stroke : strokes) {
 			s.mStrokes.add(stroke);
 		}
+		s.freeze();
 		return s;
 	}
 
@@ -55,10 +59,27 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 	}
 
 	/**
-	 * Determine if all strokes in the set have been completed
+	 * Determine if any strokes are active (i.e., not yet stopped)
 	 */
-	public boolean isComplete() {
-		return !isEmpty() && mStrokeIdToIndexMap.isEmpty();
+	public boolean areStrokesActive() {
+		if (isFrozen())
+			return false;
+		return !mStrokeIdToIndexMap.isEmpty();
+	}
+
+	@Override
+	public void freeze() {
+		if (isFrozen())
+			return;
+		if (areStrokesActive())
+			throw new IllegalStateException();
+		// Throw out unnecessary resources
+		mStrokeIdToIndexMap = null;
+		// Calculate bounds, now that frozen
+		mBounds = getBounds();
+		if (mBounds == null)
+			throw new IllegalStateException("set has no points");
+		super.freeze();
 	}
 
 	private Stroke strokeForId(int pointerId) {
@@ -131,7 +152,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 
 	@Override
 	public Freezable getMutableCopy() {
-		if (!isComplete())
+		if (!isFrozen())
 			throw new IllegalStateException();
 		StrokeSet s = new StrokeSet();
 		for (Stroke st : mStrokes) {
@@ -140,7 +161,23 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 		return s;
 	}
 
+	public Rect getBounds() {
+		if (mBounds != null)
+			return mBounds;
+		Rect r = null;
+		for (Stroke s : mStrokes) {
+			for (StrokePoint spt : s) {
+				Point pt = spt.getPoint();
+				if (r == null)
+					r = new Rect(pt, pt);
+				r.include(pt);
+			}
+		}
+		return r;
+	}
+
 	private float mInitialEventTime;
 	private Map<Integer, Integer> mStrokeIdToIndexMap = new HashMap();
 	private ArrayList<Stroke> mStrokes = new ArrayList();
+	private Rect mBounds;
 }

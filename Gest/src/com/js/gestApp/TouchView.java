@@ -71,11 +71,9 @@ public class TouchView extends UITools.OurBaseView {
 		if (actionMasked == MotionEvent.ACTION_UP
 				|| actionMasked == MotionEvent.ACTION_POINTER_UP) {
 			mTouchStrokeSet.stopStroke(activeId);
-			if (mTouchStrokeSet.isComplete()) {
-				if (mTouchStrokeSet.isMutable()) {
-					mTouchStrokeSet.freeze();
-					mListener.processTouchSet(mTouchStrokeSet);
-				}
+			if (!mTouchStrokeSet.areStrokesActive()) {
+				mTouchStrokeSet.freeze();
+				mListener.processTouchSet(mTouchStrokeSet);
 			}
 		}
 
