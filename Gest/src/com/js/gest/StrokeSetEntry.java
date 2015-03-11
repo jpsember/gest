@@ -1,9 +1,30 @@
 package com.js.gest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class StrokeSetEntry {
 
+	/**
+	 * Get stroke set of longest length
+	 */
 	public StrokeSet strokeSet() {
-		return mStrokeSet;
+		StrokeSet best = null;
+		for (StrokeSet set : mStrokeSetMap.values()) {
+			if (best == null || best.length() < set.length())
+				best = set;
+		}
+		if (best == null)
+			throw new IllegalStateException("set is empty");
+		return best;
+	}
+
+	public StrokeSet strokeSet(int desiredStrokeLength) {
+		StrokeSet set = mStrokeSetMap.get(desiredStrokeLength);
+		if (set == null)
+			throw new IllegalArgumentException("no stroke set '" + name()
+					+ "' of length " + desiredStrokeLength);
+		return set;
 	}
 
 	public String name() {
@@ -26,8 +47,8 @@ public class StrokeSetEntry {
 		mName = name;
 	}
 
-	void setStrokeSet(StrokeSet strokeSet) {
-		mStrokeSet = strokeSet;
+	void addStrokeSet(StrokeSet strokeSet) {
+		mStrokeSetMap.put(strokeSet.length(), strokeSet);
 	}
 
 	void setAlias(StrokeSetEntry strokeSetEntry) {
@@ -36,5 +57,6 @@ public class StrokeSetEntry {
 
 	private String mAliasName;
 	private String mName;
-	private StrokeSet mStrokeSet;
+	// Map of stroke sets, keyed by normalization length
+	private Map<Integer, StrokeSet> mStrokeSetMap = new HashMap();
 }

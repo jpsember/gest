@@ -100,7 +100,7 @@ class StrokeSetCollectionParser {
 			if (strokes == null)
 				continue;
 			StrokeSet strokeSet = parseStrokeSet(name, strokes);
-			entry.strokeSetEntry().setStrokeSet(strokeSet);
+			entry.strokeSetEntry().addStrokeSet(strokeSet);
 		}
 	}
 
@@ -134,7 +134,7 @@ class StrokeSetCollectionParser {
 				throw new JSONException("No strokes found for: " + sourceName);
 
 			StrokeSet strokeSet = modifyExistingStrokeSet(name, sourceSet, options);
-			strokeSetEntry.setStrokeSet(strokeSet);
+			strokeSetEntry.addStrokeSet(strokeSet);
 		}
 	}
 

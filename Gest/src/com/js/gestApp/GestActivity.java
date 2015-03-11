@@ -156,7 +156,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 				if (mNormalizedStrokeSet == null)
 					return;
 
-				mGestureLibrary.set(name, mNormalizedStrokeSet);
+				mGestureLibrary.add(name, mNormalizedStrokeSet);
 				setConsoleText("saving set as name '" + name + "'");
 				mNameWidget.setText("");
 				dumpStrokeSet(mNormalizedStrokeSet, name);
@@ -229,7 +229,8 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		}
 
 		StrokeSetEntry ent = match.setEntry();
-		mMatchView.setStrokeSet(ent.strokeSet());
+		mMatchView.setStrokeSet(ent
+				.strokeSet(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH));
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < matches.size(); i++) {
 			Match m = matches.get(i);

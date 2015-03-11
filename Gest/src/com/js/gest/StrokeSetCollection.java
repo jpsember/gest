@@ -34,12 +34,11 @@ public class StrokeSetCollection {
 		return map().get(name);
 	}
 
-	public void set(String name, StrokeSet set) {
-		warning("have alias refer to name, not actual set");
+	public void add(String name, StrokeSet set) {
 		if (set == null)
 			throw new IllegalArgumentException();
 		StrokeSetEntry entry = new StrokeSetEntry(name);
-		entry.setStrokeSet(set);
+		entry.addStrokeSet(set);
 		mEntriesMap.put(name, entry);
 	}
 
@@ -53,7 +52,7 @@ public class StrokeSetCollection {
 		TreeSet<Match> results = new TreeSet();
 		for (String setName : mEntriesMap.keySet()) {
 			StrokeSetEntry entry = mEntriesMap.get(setName);
-			StrokeSet set2 = entry.strokeSet();
+			StrokeSet set2 = entry.strokeSet(inputSet.length());
 			if (set2.size() != inputSet.size())
 				continue;
 

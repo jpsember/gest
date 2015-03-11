@@ -7,7 +7,7 @@ import com.js.basic.Point;
 
 public class StrokeNormalizer {
 
-	private static final int DEFAULT_DESIRED_STROKE_LENGTH = 32;
+	public static final int DEFAULT_DESIRED_STROKE_LENGTH = 32;
 
 	/**
 	 * Normalize a stroke set to default length
