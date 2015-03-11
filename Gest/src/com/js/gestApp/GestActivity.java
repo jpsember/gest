@@ -244,7 +244,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 					// If second best match is an alias to ours, or its cost is
 					// substantially more, set good fit prefix
 					Match m2 = matches.get(i + 1);
-					if (m2.setEntry().alias() == m.setEntry().alias()
+					if (m2.setEntry().aliasName() == m.setEntry().aliasName()
 							|| m.cost() * 3 < m2.cost())
 						goodFit = true;
 				}

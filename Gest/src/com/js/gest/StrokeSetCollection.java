@@ -113,7 +113,7 @@ public class StrokeSetCollection {
 			sb.append(' ');
 			sb.append(setEntry().name());
 			if (setEntry().hasAlias())
-				sb.append(" --> "+setEntry().alias().name());
+				sb.append(" --> " + setEntry().aliasName());
 			return sb.toString();
 		}
 

@@ -11,16 +11,15 @@ public class StrokeSetEntry {
 	}
 
 	/**
-	 * Get the stroke set this one is an alias of; returns 'this' if none
+	 * Get the name of the stroke set this one is an alias of; returns our name if
+	 * we are not an alias
 	 */
-	public StrokeSetEntry alias() {
-		if (mAlias == null)
-			return this;
-		return mAlias;
+	public String aliasName() {
+		return mAliasName;
 	}
 
 	public boolean hasAlias() {
-		return mAlias != null;
+		return mAliasName != mName;
 	}
 
 	StrokeSetEntry(String name) {
@@ -31,11 +30,11 @@ public class StrokeSetEntry {
 		mStrokeSet = strokeSet;
 	}
 
-	void setAlias(StrokeSetEntry alias) {
-		mAlias = alias;
+	void setAlias(StrokeSetEntry strokeSetEntry) {
+		mAliasName = strokeSetEntry.aliasName();
 	}
 
-	private StrokeSetEntry mAlias;
+	private String mAliasName;
 	private String mName;
 	private StrokeSet mStrokeSet;
 }
