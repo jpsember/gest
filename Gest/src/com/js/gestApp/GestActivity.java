@@ -8,7 +8,6 @@ import org.json.JSONException;
 import com.js.android.MyActivity;
 import com.js.android.UITools;
 import com.js.basic.Files;
-import com.js.gest.StrokeNormalizer;
 import com.js.gest.StrokeSet;
 import com.js.gest.StrokeSetCollection;
 import com.js.gest.StrokeSetCollection.Match;
@@ -64,7 +63,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		}
 		smoothedSet = smoothedSet.fitToRect(null);
 
-		mNormalizedStrokeSet = StrokeNormalizer.normalize(smoothedSet);
+		mNormalizedStrokeSet = smoothedSet.normalize();
 		StrokeSet displayedSet = mNormalizedStrokeSet.fitToRect(mTouchStrokeSet
 				.getBounds());
 		mTouchView.setDisplayStrokeSet(displayedSet);
@@ -199,7 +198,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	}
 
 	private void dumpStrokeSet(StrokeSet originalSet, String name) {
-		StrokeSet set = StrokeNormalizer.normalize(originalSet, 8);
+		StrokeSet set = originalSet.normalize(12);
 		try {
 			String s = set.toJSON(name);
 			pr("\n" + s);
@@ -275,8 +274,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			StrokeSetCollection destination) {
 		mMultiLengthLibrary.add(name, originalSet);
 		// Generate a lower resolution version
-		int length = SMALL_STROKE_SET_LENGTH;
-		StrokeSet set2 = StrokeNormalizer.normalize(originalSet, length);
+		StrokeSet set2 = originalSet.normalize(SMALL_STROKE_SET_LENGTH);
 		mMultiLengthLibrary.add(name, set2);
 	}
 
@@ -297,13 +295,12 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 					mGestureLibrary);
 			setConsoleText(result);
 		} else {
-			int[] lengths = { StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH,
-					SMALL_STROKE_SET_LENGTH };
+			int[] lengths = { 0, SMALL_STROKE_SET_LENGTH };
 			StringBuilder sb = new StringBuilder();
 			for (int length : lengths) {
 				StrokeSet source = mNormalizedStrokeSet;
 				if (source.length() != length)
-					source = StrokeNormalizer.normalize(source, length);
+					source = source.normalize(length);
 				String result = performMatchWithLibrary(source, mMultiLengthLibrary);
 				sb.append("Length " + length + ":\n");
 				sb.append(result);

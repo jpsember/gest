@@ -21,6 +21,25 @@ import static com.js.basic.Tools.*;
 public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 
 	/**
+	 * Normalize this stroke set to default length
+	 */
+	public StrokeSet normalize() {
+		return normalize(0);
+	}
+
+	/**
+	 * Normalize a stroke set to have arbitrary length
+	 * 
+	 * @param desiredStrokeLength
+	 *          desired length; if zero, uses default length
+	 */
+	public StrokeSet normalize(int desiredStrokeLength) {
+		if (desiredStrokeLength == 0)
+			desiredStrokeLength = StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH;
+		return StrokeNormalizer.normalize(this, desiredStrokeLength);
+	}
+
+	/**
 	 * Add a point to a stroke within the set. Construct a stroke for this pointer
 	 * id, if none currently exists
 	 * 

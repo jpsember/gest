@@ -46,24 +46,23 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 		return mPoints.size();
 	}
 
-	public StrokePoint get(int index) {
+	StrokePoint get(int index) {
 		return mPoints.get(index);
 	}
 
-	public StrokePoint last() {
-		return com.js.basic.Tools.last(mPoints);
+	public Point getPoint(int i) {
+		return get(i).getPoint();
 	}
 
-	public StrokePoint pop() {
-		mutate();
-		return com.js.basic.Tools.pop(mPoints);
+	StrokePoint last() {
+		return com.js.basic.Tools.last(mPoints);
 	}
 
 	public boolean isEmpty() {
 		return mPoints.isEmpty();
 	}
 
-	public void addPoint(StrokePoint point) {
+	void addPoint(StrokePoint point) {
 		addPoint(point.getTime(), point.getPoint());
 	}
 

@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.js.basic.Point;
 
-public class StrokeNormalizer {
+class StrokeNormalizer {
 
 	public static final int DEFAULT_DESIRED_STROKE_LENGTH = 32;
 
@@ -21,6 +21,8 @@ public class StrokeNormalizer {
 	 */
 	public static StrokeSet normalize(StrokeSet originalSet,
 			int desiredStrokeLength) {
+		if (originalSet.length() == desiredStrokeLength)
+			return originalSet;
 		StrokeNormalizer n = new StrokeNormalizer(originalSet);
 		n.setDesiredStrokeSize(desiredStrokeLength);
 		return n.getNormalizedSet();

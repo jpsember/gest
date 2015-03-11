@@ -22,6 +22,7 @@ public class StrokeTest extends MyTestCase {
 			s.addPoint(time, pt);
 			time += random().nextFloat() * .05f + 0.01f;
 		}
+		s.freeze();
 		return s;
 	}
 

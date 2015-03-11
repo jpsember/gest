@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import com.js.basic.Point;
 
-public class StrokeSetMatcher {
+class StrokeSetMatcher {
 
 	public StrokeSetMatcher(StrokeSet a, StrokeSet b) {
 		mStrokeA = frozen(a);
