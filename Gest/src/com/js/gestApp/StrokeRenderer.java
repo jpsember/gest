@@ -45,7 +45,7 @@ public class StrokeRenderer {
 		float scaleFactor = small ? 0.3f : 1.0f;
 
 		Point prevPoint = null;
-		for (int i = 0; i < s.length(); i++) {
+		for (int i = 0; i < s.size(); i++) {
 			Point point = s.get(i).getPoint();
 			point = new Point(point.x, mCanvas.getHeight() - point.y);
 			if (prevPoint != null) {

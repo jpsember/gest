@@ -38,7 +38,7 @@ public class StrokeSmoother {
 	 * vertex
 	 */
 	private Point calcStrokeVelocity(Stroke stroke, int index) {
-		if (index == 0 || index == stroke.length() - 1)
+		if (index == 0 || index == stroke.size() - 1)
 			return Point.ZERO;
 
 		StrokePoint e0 = stroke.get(index - 1);
@@ -95,7 +95,7 @@ public class StrokeSmoother {
 		Stroke newStroke = new Stroke();
 		StrokePoint prevPoint = null;
 		Point prevVelocity = null;
-		for (int strokeIndex = 0; strokeIndex < origStroke.length(); strokeIndex++) {
+		for (int strokeIndex = 0; strokeIndex < origStroke.size(); strokeIndex++) {
 			StrokePoint currentPoint = origStroke.get(strokeIndex);
 			Point currentVelocity = calcStrokeVelocity(origStroke, strokeIndex);
 

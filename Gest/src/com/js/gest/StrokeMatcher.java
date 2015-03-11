@@ -55,7 +55,7 @@ public class StrokeMatcher {
 	}
 
 	private void calculateSimilarity() {
-		if (mStrokeA.length() != mStrokeB.length())
+		if (mStrokeA.size() != mStrokeB.size())
 			throw new IllegalArgumentException("stroke lengths mismatch");
 		prepare();
 
@@ -188,7 +188,7 @@ public class StrokeMatcher {
 	}
 
 	private int pathLength() {
-		return mStrokeA.length();
+		return mStrokeA.size();
 	}
 
 	private void prepare() {

@@ -50,8 +50,6 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 	 * Stop adding points to stroke corresponding to a pointer id, so that if a
 	 * subsequent point is generated for this pointer id, it will be stored within
 	 * a fresh stroke
-	 * 
-	 * @param pointerId
 	 */
 	public void stopStroke(int pointerId) {
 		mutate();
@@ -76,9 +74,11 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 		// Throw out unnecessary resources
 		mStrokeIdToIndexMap = null;
 		// Calculate bounds, now that frozen
-		mBounds = getBounds();
+		mBounds = calculateBounds();
 		if (mBounds == null)
 			throw new IllegalStateException("set has no points");
+		for (Stroke s : mStrokes)
+			s.freeze();
 		super.freeze();
 	}
 
@@ -116,7 +116,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 				}
 			}
 			sb.append(" id:" + strokeIdString + " #:" + strokeIndex + " ");
-			for (int i = 0; i < stroke.length(); i++) {
+			for (int i = 0; i < stroke.size(); i++) {
 				StrokePoint pt = stroke.get(i);
 				sb.append(d((int) pt.getPoint().x, 4));
 				if (i > 16) {
@@ -143,7 +143,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 	public int length() {
 		if (isEmpty())
 			throw new IllegalStateException();
-		return mStrokes.get(0).length();
+		return mStrokes.get(0).size();
 	}
 
 	public Stroke get(int index) {
@@ -152,8 +152,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 
 	@Override
 	public Freezable getMutableCopy() {
-		if (!isFrozen())
-			throw new IllegalStateException();
+		assertFrozen();
 		StrokeSet s = new StrokeSet();
 		for (Stroke st : mStrokes) {
 			s.mStrokes.add(mutableCopyOf(st));
@@ -162,8 +161,11 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 	}
 
 	public Rect getBounds() {
-		if (mBounds != null)
-			return mBounds;
+		assertFrozen();
+		return mBounds;
+	}
+
+	private Rect calculateBounds() {
 		Rect r = null;
 		for (Stroke s : mStrokes) {
 			for (StrokePoint spt : s) {
@@ -176,8 +178,10 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 		return r;
 	}
 
-	private float mInitialEventTime;
-	private Map<Integer, Integer> mStrokeIdToIndexMap = new HashMap();
 	private ArrayList<Stroke> mStrokes = new ArrayList();
 	private Rect mBounds;
+
+	// Only used when mutable
+	private float mInitialEventTime;
+	private Map<Integer, Integer> mStrokeIdToIndexMap = new HashMap();
 }

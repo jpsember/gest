@@ -9,7 +9,6 @@ import org.json.JSONException;
 import com.js.basic.Point;
 import com.js.basic.Freezable;
 
-import android.graphics.Matrix;
 import static com.js.basic.Tools.*;
 
 /**
@@ -21,12 +20,6 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 
 	public Stroke() {
 		mPoints = new ArrayList();
-		mStartTime = -1;
-	}
-
-	public void clear() {
-		mutate();
-		mPoints.clear();
 		mStartTime = -1;
 	}
 
@@ -46,7 +39,10 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 		return sb.toString();
 	}
 
-	public int length() {
+	/**
+	 * Get number of points in stroke
+	 */
+	public int size() {
 		return mPoints.size();
 	}
 
@@ -88,25 +84,11 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 		mPoints.add(pt);
 	}
 
-	/**
-	 * Construct stroke as a portion of this one
-	 * 
-	 * @param start
-	 *          index of first point to appear in fragment
-	 * @param end
-	 *          one plus index of last point to appear in fragment
-	 */
-	public Stroke constructFragment(int start, int end) {
-		Stroke fragment = new Stroke();
-		for (int i = start; i < end; i++)
-			fragment.addPoint(get(i));
-		return fragment;
-	}
-
 	// Divide stroke point time values by this to get time in seconds
 	private static final float FLOAT_TIME_SCALE = 60.0f;
 
 	public JSONArray toJSONArray() throws JSONException {
+		assertFrozen();
 		JSONArray a = new JSONArray();
 		for (StrokePoint pt : mPoints) {
 			a.put((int) (pt.getTime() * FLOAT_TIME_SCALE));
@@ -130,28 +112,8 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 			float y = array.getInt(j + 2);
 			s.addPoint(time, new Point(x, y));
 		}
+		s.freeze();
 		return s;
-	}
-
-	/**
-	 * Transform all points on path, returning a new path
-	 */
-	public Stroke transformBy(Matrix matrix) {
-		Stroke p = new Stroke();
-		for (StrokePoint pt : mPoints) {
-			Point pos = new Point(pt.getPoint());
-			pos.apply(matrix);
-			p.addPoint(pt.getTime(), pos);
-		}
-		return p;
-	}
-
-	/**
-	 * Apply translation to points, returning a new path
-	 */
-	public Stroke translateBy(Point point) {
-		Matrix m = null;
-		return transformBy(m);
 	}
 
 	public Iterator<StrokePoint> iterator() {
@@ -168,6 +130,10 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 		return s;
 	}
 
+	/**
+	 * Get duration of this stroke; the time elapsed from the first to the last
+	 * point
+	 */
 	public float totalTime() {
 		float time = 0;
 		if (!mPoints.isEmpty())

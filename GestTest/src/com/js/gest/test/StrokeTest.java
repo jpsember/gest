@@ -41,7 +41,7 @@ public class StrokeTest extends MyTestCase {
 		String json1 = stroke1.toJSONArray().toString();
 		JSONArray array1 = new JSONArray(json1);
 		Stroke stroke2 = Stroke.parseJSONArray(array1);
-		assertEquals(stroke2.length(), stroke1.length());
+		assertEquals(stroke2.size(), stroke1.size());
 		String json2 = stroke2.toJSONArray().toString();
 		assertEquals(json1, json2);
 	}

@@ -54,6 +54,8 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	@Override
 	public void processTouchSet(StrokeSet set) {
 
+		if (!set.isFrozen())
+			throw new IllegalArgumentException();
 		mTouchStrokeSet = set;
 
 		boolean withSmoothing = mSmoothingCheckBox.isChecked();
@@ -74,9 +76,8 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			normalizedSet = n.getNormalizedSet();
 		}
 		mNormalizedStrokeSet = normalizedSet;
-		Rect originalBounds = StrokeRegistrator.bounds(mTouchStrokeSet);
 		StrokeSet mDisplayStrokeSet = StrokeRegistrator.fitToRect(
-				mNormalizedStrokeSet, originalBounds);
+				mNormalizedStrokeSet, mTouchStrokeSet.getBounds());
 		mTouchView.setDisplayStrokeSet(mDisplayStrokeSet);
 
 		performMatch();

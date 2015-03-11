@@ -2,23 +2,9 @@ package com.js.gest;
 
 import android.graphics.Matrix;
 
-import com.js.basic.Point;
 import static com.js.basic.Tools.*;
 
 public class StrokeRegistrator {
-
-	public static Rect bounds(StrokeSet set) {
-		Rect r = null;
-		for (Stroke s : set) {
-			for (StrokePoint spt : s) {
-				Point pt = spt.getPoint();
-				if (r == null)
-					r = new Rect(pt, pt);
-				r.include(pt);
-			}
-		}
-		return r;
-	}
 
 	public static final int STANDARD_WIDTH = 256;
 	private static final float STANDARD_ASPECT_RATIO = 1.0f;
@@ -37,7 +23,7 @@ public class StrokeRegistrator {
 	 * @return StrokeSet fitted to destinationRect
 	 */
 	public static StrokeSet fitToRect(StrokeSet set, Rect destinationRect) {
-		Rect origBounds = bounds(set);
+		Rect origBounds = set.getBounds();
 		if (destinationRect == null)
 			destinationRect = sStandardRect;
 		Matrix transform = MyMath.calcRectFitRectTransform(origBounds,
