@@ -16,7 +16,7 @@ public class StrokePoint {
 	public StrokePoint(StrokePoint source) {
 		this(source.mTime, source.mPoint);
 	}
-	
+
 	public Point getPoint() {
 		return mPoint;
 	}

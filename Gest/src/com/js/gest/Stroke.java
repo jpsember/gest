@@ -5,9 +5,7 @@ import java.util.Iterator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import com.js.basic.JSONTools;
 import com.js.basic.Point;
 import com.js.basic.Freezable;
 
@@ -105,12 +103,8 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 		return fragment;
 	}
 
-	private static final float FLOAT_TIME_SCALE = 120.0f;
-
-	@Deprecated
-	public String toJSON() throws JSONException {
-		return toJSONArray().toString();
-	}
+	// Divide stroke point time values by this to get time in seconds
+	private static final float FLOAT_TIME_SCALE = 60.0f;
 
 	public JSONArray toJSONArray() throws JSONException {
 		JSONArray a = new JSONArray();
@@ -137,16 +131,6 @@ public class Stroke extends Freezable.Mutable implements Iterable<StrokePoint> {
 			s.addPoint(time, new Point(x, y));
 		}
 		return s;
-	}
-
-	@Deprecated
-	public static Stroke parseJSON(String script) throws JSONException {
-	 final String JSON_KEY_POINTS = "pts";
-	 	JSONObject map = JSONTools.parseMap(script);
-		if (!map.has(JSON_KEY_POINTS)) {
-			throw new JSONException(JSON_KEY_POINTS + " key missing");
-		}
-		return parseJSONArray(map.getJSONArray(JSON_KEY_POINTS));
 	}
 
 	/**

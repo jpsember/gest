@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -135,26 +136,29 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		mConsole.setText(text);
 	}
 
-	private void addButton(String label, final Runnable handler) {
+	private void addButton(String label, OnClickListener listener) {
 		Button b = new Button(this);
 		b.setText(label);
 		mControlView.addView(b, UITools.layoutParams(mControlView));
-		if (handler != null)
-			b.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					handler.run();
-				}
-			});
+		if (listener != null)
+			b.setOnClickListener(listener);
+	}
+
+	private void addCheckBox(String label, OnClickListener listener) {
+		CheckBox checkBox = new CheckBox(this);
+		checkBox.setText(label);
+		mControlView.addView(checkBox, UITools.layoutParams(mControlView));
+		if (listener != null)
+			checkBox.setOnClickListener(listener);
 	}
 
 	private void buildControlView() {
 		LinearLayout ctrlView = UITools.linearLayout(this, false);
 		mControlView = ctrlView;
 
-		addButton("Save", new Runnable() {
+		addButton("Save", new OnClickListener() {
 			@Override
-			public void run() {
+			public void onClick(View v) {
 				String name = mNameWidget.getText().toString().trim();
 				if (name.isEmpty())
 					return;
@@ -177,6 +181,13 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		p.weight = 1;
 		ctrlView.addView(name, p);
 		mNameWidget = name;
+
+		addCheckBox("Smoothing", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				unimp("onclick");
+			}
+		});
 	}
 
 	private void dumpStrokeSet(StrokeSet set, String name) {

@@ -2,6 +2,10 @@ package com.js.gest;
 
 import static com.js.basic.Tools.*;
 
+/**
+ * Used by matching algorithm; represents an entry in the dynamic programming
+ * table
+ */
 class Cell {
 
 	public Cell(int aIndex, int bIndex) {
