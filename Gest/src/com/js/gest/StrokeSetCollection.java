@@ -37,9 +37,12 @@ public class StrokeSetCollection {
 	public void add(String name, StrokeSet set) {
 		if (set == null)
 			throw new IllegalArgumentException();
-		StrokeSetEntry entry = new StrokeSetEntry(name);
+		StrokeSetEntry entry = mEntriesMap.get(name);
+		if (entry == null) {
+			entry = new StrokeSetEntry(name);
+			mEntriesMap.put(name, entry);
+		}
 		entry.addStrokeSet(set);
-		mEntriesMap.put(name, entry);
 	}
 
 	public Match findMatch(StrokeSet inputSet) {

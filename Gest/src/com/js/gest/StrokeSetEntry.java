@@ -2,6 +2,7 @@ package com.js.gest;
 
 import java.util.HashMap;
 import java.util.Map;
+import static com.js.basic.Tools.*;
 
 public class StrokeSetEntry {
 
@@ -23,7 +24,7 @@ public class StrokeSetEntry {
 		StrokeSet set = mStrokeSetMap.get(desiredStrokeLength);
 		if (set == null)
 			throw new IllegalArgumentException("no stroke set '" + name()
-					+ "' of length " + desiredStrokeLength);
+					+ "' of length " + desiredStrokeLength + " within " + nameOf(this));
 		return set;
 	}
 
@@ -36,11 +37,13 @@ public class StrokeSetEntry {
 	 * we are not an alias
 	 */
 	public String aliasName() {
+		if (mAliasName == null)
+			return mName;
 		return mAliasName;
 	}
 
 	public boolean hasAlias() {
-		return mAliasName != mName;
+		return mAliasName != null;
 	}
 
 	StrokeSetEntry(String name) {

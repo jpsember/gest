@@ -155,8 +155,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 					return;
 				if (mNormalizedStrokeSet == null)
 					return;
-
-				mGestureLibrary.add(name, mNormalizedStrokeSet);
+				addGestureToLibrary(name, mNormalizedStrokeSet);
 				setConsoleText("saving set as name '" + name + "'");
 				mNameWidget.setText("");
 				dumpStrokeSet(mNormalizedStrokeSet, name);
@@ -182,6 +181,15 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			}
 		});
 
+		mMultiLengthCheckBox = addCheckBox("Multilength", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (!((CheckBox) v).isChecked()) {
+					mMultiLengthLibrary = null;
+				}
+			}
+		});
+
 		addCheckBox("Coarse", new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -197,6 +205,16 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			pr("\n" + s);
 		} catch (JSONException e) {
 			die(e);
+		}
+	}
+
+	// Length of strokes normalized for small version within multilength library
+	private static final int SMALL_STROKE_SET_LENGTH = 10;
+
+	private void addGestureToLibrary(String name, StrokeSet set) {
+		mGestureLibrary.add(name, set);
+		if (mMultiLengthLibrary != null) {
+			generateMultiLengthSets(name, set, mMultiLengthLibrary);
 		}
 	}
 
@@ -220,17 +238,16 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		setConsoleText(null);
 	}
 
-	private void performMatch() {
+	private String performMatchWithLibrary(StrokeSet sourceSet,
+			StrokeSetCollection library) {
 		ArrayList<StrokeSetCollection.Match> matches = new ArrayList();
-		Match match = mGestureLibrary.findMatch(mNormalizedStrokeSet, matches);
+		Match match = library.findMatch(sourceSet, matches);
 		if (match == null) {
-			setConsoleText("No match found");
-			return;
+			return "No match found";
 		}
 
 		StrokeSetEntry ent = match.setEntry();
-		mMatchView.setStrokeSet(ent
-				.strokeSet(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH));
+		mMatchView.setStrokeSet(ent.strokeSet(sourceSet.length()));
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < matches.size(); i++) {
 			Match m = matches.get(i);
@@ -251,7 +268,49 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			sb.append(m);
 			sb.append("\n");
 		}
-		setConsoleText(sb.toString());
+		return sb.toString();
+	}
+
+	private void generateMultiLengthSets(String name, StrokeSet originalSet,
+			StrokeSetCollection destination) {
+		mMultiLengthLibrary.add(name, originalSet);
+		// Generate a lower resolution version
+		int length = SMALL_STROKE_SET_LENGTH;
+		StrokeSet set2 = StrokeNormalizer.normalize(originalSet, length);
+		mMultiLengthLibrary.add(name, set2);
+	}
+
+	private void performMatch() {
+		if (mMultiLengthCheckBox.isChecked()) {
+			if (mMultiLengthLibrary == null) {
+				mMultiLengthLibrary = new StrokeSetCollection();
+				for (String name : mGestureLibrary.map().keySet()) {
+					StrokeSetEntry ent = mGestureLibrary.get(name);
+					StrokeSet set = ent.strokeSet();
+					generateMultiLengthSets(name, set, mMultiLengthLibrary);
+				}
+			}
+		}
+
+		if (mMultiLengthLibrary == null) {
+			String result = performMatchWithLibrary(mNormalizedStrokeSet,
+					mGestureLibrary);
+			setConsoleText(result);
+		} else {
+			int[] lengths = { StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH,
+					SMALL_STROKE_SET_LENGTH };
+			StringBuilder sb = new StringBuilder();
+			for (int length : lengths) {
+				StrokeSet source = mNormalizedStrokeSet;
+				if (source.length() != length)
+					source = StrokeNormalizer.normalize(source, length);
+				String result = performMatchWithLibrary(source, mMultiLengthLibrary);
+				sb.append("Length " + length + ":\n");
+				sb.append(result);
+				sb.append("\n");
+			}
+			setConsoleText(sb.toString());
+		}
 	}
 
 	private void prepareGestureLibrary() {
@@ -267,6 +326,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	}
 
 	private StrokeSetCollection mGestureLibrary;
+	private StrokeSetCollection mMultiLengthLibrary;
 	private TouchView mTouchView;
 	// Stroke set from user touch event
 	private StrokeSet mTouchStrokeSet;
@@ -277,4 +337,5 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	private LinearLayout mControlView;
 	private EditText mNameWidget;
 	private CheckBox mSmoothingCheckBox;
+	private CheckBox mMultiLengthCheckBox;
 }
