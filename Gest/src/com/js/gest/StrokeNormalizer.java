@@ -10,16 +10,33 @@ public class StrokeNormalizer {
 	private static final int DEFAULT_DESIRED_STROKE_LENGTH = 32;
 
 	/**
+	 * Normalize a stroke set to default length
+	 */
+	public static StrokeSet normalize(StrokeSet originalSet) {
+		return normalize(originalSet, DEFAULT_DESIRED_STROKE_LENGTH);
+	}
+
+	/**
+	 * Normalize a stroke set to have arbitrary length
+	 */
+	public static StrokeSet normalize(StrokeSet originalSet,
+			int desiredStrokeLength) {
+		StrokeNormalizer n = new StrokeNormalizer(originalSet);
+		n.setDesiredStrokeSize(desiredStrokeLength);
+		return n.getNormalizedSet();
+	}
+
+	/**
 	 * Construct a normalizer for a particular stroke set
 	 * 
 	 * @param strokeSet
 	 */
-	public StrokeNormalizer(StrokeSet strokeSet) {
+	private StrokeNormalizer(StrokeSet strokeSet) {
 		mOriginalStrokeSet = strokeSet;
 		mDesiredStrokeSize = DEFAULT_DESIRED_STROKE_LENGTH;
 	}
 
-	public void setDesiredStrokeSize(int size) {
+	private void setDesiredStrokeSize(int size) {
 		if (mNormalizedStrokeSet != null)
 			throw new IllegalStateException();
 		mDesiredStrokeSize = size;
@@ -30,7 +47,7 @@ public class StrokeNormalizer {
 	 * 
 	 * @return normalized stroke set
 	 */
-	public StrokeSet getNormalizedSet() {
+	private StrokeSet getNormalizedSet() {
 		if (mNormalizedStrokeSet == null) {
 			List<Stroke> normalizedList = new ArrayList();
 			for (Stroke s : mOriginalStrokeSet) {

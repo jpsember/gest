@@ -39,7 +39,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 		s.addPoint(eventTime - mInitialEventTime, pt);
 	}
 
-	public static StrokeSet buildFromStrokes(List<Stroke> strokes) {
+	static StrokeSet buildFromStrokes(List<Stroke> strokes) {
 		StrokeSet s = new StrokeSet();
 		for (Stroke stroke : strokes) {
 			s.mStrokes.add(stroke);

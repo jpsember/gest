@@ -182,8 +182,7 @@ class StrokeSetCollectionParser {
 
 		StrokeSet normalizedSet = smoothedSet;
 		if (withNormalizing) {
-			StrokeNormalizer n = new StrokeNormalizer(normalizedSet);
-			normalizedSet = n.getNormalizedSet();
+			normalizedSet = StrokeNormalizer.normalize(normalizedSet);
 		}
 		return normalizedSet;
 	}

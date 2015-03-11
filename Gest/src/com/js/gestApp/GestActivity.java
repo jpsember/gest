@@ -64,8 +64,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		}
 		smoothedSet = smoothedSet.fitToRect(null);
 
-		StrokeNormalizer n = new StrokeNormalizer(smoothedSet);
-		mNormalizedStrokeSet = n.getNormalizedSet();
+		mNormalizedStrokeSet = StrokeNormalizer.normalize(smoothedSet);
 		StrokeSet displayedSet = mNormalizedStrokeSet.fitToRect(mTouchStrokeSet
 				.getBounds());
 		mTouchView.setDisplayStrokeSet(displayedSet);
@@ -192,9 +191,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	}
 
 	private void dumpStrokeSet(StrokeSet originalSet, String name) {
-		StrokeNormalizer n = new StrokeNormalizer(originalSet);
-		n.setDesiredStrokeSize(8);
-		StrokeSet set = n.getNormalizedSet();
+		StrokeSet set = StrokeNormalizer.normalize(originalSet, 8);
 		try {
 			String s = set.toJSON(name);
 			pr("\n" + s);
