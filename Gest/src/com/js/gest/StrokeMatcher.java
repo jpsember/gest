@@ -21,8 +21,7 @@ public class StrokeMatcher {
 	public void setDistanceThreshold(float factor) {
 		if (matched())
 			throw new IllegalStateException();
-		mZeroThreshold = (float) Math.pow(
-				StrokeRegistrator.STANDARD_WIDTH * factor, 2);
+		mZeroThreshold = (float) Math.pow(StrokeSet.STANDARD_WIDTH * factor, 2);
 	}
 
 	private boolean matched() {

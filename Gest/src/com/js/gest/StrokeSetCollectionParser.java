@@ -133,7 +133,7 @@ class StrokeSetCollectionParser {
 			if (sourceSet == null)
 				throw new JSONException("No strokes found for: " + sourceName);
 
-			StrokeSet strokeSet = modifyExistingStrokeSet(name,sourceSet, options);
+			StrokeSet strokeSet = modifyExistingStrokeSet(name, sourceSet, options);
 			strokeSetEntry.setStrokeSet(strokeSet);
 		}
 	}
@@ -178,8 +178,7 @@ class StrokeSetCollectionParser {
 			set = s.getSmoothedSet();
 			smoothedSet = set;
 		}
-		Rect fitRect = StrokeRegistrator.sStandardRect;
-		smoothedSet = StrokeRegistrator.fitToRect(smoothedSet, fitRect);
+		smoothedSet = smoothedSet.fitToRect(null);
 
 		StrokeSet normalizedSet = smoothedSet;
 		if (withNormalizing) {
@@ -206,8 +205,8 @@ class StrokeSetCollectionParser {
 	 * @param options
 	 * 
 	 */
-	private StrokeSet modifyExistingStrokeSet(String setName, StrokeSet sourceSet,
-			Set<String> options) {
+	private StrokeSet modifyExistingStrokeSet(String setName,
+			StrokeSet sourceSet, Set<String> options) {
 		if (sLegalOptions == null) {
 			sLegalOptions = new HashSet();
 			sLegalOptions.add("reverse");
@@ -215,7 +214,8 @@ class StrokeSetCollectionParser {
 			sLegalOptions.add("flipvert");
 		}
 		if (!sLegalOptions.containsAll(options))
-			throw new IllegalArgumentException("illegal options for "+setName+": " + d(options));
+			throw new IllegalArgumentException("illegal options for " + setName
+					+ ": " + d(options));
 
 		boolean reverse = options.contains("reverse");
 		boolean flipHorz = options.contains("fliphorz");
@@ -234,9 +234,9 @@ class StrokeSetCollectionParser {
 				if (reverse)
 					time = totalTime - time;
 				if (flipHorz)
-					pt.x = StrokeRegistrator.sStandardRect.width - pt.x;
+					pt.x = StrokeSet.sStandardRect.width - pt.x;
 				if (flipVert)
-					pt.y = StrokeRegistrator.sStandardRect.height - pt.y;
+					pt.y = StrokeSet.sStandardRect.height - pt.y;
 				workList.add(new StrokePoint(time, pt));
 			}
 			if (reverse)

@@ -8,9 +8,7 @@ import org.json.JSONException;
 import com.js.android.MyActivity;
 import com.js.android.UITools;
 import com.js.basic.Files;
-import com.js.gest.Rect;
 import com.js.gest.StrokeNormalizer;
-import com.js.gest.StrokeRegistrator;
 import com.js.gest.StrokeSet;
 import com.js.gest.StrokeSetCollection;
 import com.js.gest.StrokeSetCollection.Match;
@@ -67,8 +65,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			set = s.getSmoothedSet();
 			smoothedSet = set;
 		}
-		Rect fitRect = StrokeRegistrator.sStandardRect;
-		smoothedSet = StrokeRegistrator.fitToRect(smoothedSet, fitRect);
+		smoothedSet = smoothedSet.fitToRect(null);
 
 		StrokeSet normalizedSet = smoothedSet;
 		if (withNormalizing) {
@@ -76,8 +73,8 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			normalizedSet = n.getNormalizedSet();
 		}
 		mNormalizedStrokeSet = normalizedSet;
-		StrokeSet mDisplayStrokeSet = StrokeRegistrator.fitToRect(
-				mNormalizedStrokeSet, mTouchStrokeSet.getBounds());
+		StrokeSet mDisplayStrokeSet = mNormalizedStrokeSet
+				.fitToRect(mTouchStrokeSet.getBounds());
 		mTouchView.setDisplayStrokeSet(mDisplayStrokeSet);
 
 		performMatch();
@@ -91,8 +88,8 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			mMatchView = new MatchView(this);
 			mMatchView.setBackgroundColor(Color.BLUE);
 			LinearLayout.LayoutParams p = UITools.layoutParams(layout2);
-			p.width = (int) StrokeRegistrator.sStandardRect.width;
-			p.height = (int) StrokeRegistrator.sStandardRect.height;
+			p.width = (int) StrokeSet.sStandardRect.width;
+			p.height = (int) StrokeSet.sStandardRect.height;
 			p.setMargins(10, 10, 10, 10);
 			p.gravity = Gravity.CENTER;
 			layout2.addView(mMatchView, p);

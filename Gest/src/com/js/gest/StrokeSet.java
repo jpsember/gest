@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.json.JSONException;
 
+import android.graphics.Matrix;
+
 import com.js.basic.Freezable;
 import com.js.basic.Point;
 import static com.js.basic.Tools.*;
@@ -176,6 +178,47 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 			}
 		}
 		return r;
+	}
+
+	public static final int STANDARD_WIDTH = 256;
+	private static final float STANDARD_ASPECT_RATIO = 1.0f;
+
+	public static final Rect sStandardRect = new Rect(0, 0, STANDARD_WIDTH - 1,
+			(STANDARD_WIDTH - 1) * STANDARD_ASPECT_RATIO);
+
+	/**
+	 * Construct version of this StrokeSet that has been fit within a rectangle,
+	 * preserving the aspect ratio
+	 * 
+	 * @param destinationRect
+	 *          rectangle to fit within, or null to use standard rectangle
+	 * @return StrokeSet fitted to destinationRect
+	 */
+	public StrokeSet fitToRect(Rect destinationRect) {
+		Rect origBounds = getBounds();
+		if (destinationRect == null)
+			destinationRect = sStandardRect;
+		Matrix transform = MyMath.calcRectFitRectTransform(origBounds,
+				destinationRect);
+		return applyTransform(transform);
+	}
+
+	/**
+	 * Construct a transformed version of this stroke set
+	 * 
+	 * @param transform
+	 *          transformation matrix to apply
+	 * @return transformed stroke set
+	 */
+	public StrokeSet applyTransform(Matrix transform) {
+		StrokeSet transformedSet = mutableCopyOf(this);
+		for (Stroke stroke : transformedSet) {
+			for (StrokePoint strokePoint : stroke) {
+				strokePoint.getPoint().apply(transform);
+			}
+		}
+		transformedSet.freeze();
+		return transformedSet;
 	}
 
 	private ArrayList<Stroke> mStrokes = new ArrayList();

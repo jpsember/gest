@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 
 import com.js.android.UITools;
-import com.js.gest.StrokeRegistrator;
 import com.js.gest.StrokeSet;
 
 public class MatchView extends UITools.OurBaseView {
@@ -19,7 +18,7 @@ public class MatchView extends UITools.OurBaseView {
 
 		if (mRegisteredSet != null) {
 			mRenderer.drawStrokeSet(mRegisteredSet, true, 0);
-			mRenderer.drawRect(StrokeRegistrator.sStandardRect);
+			mRenderer.drawRect(StrokeSet.sStandardRect);
 		}
 		mRenderer.stopRender();
 	}
