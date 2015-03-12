@@ -245,12 +245,10 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			return "No match found";
 		}
 
-		StrokeSetEntry ent = match.setEntry();
-		mMatchView.setStrokeSet(ent.strokeSet(sourceSet.length()));
+		boolean goodFit = false;
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < matches.size(); i++) {
 			Match m = matches.get(i);
-			boolean goodFit = false;
 			if (i == 0) {
 				if (matches.size() < 2)
 					goodFit = true;
@@ -259,14 +257,20 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 					// substantially more, set good fit prefix
 					Match m2 = matches.get(i + 1);
 					if (m2.setEntry().aliasName() == m.setEntry().aliasName()
-							|| m.cost() * 3 < m2.cost())
+							|| m.cost() * 1.6f < m2.cost())
 						goodFit = true;
 				}
 			}
-			sb.append(goodFit ? "***" : "   ");
+			sb.append((i == 0 && goodFit) ? "***" : "   ");
 			sb.append(m);
 			sb.append("\n");
 		}
+		if (goodFit) {
+			StrokeSetEntry ent = match.setEntry();
+			mMatchView.setStrokeSet(ent.strokeSet(sourceSet.length()));
+		} else
+			mMatchView.setStrokeSet(null);
+
 		return sb.toString();
 	}
 

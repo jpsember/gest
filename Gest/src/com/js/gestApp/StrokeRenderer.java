@@ -24,6 +24,7 @@ public class StrokeRenderer {
 		p = new Paint();
 		mPaintFill = p;
 		p.setColor(Color.WHITE);
+		p.setStrokeWidth(3.4f);
 	}
 
 	public void startRender(Canvas c) {

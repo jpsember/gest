@@ -9,6 +9,8 @@ import com.js.basic.Point;
 
 /**
  * Determines how closely two strokes match
+ * 
+ * Public for test purposes
  */
 public class StrokeMatcher {
 
