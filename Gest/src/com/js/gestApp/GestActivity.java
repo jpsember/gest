@@ -302,7 +302,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 				if (source.length() != length)
 					source = source.normalize(length);
 				String result = performMatchWithLibrary(source, mMultiLengthLibrary);
-				sb.append("Length " + length + ":\n");
+				sb.append("Length " + source.length() + ":\n");
 				sb.append(result);
 				sb.append("\n");
 			}
