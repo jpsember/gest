@@ -14,14 +14,6 @@ class Cell {
 		mCost = 0;
 	}
 
-	public int distanceAlongAxis() {
-		return mIndexA + mIndexB;
-	}
-
-	public float distanceFromAxis() {
-		return Math.abs(distanceAlongAxis() / 2.0f - mIndexA);
-	}
-
 	public void setCost(float cost) {
 		mCost = cost;
 	}
@@ -40,13 +32,15 @@ class Cell {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("Cell ");
-		sb.append(d(mIndexA));
-		sb.append(d(mIndexB));
+		StringBuilder sb = new StringBuilder();
+		sb.append(d(mIndexA, 2));
+		sb.append(d(mIndexB, 2));
 		sb.append(d(cost()));
 		return sb.toString();
 	}
 
+	// Indices and previous cell are for display / debug purposes only; all we
+	// really need is the cost
 	private int mIndexA;
 	private int mIndexB;
 	private float mCost;

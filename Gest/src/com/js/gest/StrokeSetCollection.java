@@ -59,7 +59,7 @@ public class StrokeSetCollection {
 			if (set2.size() != inputSet.size())
 				continue;
 
-			StrokeSetMatcher m = new StrokeSetMatcher(set2, inputSet);
+			StrokeSetMatcher m = new StrokeSetMatcher(set2, inputSet,null);
 			Match match = new Match(entry, m.similarity());
 			results.add(match);
 			// Throw out all but top three

@@ -8,19 +8,15 @@ import com.js.basic.Point;
 
 class StrokeSetMatcher {
 
-	public StrokeSetMatcher(StrokeSet a, StrokeSet b) {
+	public StrokeSetMatcher(StrokeSet a, StrokeSet b, MatcherParameters param) {
 		mStrokeA = frozen(a);
 		mStrokeB = frozen(b);
+		if (param == null)
+			param = MatcherParameters.DEFAULT;
+		mParam = param;
 		if (mStrokeA.size() != mStrokeB.size())
 			throw new IllegalArgumentException(
 					"Different number of strokes in each set");
-		setDistanceThreshold(.01f);
-	}
-
-	public void setDistanceThreshold(float f) {
-		if (matched())
-			throw new IllegalStateException();
-		mDistanceThreshold = f;
 	}
 
 	public float similarity() {
@@ -30,18 +26,13 @@ class StrokeSetMatcher {
 			for (int i = 0; i < mStrokeA.size(); i++) {
 				Stroke sa = mStrokeA.get(i);
 				Stroke sb = mStrokeB.get(bOrder[i]);
-				StrokeMatcher m = new StrokeMatcher(sa, sb);
-				m.setDistanceThreshold(mDistanceThreshold);
+				StrokeMatcher m = new StrokeMatcher(sa, sb, mParam);
 				float cost = m.similarity();
 				totalCost += cost;
 			}
 			mSimilarity = totalCost;
 		}
 		return mSimilarity;
-	}
-
-	private boolean matched() {
-		return mSimilarity != null;
 	}
 
 	private int[] calcBestOrderForB() {
@@ -121,9 +112,9 @@ class StrokeSetMatcher {
 		}
 	}
 
-	private float mDistanceThreshold;
 	private StrokeSet mStrokeA;
 	private StrokeSet mStrokeB;
+	private MatcherParameters mParam;
 	private Float mSimilarity;
 	private int[] mPermuteArray;
 	private ArrayList<int[]> mPermutations;
