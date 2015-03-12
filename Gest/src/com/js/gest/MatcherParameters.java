@@ -10,6 +10,7 @@ public class MatcherParameters extends Freezable.Mutable {
 
 	public MatcherParameters() {
 		mZeroDistanceThreshold = StrokeSet.STANDARD_WIDTH * .01f;
+		mSquaredErrorFlag = true;
 	}
 
 	public void setZeroDistanceThreshold(float threshold) {
@@ -21,10 +22,20 @@ public class MatcherParameters extends Freezable.Mutable {
 		return mZeroDistanceThreshold;
 	}
 
+	public void setSquaredErrorFlag(boolean f) {
+		mutate();
+		mSquaredErrorFlag = f;
+	}
+
+	public boolean squaredErrorFlag() {
+		return mSquaredErrorFlag;
+	}
+
 	@Override
 	public Freezable getMutableCopy() {
 		MatcherParameters m = new MatcherParameters();
 		m.setZeroDistanceThreshold(zeroDistanceThreshold());
+		m.setSquaredErrorFlag(squaredErrorFlag());
 		return m;
 	}
 
@@ -32,9 +43,11 @@ public class MatcherParameters extends Freezable.Mutable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("MatcherParameters");
 		sb.append("\n zero threshold: " + d(zeroDistanceThreshold()));
+		sb.append("\n squared errors: " + d(squaredErrorFlag()));
 		return sb.toString();
 	}
 
 	private float mZeroDistanceThreshold;
+	private boolean mSquaredErrorFlag;
 
 }

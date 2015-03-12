@@ -8,6 +8,7 @@ import org.json.JSONException;
 import com.js.android.MyActivity;
 import com.js.android.UITools;
 import com.js.basic.Files;
+import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
 import com.js.gest.StrokeSetCollection;
 import com.js.gest.StrokeSetCollection.Match;
@@ -50,6 +51,8 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 
 	@Override
 	public void processTouchSet(StrokeSet set) {
+		if (set == null)
+			return;
 
 		if (!set.isFrozen())
 			throw new IllegalArgumentException();
@@ -174,8 +177,6 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		mSmoothingCheckBox = addCheckBox("Smoothing", new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (mTouchStrokeSet == null)
-					return;
 				processTouchSet(mTouchStrokeSet);
 			}
 		});
@@ -186,6 +187,12 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 				if (!((CheckBox) v).isChecked()) {
 					mMultiLengthLibrary = null;
 				}
+			}
+		});
+		mNonSquaredErrorsCheckBox = addCheckBox("RootError", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				processTouchSet(mTouchStrokeSet);
 			}
 		});
 
@@ -239,8 +246,10 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 
 	private String performMatchWithLibrary(StrokeSet sourceSet,
 			StrokeSetCollection library) {
+		MatcherParameters p = new MatcherParameters();
+		p.setSquaredErrorFlag(!mNonSquaredErrorsCheckBox.isChecked());
 		ArrayList<StrokeSetCollection.Match> matches = new ArrayList();
-		Match match = library.findMatch(sourceSet, matches);
+		Match match = library.findMatch(sourceSet, matches, p);
 		if (match == null) {
 			return "No match found";
 		}
@@ -339,4 +348,5 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	private EditText mNameWidget;
 	private CheckBox mSmoothingCheckBox;
 	private CheckBox mMultiLengthCheckBox;
+	private CheckBox mNonSquaredErrorsCheckBox;
 }

@@ -193,8 +193,9 @@ public class StrokeMatcher {
 		float c = mBestCell.cost();
 		// Divide by the number steps taken, including one for the initial cost
 		c /= mTotalColumns;
-		// Take the square root, since the penalties were actually squared distances
-		c = (float) Math.sqrt(c);
+		if (mParameters.squaredErrorFlag()) {
+			c = (float) Math.sqrt(c);
+		}
 		// Scale by the width of the standard rectangle
 		c /= StrokeSet.STANDARD_WIDTH;
 		return c;
@@ -232,10 +233,17 @@ public class StrokeMatcher {
 		Point pos_a = elem_a.getPoint();
 		Point pos_b = elem_b.getPoint();
 
-		float dist = MyMath.squaredDistanceBetween(pos_a, pos_b);
-		if (dist < mParameters.zeroDistanceThreshold()
-				* mParameters.zeroDistanceThreshold())
-			dist = 0;
+		float dist;
+		if (mParameters.squaredErrorFlag()) {
+			dist = MyMath.squaredDistanceBetween(pos_a, pos_b);
+			if (dist < mParameters.zeroDistanceThreshold()
+					* mParameters.zeroDistanceThreshold())
+				dist = 0;
+		} else {
+			dist = MyMath.distanceBetween(pos_a, pos_b);
+			if (dist < mParameters.zeroDistanceThreshold())
+				dist = 0;
+		}
 		return dist;
 	}
 

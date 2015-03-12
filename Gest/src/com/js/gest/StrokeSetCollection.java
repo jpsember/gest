@@ -45,11 +45,12 @@ public class StrokeSetCollection {
 		entry.addStrokeSet(set);
 	}
 
-	public Match findMatch(StrokeSet inputSet) {
-		return findMatch(inputSet, null);
+	public Match findMatch(StrokeSet inputSet, MatcherParameters param) {
+		return findMatch(inputSet, null, param);
 	}
 
-	public Match findMatch(StrokeSet inputSet, List<Match> resultsList) {
+	public Match findMatch(StrokeSet inputSet, List<Match> resultsList,
+			MatcherParameters param) {
 		if (resultsList != null)
 			resultsList.clear();
 		TreeSet<Match> results = new TreeSet();
@@ -59,7 +60,7 @@ public class StrokeSetCollection {
 			if (set2.size() != inputSet.size())
 				continue;
 
-			StrokeSetMatcher m = new StrokeSetMatcher(set2, inputSet,null);
+			StrokeSetMatcher m = new StrokeSetMatcher(set2, inputSet, param);
 			Match match = new Match(entry, m.similarity());
 			results.add(match);
 			// Throw out all but top three
