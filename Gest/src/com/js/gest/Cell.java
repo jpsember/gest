@@ -45,5 +45,4 @@ class Cell {
 	private int mIndexB;
 	private float mCost;
 	private Cell mPrevCell;
-
 }

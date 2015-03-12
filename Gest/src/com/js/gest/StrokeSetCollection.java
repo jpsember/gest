@@ -111,7 +111,7 @@ public class StrokeSetCollection {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append(d(Math.round(cost())));
+			sb.append(d(cost()));
 			sb.append(' ');
 			sb.append(setEntry().name());
 			if (setEntry().hasAlias())

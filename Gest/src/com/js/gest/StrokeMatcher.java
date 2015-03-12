@@ -79,10 +79,6 @@ public class StrokeMatcher {
 			throw new IllegalArgumentException("stroke lengths mismatch");
 		prepare();
 
-		if (sDump) {
-			dump(mColumn1);
-		}
-
 		// We've already generated the first column, so start with second
 		int aCursor = mWindowSize + 1;
 		int bCursor = -mWindowSize;
@@ -93,33 +89,11 @@ public class StrokeMatcher {
 				aCursor++;
 			else
 				bCursor++;
-			if (sDump) {
-				dump(mColumn1);
-			}
 		}
 
 		mBestCell = mColumn1[mWindowSize];
 
 		mSimilarity = cost();
-		if (sDump) {
-			pr("best cell cost=" + mSimilarity);
-			pr("path:\n" + d(optimalPath()));
-		}
-
-		sDump = false;
-	}
-
-	private void dump(Cell[] col) {
-		StringBuilder sb = new StringBuilder();
-		for (Cell c : col) {
-			if (c == null) {
-				sb.append("                 ");
-			} else {
-				sb.append(c.toString());
-			}
-			sb.append("|");
-		}
-		pr(sb);
 	}
 
 	/**
@@ -289,5 +263,4 @@ public class StrokeMatcher {
 	private Cell mBestCell;
 	private float mMinCost;
 	private Cell mMinPredecessor;
-	private static boolean sDump = true;
 }
