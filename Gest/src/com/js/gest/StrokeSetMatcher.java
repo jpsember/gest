@@ -23,14 +23,15 @@ class StrokeSetMatcher {
 		if (mSimilarity == null) {
 			int[] bOrder = calcBestOrderForB();
 			float totalCost = 0;
-			for (int i = 0; i < mStrokeA.size(); i++) {
+			int numberOfStrokes = mStrokeA.size();
+			for (int i = 0; i < numberOfStrokes; i++) {
 				Stroke sa = mStrokeA.get(i);
 				Stroke sb = mStrokeB.get(bOrder[i]);
 				StrokeMatcher m = new StrokeMatcher(sa, sb, mParam);
 				float cost = m.similarity();
 				totalCost += cost;
 			}
-			mSimilarity = totalCost;
+			mSimilarity = totalCost / numberOfStrokes;
 		}
 		return mSimilarity;
 	}
