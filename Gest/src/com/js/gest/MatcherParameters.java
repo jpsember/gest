@@ -9,7 +9,7 @@ public class MatcherParameters extends Freezable.Mutable {
 	public static final MatcherParameters DEFAULT = frozen(new MatcherParameters());
 
 	public MatcherParameters() {
-		mZeroDistanceThreshold = StrokeSet.STANDARD_WIDTH * .01f;
+		setZeroDistanceThreshold(StrokeSet.STANDARD_WIDTH * .01f);
 		mSquaredErrorFlag = true;
 	}
 

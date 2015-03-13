@@ -6,6 +6,7 @@ import android.view.MotionEvent;
 
 import com.js.android.UITools;
 import com.js.basic.Point;
+import com.js.gest.GestureEventFilter;
 import com.js.gest.StrokeSet;
 
 /**
@@ -31,11 +32,13 @@ public class TouchView extends UITools.OurBaseView {
 		super(context);
 		mListener = listener;
 		mRenderer = new StrokeRenderer();
+
+		mEventFilter = new GestureEventFilter();
+		mEventFilter.attachToView(this);
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-
 		int actionMasked = event.getActionMasked();
 		if (actionMasked == MotionEvent.ACTION_DOWN) {
 			mStartEventTimeMillis = event.getEventTime();
@@ -123,4 +126,5 @@ public class TouchView extends UITools.OurBaseView {
 	private int mSkipCount;
 	private Long mStartEventTimeMillis;
 	private boolean mCoarseMode;
+	private GestureEventFilter mEventFilter;
 }

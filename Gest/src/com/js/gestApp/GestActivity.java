@@ -164,6 +164,15 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 				clearRegisteredSet();
 			}
 		});
+		addButton("ZeroDist", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mZeroDistIndex++;
+				pr("zero dist threshold now " + d(calcZeroDistValue()));
+				processTouchSet(mTouchStrokeSet);
+			}
+		});
+
 		EditText name = new EditText(this);
 		name.setSingleLine();
 		name.setTypeface(Typeface.MONOSPACE);
@@ -244,10 +253,20 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		setConsoleText(null);
 	}
 
+	private float calcZeroDistValue() {
+		return sZeroDistValues[mZeroDistIndex % sZeroDistValues.length];
+	}
+
+	private static final float[] sZeroDistValues = { .01f, .02f, .04f, .06f,
+			.08f, .12f, .22f, 0f };
+
 	private String performMatchWithLibrary(StrokeSet sourceSet,
 			StrokeSetCollection library) {
+
 		MatcherParameters p = new MatcherParameters();
 		p.setSquaredErrorFlag(!mNonSquaredErrorsCheckBox.isChecked());
+		p.setZeroDistanceThreshold(calcZeroDistValue() * StrokeSet.STANDARD_WIDTH);
+
 		ArrayList<StrokeSetCollection.Match> matches = new ArrayList();
 		Match match = library.findMatch(sourceSet, matches, p);
 		if (match == null) {
@@ -349,4 +368,5 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	private CheckBox mSmoothingCheckBox;
 	private CheckBox mMultiLengthCheckBox;
 	private CheckBox mNonSquaredErrorsCheckBox;
+	private int mZeroDistIndex;
 }

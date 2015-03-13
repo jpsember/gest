@@ -2,6 +2,7 @@ package com.js.android;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
@@ -148,5 +149,46 @@ public final class UITools {
 
 	}
 
+	/**
+	 * Get (brief) information about a MotionEvent
+	 * 
+	 * This is similar to MotionEvent.actionToString(...), but that method is not
+	 * supported for older API levels
+	 * 
+	 */
+	public static String dump(MotionEvent event) {
+		if (event == null)
+			return d(event);
+
+		int action = event.getActionMasked();
+		int index = event.getActionIndex();
+		StringBuilder sb = new StringBuilder("ACTION_");
+		switch (action) {
+		default:
+			sb.append("***UNKNOWN:" + action + "***");
+			break;
+		case MotionEvent.ACTION_CANCEL:
+			sb.append("CANCEL");
+			break;
+		case MotionEvent.ACTION_DOWN:
+			sb.append("DOWN");
+			break;
+		case MotionEvent.ACTION_UP:
+			sb.append("UP");
+			break;
+		case MotionEvent.ACTION_MOVE:
+			sb.append("MOVE");
+			break;
+		case MotionEvent.ACTION_POINTER_DOWN:
+			sb.append("DOWN(" + index + ")");
+			break;
+		case MotionEvent.ACTION_POINTER_UP:
+			sb.append("UP(" + index + ")");
+			break;
+		}
+		return sb.toString();
+	}
+
 	private static int sDebugColorIndex;
+
 }
