@@ -12,7 +12,8 @@ import com.js.gest.StrokeSet;
 /**
  * View for inputting and rendering user touch sequences
  */
-public class TouchView extends UITools.OurBaseView {
+public class TouchView extends UITools.OurBaseView implements
+		GestureEventFilter.Listener {
 
 	public interface Listener {
 		void startTouchSequence();
@@ -25,7 +26,8 @@ public class TouchView extends UITools.OurBaseView {
 	 * points per second (for test purposes) by ignoring certain TouchEvents
 	 */
 	public void setCoarseFlag(boolean f) {
-		mCoarseMode = f;
+			mCoarseMode = f;
+			mEventFilter.setCoarseMode(f);
 	}
 
 	public TouchView(Context context, Listener listener) {
@@ -34,7 +36,7 @@ public class TouchView extends UITools.OurBaseView {
 		mRenderer = new StrokeRenderer();
 
 		mEventFilter = new GestureEventFilter();
-		mEventFilter.attachToView(this);
+		mEventFilter.attachToView(this, this);
 	}
 
 	@Override
@@ -115,6 +117,21 @@ public class TouchView extends UITools.OurBaseView {
 			mDisplayStrokeSet = set;
 			invalidate();
 		}
+	}
+
+	@Override
+	public void strokeSetExtended(StrokeSet strokeSet) {
+		mTouchStrokeSet = strokeSet;
+		if (strokeSet.length() == 1) {
+			mDisplayStrokeSet = null;
+			mListener.startTouchSequence();
+		}
+		invalidate();
+	}
+
+	@Override
+	public void strokeSetCompleted(StrokeSet strokeSet) {
+		mListener.processTouchSet(strokeSet);
 	}
 
 	// Stroke set from user touch event

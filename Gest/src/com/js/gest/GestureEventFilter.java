@@ -32,6 +32,10 @@ public class GestureEventFilter implements View.OnTouchListener {
 		mTraceActive = false;
 	}
 
+	public void setCoarseMode(boolean f) {
+		mCoarseMode = f;
+	}
+
 	private void pr(Object message) {
 		if (mTraceActive)
 			Tools.pr(message);
@@ -53,11 +57,12 @@ public class GestureEventFilter implements View.OnTouchListener {
 		mState = s;
 	}
 
-	public void attachToView(View view) {
+	public void attachToView(View view, Listener listener) {
 		if (state() != STATE_UNATTACHED)
 			throw new IllegalStateException();
 		mView = view;
 		mView.setOnTouchListener(this);
+		mListener = listener;
 		setState(STATE_DORMANT);
 	}
 
@@ -103,12 +108,7 @@ public class GestureEventFilter implements View.OnTouchListener {
 			MotionEvent event = mEventQueue.poll();
 			if (event == null)
 				break;
-			unimp("send event to gesture processor instead of original");
-			{
-				mPassingEventFlag = true;
-				mView.dispatchTouchEvent(event);
-				mPassingEventFlag = false;
-			}
+			processGestureEvent(event);
 			event.recycle();
 		}
 	}
@@ -235,6 +235,66 @@ public class GestureEventFilter implements View.OnTouchListener {
 		return onTouchAux(event);
 	}
 
+	private void processGestureEvent(MotionEvent event) {
+		int actionMasked = event.getActionMasked();
+		if (actionMasked == MotionEvent.ACTION_DOWN) {
+			mStartEventTimeMillis = event.getEventTime();
+			mTouchStrokeSet = new StrokeSet();
+		}
+
+		if (mCoarseMode) {
+			if (actionMasked == MotionEvent.ACTION_MOVE) {
+				mSkipCount++;
+				if (mSkipCount == 4) {
+					mSkipCount = 0;
+				} else
+					return;
+			} else {
+				mSkipCount = 0;
+			}
+		}
+
+		float eventTime = ((event.getEventTime() - mStartEventTimeMillis) / 1000.0f);
+
+		int activeId = event.getPointerId(event.getActionIndex());
+		MotionEvent.PointerCoords mCoord = new MotionEvent.PointerCoords();
+		for (int i = 0; i < event.getPointerCount(); i++) {
+			int ptrId = event.getPointerId(i);
+			event.getPointerCoords(i, mCoord);
+			Point pt = new Point(mCoord.x, mCoord.y);
+			pt.y = mView.getHeight() - mCoord.y;
+			mTouchStrokeSet.addPoint(eventTime, ptrId, pt);
+		}
+
+		mListener.strokeSetExtended(mTouchStrokeSet);
+
+		if (actionMasked == MotionEvent.ACTION_UP
+				|| actionMasked == MotionEvent.ACTION_POINTER_UP) {
+			mTouchStrokeSet.stopStroke(activeId);
+			if (!mTouchStrokeSet.areStrokesActive()) {
+				mTouchStrokeSet.freeze();
+				mListener.strokeSetCompleted(mTouchStrokeSet);
+			}
+		}
+
+		if (actionMasked == MotionEvent.ACTION_UP) {
+			mStartEventTimeMillis = null;
+		}
+
+	}
+
+	public static interface Listener {
+		void strokeSetExtended(StrokeSet strokeSet);
+
+		void strokeSetCompleted(StrokeSet strokeSet);
+	}
+
+	// Stroke set from user touch event
+	private StrokeSet mTouchStrokeSet;
+	private Listener mListener;
+	private int mSkipCount;
+	private Long mStartEventTimeMillis;
+
 	private static boolean sAlwaysFalse = false;
 	private static Handler sHandler = new Handler();
 	private View mView;
@@ -242,4 +302,5 @@ public class GestureEventFilter implements View.OnTouchListener {
 	private Queue<MotionEvent> mEventQueue = new ArrayDeque();
 	private boolean mPassingEventFlag;
 	private int mState;
+	private boolean mCoarseMode;
 }

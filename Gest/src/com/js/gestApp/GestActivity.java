@@ -8,6 +8,7 @@ import org.json.JSONException;
 import com.js.android.MyActivity;
 import com.js.android.UITools;
 import com.js.basic.Files;
+import com.js.gest.GestureEventFilter;
 import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
 import com.js.gest.StrokeSetCollection;
@@ -209,6 +210,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			@Override
 			public void onClick(View v) {
 				mTouchView.setCoarseFlag(((CheckBox) v).isChecked());
+				
 			}
 		});
 	}
