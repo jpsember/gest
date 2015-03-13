@@ -32,12 +32,15 @@ public class GestureEventFilter implements View.OnTouchListener {
 		// mTraceActive = true;
 	}
 
-	public void attachToView(View view, Listener listener) {
+	public void setListener(Listener listener) {
+		mListener = listener;
+	}
+
+	public void attachToView(View view) {
 		if (state() != STATE_UNATTACHED)
 			throw new IllegalStateException();
 		mView = view;
 		mView.setOnTouchListener(this);
-		mListener = listener;
 		setState(STATE_DORMANT);
 	}
 
@@ -257,13 +260,17 @@ public class GestureEventFilter implements View.OnTouchListener {
 			mTouchStrokeSet.addPoint(eventTime, ptrId, pt);
 		}
 
-		mListener.strokeSetExtended(mTouchStrokeSet);
+		if (mListener == null)
+			warning("no listener defined");
+		else
+			mListener.strokeSetExtended(mTouchStrokeSet);
 
 		if (actionMasked == MotionEvent.ACTION_UP
 				|| actionMasked == MotionEvent.ACTION_POINTER_UP) {
 			mTouchStrokeSet.stopStroke(activeId);
 			if (!mTouchStrokeSet.areStrokesActive()) {
 				mTouchStrokeSet.freeze();
+				if (mListener != null)
 				mListener.strokeSetCompleted(mTouchStrokeSet);
 			}
 		}

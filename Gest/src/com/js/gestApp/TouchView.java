@@ -21,7 +21,8 @@ public class TouchView extends UITools.OurBaseView implements
 		mRenderer = new StrokeRenderer();
 
 		mEventFilter = new GestureEventFilter();
-		mEventFilter.attachToView(this, this);
+		mEventFilter.setListener(this);
+		mEventFilter.attachToView(this);
 	}
 
 	// We don't need to include onTouchEvent() and performClick(), but we do so to
