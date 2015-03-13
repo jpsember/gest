@@ -39,22 +39,16 @@ public class GestActivity extends MyActivity implements
 		// To address issue #6:
 		getWindow().setSoftInputMode(
 				WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-		setContentView(buildContentView());
-
 		prepareGestureLibrary();
+		setContentView(buildContentView());
 	}
 
 	@Override
-	public void strokeSetExtended(StrokeSet strokeSet) {
-	}
-
-	@Override
-	public void strokeSetCompleted(StrokeSet set) {
+	public void strokeSetExtended(StrokeSet set) {
 		if (set == null)
 			return;
-
 		if (!set.isFrozen())
-			throw new IllegalArgumentException();
+			return;
 		mTouchStrokeSet = set;
 
 		StrokeSet smoothedSet = set;
@@ -71,6 +65,11 @@ public class GestActivity extends MyActivity implements
 		mTouchView.setDisplayStrokeSet(displayedSet);
 
 		performMatch();
+	}
+
+	@Override
+	public void processGesture(String gestureName) {
+		pr("recognized gesture " + gestureName);
 	}
 
 	private View buildUpperViews() {
@@ -111,6 +110,7 @@ public class GestActivity extends MyActivity implements
 		horzLayout.addView(layout2, p);
 
 		mTouchView = new TouchView(this, this);
+		mTouchView.setGestureSet(mFilterGestureLibrary);
 
 		mTouchView.setBackgroundColor(Color.BLUE);
 		p = UITools.layoutParams(horzLayout);
@@ -168,7 +168,7 @@ public class GestActivity extends MyActivity implements
 			public void onClick(View v) {
 				mZeroDistIndex++;
 				pr("zero dist threshold now " + d(calcZeroDistValue()));
-				strokeSetCompleted(mTouchStrokeSet);
+				strokeSetExtended(mTouchStrokeSet);
 			}
 		});
 
@@ -185,7 +185,7 @@ public class GestActivity extends MyActivity implements
 		mSmoothingCheckBox = addCheckBox("Smoothing", new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				strokeSetCompleted(mTouchStrokeSet);
+				strokeSetExtended(mTouchStrokeSet);
 			}
 		});
 
@@ -200,7 +200,7 @@ public class GestActivity extends MyActivity implements
 		mNonSquaredErrorsCheckBox = addCheckBox("RootError", new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				strokeSetCompleted(mTouchStrokeSet);
+				strokeSetExtended(mTouchStrokeSet);
 			}
 		});
 
@@ -335,20 +335,27 @@ public class GestActivity extends MyActivity implements
 		}
 	}
 
-	private void prepareGestureLibrary() {
-
+	private StrokeSetCollection readGesturesFromFile(String filename) {
+		StrokeSetCollection c = null;
 		try {
-			InputStream stream = getClass()
-					.getResourceAsStream("basic_gestures.json");
+			InputStream stream = getClass().getResourceAsStream(filename);
 			String json = Files.readString(stream);
-			mGestureLibrary = StrokeSetCollection.parseJSON(json);
+			c = StrokeSetCollection.parseJSON(json);
 		} catch (Exception e) {
 			die(e);
 		}
+		return c;
+	}
+
+	private void prepareGestureLibrary() {
+		mGestureLibrary = readGesturesFromFile("basic_gestures.json");
+		mFilterGestureLibrary = readGesturesFromFile("small_gesture_set.json");
 	}
 
 	private StrokeSetCollection mGestureLibrary;
 	private StrokeSetCollection mMultiLengthLibrary;
+	// The gesture set to be used by the filter (for test purposes)
+	private StrokeSetCollection mFilterGestureLibrary;
 	private TouchView mTouchView;
 	// Stroke set from user touch event
 	private StrokeSet mTouchStrokeSet;

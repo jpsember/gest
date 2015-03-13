@@ -7,6 +7,8 @@ import android.view.MotionEvent;
 import com.js.android.UITools;
 import com.js.gest.GestureEventFilter;
 import com.js.gest.StrokeSet;
+import com.js.gest.StrokeSetCollection;
+
 import static com.js.basic.Tools.*;
 
 /**
@@ -23,6 +25,10 @@ public class TouchView extends UITools.OurBaseView implements
 		mEventFilter = new GestureEventFilter();
 		mEventFilter.setListener(this);
 		mEventFilter.attachToView(this);
+	}
+
+	public void setGestureSet(StrokeSetCollection gestures) {
+		mEventFilter.setGestures(gestures);
 	}
 
 	// We don't need to include onTouchEvent() and performClick(), but we do so to
@@ -66,12 +72,13 @@ public class TouchView extends UITools.OurBaseView implements
 		if (strokeSet.length() == 1) {
 			mDisplayStrokeSet = null;
 		}
+		mListener.strokeSetExtended(strokeSet);
 		invalidate();
 	}
 
 	@Override
-	public void strokeSetCompleted(StrokeSet strokeSet) {
-		mListener.strokeSetCompleted(strokeSet);
+	public void processGesture(String gestureName) {
+		mListener.processGesture(gestureName);
 	}
 
 	// Stroke set from user touch event

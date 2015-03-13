@@ -1,11 +1,13 @@
 package com.js.gest;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Queue;
 
 import com.js.android.UITools;
 import com.js.basic.Point;
 import com.js.basic.Tools;
+import com.js.gest.StrokeSetCollection.Match;
 
 import android.os.Handler;
 import android.view.MotionEvent;
@@ -34,6 +36,10 @@ public class GestureEventFilter implements View.OnTouchListener {
 
 	public void setListener(Listener listener) {
 		mListener = listener;
+	}
+
+	public void setGestures(StrokeSetCollection c) {
+		mStrokeSetCollection = c;
 	}
 
 	public void attachToView(View view) {
@@ -270,17 +276,51 @@ public class GestureEventFilter implements View.OnTouchListener {
 			mTouchStrokeSet.stopStroke(activeId);
 			if (!mTouchStrokeSet.areStrokesActive()) {
 				mTouchStrokeSet.freeze();
-				if (mListener != null)
-				mListener.strokeSetCompleted(mTouchStrokeSet);
+
+				if (mListener != null) {
+					mListener.strokeSetExtended(mTouchStrokeSet);
+					if (mStrokeSetCollection == null)
+						warning("no stroke collection defined");
+					else
+						performMatch();
+				}
 			}
 		}
 
 	}
 
+	private void performMatch() {
+		mMatch = null;
+		StrokeSet set = mTouchStrokeSet;
+		set = set.fitToRect(null);
+		set = set.normalize();
+
+		MatcherParameters p = new MatcherParameters();
+		ArrayList<StrokeSetCollection.Match> matches = new ArrayList();
+		Match match = mStrokeSetCollection.findMatch(set, matches, p);
+		do {
+			if (match == null)
+				break;
+
+			if (match.cost() >= 0.15f)
+				break;
+			mMatch = match;
+			mListener.processGesture(mMatch.setEntry().aliasName());
+		} while (false);
+	}
+
 	public static interface Listener {
+		/**
+		 * For development purposes only: called when the gesture being constructed
+		 * by the user has been changed. If it is frozen, it is complete
+		 */
 		void strokeSetExtended(StrokeSet strokeSet);
 
-		void strokeSetCompleted(StrokeSet strokeSet);
+		/**
+		 * In normal use, this is the only method that has to do anything; the
+		 * client should handle the recognized gesture
+		 */
+		void processGesture(String gestureName);
 	}
 
 	// Stroke set from user touch event
@@ -295,4 +335,6 @@ public class GestureEventFilter implements View.OnTouchListener {
 	private Queue<MotionEvent> mEventQueue = new ArrayDeque();
 	private boolean mPassingEventFlag;
 	private int mState;
+	private StrokeSetCollection mStrokeSetCollection;
+	private Match mMatch;
 }
