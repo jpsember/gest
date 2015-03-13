@@ -19,7 +19,7 @@ public class GestureEventFilter implements View.OnTouchListener {
 	private static final int BUFFERING_TIME_MS = 100;
 	// Minimum distance finger must move by end of buffering time to be
 	// interpreted as a gesture
-	private static final float MIN_GESTURE_DISTANCE = 13.0f;
+	private static final float MIN_GESTURE_DISTANCE = .5f * BUFFERING_TIME_MS;
 
 	private static final int STATE_UNATTACHED = 0;
 	private static final int STATE_DORMANT = 1;
@@ -29,17 +29,24 @@ public class GestureEventFilter implements View.OnTouchListener {
 	private static final int STATE_STOPPED = 5;
 
 	public GestureEventFilter() {
-		mTraceActive = false;
+		// mTraceActive = true;
 	}
 
 	public void attachToView(View view, Listener listener) {
-		unimp("support de-attaching to prevent memory leaks");
 		if (state() != STATE_UNATTACHED)
 			throw new IllegalStateException();
 		mView = view;
 		mView.setOnTouchListener(this);
 		mListener = listener;
 		setState(STATE_DORMANT);
+	}
+
+	public void detach() {
+		if (state() == STATE_STOPPED)
+			return;
+		setState(STATE_STOPPED);
+		mView.setOnTouchListener(null);
+		mListener = null;
 	}
 
 	private void pr(Object message) {
