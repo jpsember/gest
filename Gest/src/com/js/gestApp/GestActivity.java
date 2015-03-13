@@ -204,12 +204,6 @@ public class GestActivity extends MyActivity implements
 			}
 		});
 
-		addCheckBox("Coarse", new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mTouchView.setCoarseFlag(((CheckBox) v).isChecked());
-			}
-		});
 	}
 
 	private void dumpStrokeSet(StrokeSet originalSet, String name) {

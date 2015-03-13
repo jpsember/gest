@@ -15,14 +15,6 @@ import static com.js.basic.Tools.*;
 public class TouchView extends UITools.OurBaseView implements
 		GestureEventFilter.Listener {
 
-	/**
-	 * Set 'coarse mode' status. Off by default, if enabled, it generates fewer
-	 * points per second (for test purposes) by ignoring certain TouchEvents
-	 */
-	public void setCoarseFlag(boolean f) {
-		mEventFilter.setCoarseMode(f);
-	}
-
 	public TouchView(Context context, GestureEventFilter.Listener listener) {
 		super(context);
 		mListener = listener;
