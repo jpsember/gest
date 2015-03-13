@@ -8,13 +8,13 @@ import org.json.JSONException;
 import com.js.android.MyActivity;
 import com.js.android.UITools;
 import com.js.basic.Files;
-import com.js.gest.GestureEventFilter;
 import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
 import com.js.gest.StrokeSetCollection;
 import com.js.gest.StrokeSetCollection.Match;
 import com.js.gest.StrokeSetEntry;
 import com.js.gest.StrokeSmoother;
+import com.js.gest.GestureEventFilter;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -30,7 +30,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import static com.js.basic.Tools.*;
 
-public class GestActivity extends MyActivity implements TouchView.Listener {
+public class GestActivity extends MyActivity implements
+		GestureEventFilter.Listener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +45,11 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	}
 
 	@Override
-	public void startTouchSequence() {
-		mTouchStrokeSet = new StrokeSet();
-		mNormalizedStrokeSet = null;
-		mTouchView.setDisplayStrokeSet(null);
+	public void strokeSetExtended(StrokeSet strokeSet) {
 	}
 
 	@Override
-	public void processTouchSet(StrokeSet set) {
+	public void strokeSetCompleted(StrokeSet set) {
 		if (set == null)
 			return;
 
@@ -170,7 +168,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			public void onClick(View v) {
 				mZeroDistIndex++;
 				pr("zero dist threshold now " + d(calcZeroDistValue()));
-				processTouchSet(mTouchStrokeSet);
+				strokeSetCompleted(mTouchStrokeSet);
 			}
 		});
 
@@ -187,7 +185,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		mSmoothingCheckBox = addCheckBox("Smoothing", new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				processTouchSet(mTouchStrokeSet);
+				strokeSetCompleted(mTouchStrokeSet);
 			}
 		});
 
@@ -202,7 +200,7 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 		mNonSquaredErrorsCheckBox = addCheckBox("RootError", new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				processTouchSet(mTouchStrokeSet);
+				strokeSetCompleted(mTouchStrokeSet);
 			}
 		});
 
@@ -210,7 +208,6 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 			@Override
 			public void onClick(View v) {
 				mTouchView.setCoarseFlag(((CheckBox) v).isChecked());
-				
 			}
 		});
 	}
@@ -371,4 +368,5 @@ public class GestActivity extends MyActivity implements TouchView.Listener {
 	private CheckBox mMultiLengthCheckBox;
 	private CheckBox mNonSquaredErrorsCheckBox;
 	private int mZeroDistIndex;
+
 }
