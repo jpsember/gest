@@ -32,9 +32,12 @@ public class TouchView extends UITools.OurBaseView implements
 		mEventFilter.attachToView(this, this);
 	}
 
+	// We don't need to include onTouchEvent() and performClick(), but we do so to
+	// verify that we still get non-gesture-related motions
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		pr("TouchView ignoring non-gesture event " + UITools.dump(event));
+		if (event.getActionMasked() != MotionEvent.ACTION_MOVE)
+			pr("TouchView ignoring non-gesture event " + UITools.dump(event));
 		if (mAlwaysFalse)
 			return performClick();
 		return true;

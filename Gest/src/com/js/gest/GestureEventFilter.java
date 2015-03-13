@@ -91,8 +91,7 @@ public class GestureEventFilter implements View.OnTouchListener {
 			MotionEvent event = mEventQueue.poll();
 			if (event == null)
 				break;
-			warning("not dispatching");
-			// mView.dispatchTouchEvent(event);
+			mView.dispatchTouchEvent(event);
 			event.recycle();
 		}
 		mPassingEventFlag = false;
