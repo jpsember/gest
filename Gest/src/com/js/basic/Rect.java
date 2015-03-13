@@ -1,8 +1,7 @@
-package com.js.gest;
+package com.js.basic;
 
 import java.util.List;
 
-import com.js.basic.Point;
 
 public class Rect {
 

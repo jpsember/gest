@@ -3,8 +3,8 @@ package com.js.gest.test;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import com.js.basic.MyMath;
 import com.js.basic.Point;
-import com.js.gest.MyMath;
 import com.js.gest.Stroke;
 import com.js.testUtils.*;
 

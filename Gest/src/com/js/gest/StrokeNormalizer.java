@@ -3,6 +3,7 @@ package com.js.gest;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.js.basic.MyMath;
 import com.js.basic.Point;
 
 class StrokeNormalizer {

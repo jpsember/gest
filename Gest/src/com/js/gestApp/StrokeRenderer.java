@@ -1,7 +1,7 @@
 package com.js.gestApp;
 
 import com.js.basic.Point;
-import com.js.gest.Rect;
+import com.js.basic.Rect;
 import com.js.gest.Stroke;
 import com.js.gest.StrokeSet;
 
