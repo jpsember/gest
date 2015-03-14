@@ -13,6 +13,8 @@ import com.js.gest.Stroke.DataPoint;
  * Determines how closely two strokes match
  * 
  * Public for test purposes
+ * 
+ * Consider making this package visibility only, and testing at higher level
  */
 public class StrokeMatcher {
 

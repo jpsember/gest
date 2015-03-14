@@ -12,7 +12,6 @@ import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
 import com.js.gest.StrokeSetCollection;
 import com.js.gest.StrokeSetCollection.Match;
-import com.js.gest.StrokeSetEntry;
 import com.js.gest.GestureEventFilter;
 
 import android.content.res.Configuration;
@@ -280,11 +279,10 @@ public class GestActivity extends MyActivity implements
         if (matches.size() < 2)
           goodFit = true;
         else {
-          // If second best match is an alias to ours, or its cost is
+          // If second best match's cost is
           // substantially more, set good fit prefix
           Match m2 = matches.get(i + 1);
-          if (m2.setEntry().aliasName() == m.setEntry().aliasName()
-              || m.cost() * 1.6f < m2.cost())
+          if (m.cost() * 1.6f < m2.cost())
             goodFit = true;
         }
       }
@@ -293,8 +291,7 @@ public class GestActivity extends MyActivity implements
       sb.append("\n");
     }
     if (goodFit) {
-      StrokeSetEntry ent = match.setEntry();
-      mMatchView.setStrokeSet(ent.strokeSet(sourceSet.length()));
+      mMatchView.setStrokeSet(match.strokeSet(sourceSet.length()));
     } else
       mMatchView.setStrokeSet(null);
 
@@ -314,8 +311,7 @@ public class GestActivity extends MyActivity implements
       if (mMultiLengthLibrary == null) {
         mMultiLengthLibrary = new StrokeSetCollection();
         for (String name : mGestureLibrary.map().keySet()) {
-          StrokeSetEntry ent = mGestureLibrary.get(name);
-          StrokeSet set = ent.strokeSet();
+          StrokeSet set = mGestureLibrary.getStrokeSet(name);
           generateMultiLengthSets(name, set, mMultiLengthLibrary);
         }
       }
