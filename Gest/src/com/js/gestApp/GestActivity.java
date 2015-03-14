@@ -210,13 +210,6 @@ public class GestActivity extends MyActivity implements
         }
       }
     });
-    mNonSquaredErrorsCheckBox = addCheckBox("RootError", new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        strokeSetExtended(mTouchStrokeSet);
-      }
-    });
-
   }
 
   private String dumpStrokeSet(StrokeSet originalSet, String name) {
@@ -272,7 +265,6 @@ public class GestActivity extends MyActivity implements
       StrokeSetCollection library) {
 
     MatcherParameters p = new MatcherParameters();
-    p.setSquaredErrorFlag(!mNonSquaredErrorsCheckBox.isChecked());
     p.setZeroDistanceThreshold(calcZeroDistValue() * StrokeSet.STANDARD_WIDTH);
 
     ArrayList<StrokeSetCollection.Match> matches = new ArrayList();
@@ -382,7 +374,6 @@ public class GestActivity extends MyActivity implements
   private EditText mNameWidget;
   private CheckBox mSmoothingCheckBox;
   private CheckBox mMultiLengthCheckBox;
-  private CheckBox mNonSquaredErrorsCheckBox;
   private int mZeroDistIndex;
 
 }
