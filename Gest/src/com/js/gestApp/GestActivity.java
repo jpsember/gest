@@ -16,6 +16,7 @@ import com.js.gest.StrokeSetEntry;
 import com.js.gest.StrokeSmoother;
 import com.js.gest.GestureEventFilter;
 
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -72,6 +73,21 @@ public class GestActivity extends MyActivity implements
     pr("recognized gesture " + gestureName);
   }
 
+  /**
+   * Set parameters to make a view stretch to fit available space (according to
+   * weight) in the appropriate dimension
+   */
+  private void setStretch(LinearLayout container, LayoutParams p, float weight) {
+    if (container.getOrientation() == LinearLayout.HORIZONTAL) {
+      p.width = 1;
+      p.height = LayoutParams.MATCH_PARENT;
+    } else {
+      p.width = LayoutParams.MATCH_PARENT;
+      p.height = 1;
+    }
+    p.weight = weight;
+  }
+
   private void buildConsole(LinearLayout container) {
     TextView tv = new TextView(this);
     tv.setBackgroundColor(Color.LTGRAY);
@@ -82,41 +98,36 @@ public class GestActivity extends MyActivity implements
     mConsole = tv;
 
     LinearLayout.LayoutParams p = UITools.layoutParams(container);
-    p.weight = .7f;
-    // It seems we should make the variable dimension have mninimal size (1), in
-    // which case it will be given additional pixels based on its weight
-    p.width = LayoutParams.MATCH_PARENT;
-    p.height = 1;
+    setStretch(container, p, 1.5f);
     container.addView(mConsole, p);
   }
 
   private void buildMatchView(LinearLayout container) {
     mMatchView = new MatchView(this);
     LinearLayout.LayoutParams p = UITools.layoutParams(container);
-    p.weight = .3f;
-    p.width = LayoutParams.MATCH_PARENT;
-    p.height = 1;
+    setStretch(container, p, 1f);
     container.addView(mMatchView, p);
   }
 
-  private View buildUpperViews() {
-    LinearLayout upperView = UITools.linearLayout(this, false);
+  private boolean mLandscape;
 
-    LinearLayout leftColumn = UITools.linearLayout(this, true);
-    buildMatchView(leftColumn);
-    buildConsole(leftColumn);
+  private View buildUpperViews() {
+    mLandscape = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+    LinearLayout upperView = UITools.linearLayout(this, !mLandscape);
+
+    LinearLayout auxContainer = UITools.linearLayout(this, mLandscape);
+    buildMatchView(auxContainer);
+    buildConsole(auxContainer);
 
     LinearLayout.LayoutParams p = UITools.layoutParams(upperView);
-    p.weight = 1f;
-    p.width = 1;
-    upperView.addView(leftColumn, p);
+    setStretch(upperView, p, 1f);
+    upperView.addView(auxContainer, p);
 
     mTouchView = new TouchView(this, this);
     mTouchView.setGestureSet(mFilterGestureLibrary);
 
-    mTouchView.setBackgroundColor(Color.BLUE);
     p = UITools.layoutParams(upperView);
-    p.weight = 2f;
+    setStretch(upperView, p, 2f);
     upperView.addView(mTouchView, p);
     return upperView;
   }

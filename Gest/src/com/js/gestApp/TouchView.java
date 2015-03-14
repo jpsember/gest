@@ -2,6 +2,7 @@ package com.js.gestApp;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.view.MotionEvent;
 
 import com.js.android.UITools;
@@ -21,6 +22,7 @@ public class TouchView extends UITools.OurBaseView implements
 
   public TouchView(Context context, GestureEventFilter.Listener listener) {
     super(context);
+    setBackgroundColor(Color.BLUE);
     mListener = listener;
     mRenderer = new StrokeRenderer();
 
