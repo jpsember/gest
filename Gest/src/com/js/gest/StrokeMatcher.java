@@ -7,6 +7,7 @@ import java.util.Collections;
 
 import com.js.basic.MyMath;
 import com.js.basic.Point;
+import com.js.gest.Stroke.DataPoint;
 
 /**
  * Determines how closely two strokes match
@@ -227,8 +228,8 @@ public class StrokeMatcher {
   }
 
   private float comparePoints(int aIndex, int bIndex) {
-    StrokePoint elem_a = mStrokeA.get(aIndex);
-    StrokePoint elem_b = mStrokeB.get(bIndex);
+    DataPoint elem_a = mStrokeA.get(aIndex);
+    DataPoint elem_b = mStrokeB.get(bIndex);
     Point pos_a = elem_a.getPoint();
     Point pos_b = elem_b.getPoint();
 

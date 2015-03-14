@@ -14,6 +14,7 @@ import com.js.basic.Freezable;
 import com.js.basic.MyMath;
 import com.js.basic.Point;
 import com.js.basic.Rect;
+import com.js.gest.Stroke.DataPoint;
 
 import static com.js.basic.Tools.*;
 
@@ -61,7 +62,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
     s.addPoint(eventTime - mInitialEventTime, pt);
   }
 
-  static StrokeSet buildFromStrokes(List<Stroke> strokes) {
+  public static StrokeSet buildFromStrokes(List<Stroke> strokes) {
     StrokeSet s = new StrokeSet();
     for (Stroke stroke : strokes) {
       s.mStrokes.add(stroke);
@@ -141,7 +142,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
       }
       sb.append(" id:" + strokeIdString + " #:" + strokeIndex + " ");
       for (int i = 0; i < stroke.size(); i++) {
-        StrokePoint pt = stroke.get(i);
+        DataPoint pt = stroke.get(i);
         sb.append(d((int) pt.getPoint().x, 4));
         if (i > 16) {
           sb.append("...");
@@ -192,7 +193,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
   private Rect calculateBounds() {
     Rect r = null;
     for (Stroke s : mStrokes) {
-      for (StrokePoint spt : s) {
+      for (DataPoint spt : s) {
         Point pt = spt.getPoint();
         if (r == null)
           r = new Rect(pt, pt);
@@ -235,7 +236,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
   public StrokeSet applyTransform(Matrix transform) {
     StrokeSet transformedSet = mutableCopyOf(this);
     for (Stroke stroke : transformedSet) {
-      for (StrokePoint strokePoint : stroke) {
+      for (DataPoint strokePoint : stroke) {
         strokePoint.getPoint().apply(transform);
       }
     }

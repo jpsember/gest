@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.js.basic.MyMath;
 import com.js.basic.Point;
+import com.js.gest.Stroke.DataPoint;
 
 class StrokeNormalizer {
 
@@ -77,7 +78,7 @@ class StrokeNormalizer {
 		Stroke normalizedStroke = new Stroke();
 
 		int cursor = 0;
-		StrokePoint strokePoint = originalStroke.get(cursor);
+		DataPoint strokePoint = originalStroke.get(cursor);
 
 		// Add fragment's start point, if it's the first fragment
 		if (normalizedStroke.isEmpty())
@@ -104,7 +105,7 @@ class StrokeNormalizer {
 
 			// Advance to next interpolation point, or next source element,
 			// whichever is first
-			StrokePoint nextStrokePoint = originalStroke.get(cursor + 1);
+		  DataPoint nextStrokePoint = originalStroke.get(cursor + 1);
 
 			if (nextInterpolationTime < nextStrokePoint.getTime()) {
 				// generate a new interpolation point

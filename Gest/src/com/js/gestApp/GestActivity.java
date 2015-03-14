@@ -13,7 +13,6 @@ import com.js.gest.StrokeSet;
 import com.js.gest.StrokeSetCollection;
 import com.js.gest.StrokeSetCollection.Match;
 import com.js.gest.StrokeSetEntry;
-import com.js.gest.StrokeSmoother;
 import com.js.gest.GestureEventFilter;
 
 import android.content.res.Configuration;
