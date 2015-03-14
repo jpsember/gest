@@ -19,7 +19,6 @@ import com.js.gest.GestureEventFilter;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -73,58 +72,53 @@ public class GestActivity extends MyActivity implements
     pr("recognized gesture " + gestureName);
   }
 
+  private void buildConsole(LinearLayout container) {
+    TextView tv = new TextView(this);
+    tv.setBackgroundColor(Color.LTGRAY);
+    tv.setTypeface(Typeface.MONOSPACE);
+    tv.setTextSize(18);
+    tv.setPadding(10, 10, 10, 10);
+    tv.setHeight(1);
+    mConsole = tv;
+
+    LinearLayout.LayoutParams p = UITools.layoutParams(container);
+    p.weight = .7f;
+    // It seems we should make the variable dimension have mninimal size (1), in
+    // which case it will be given additional pixels based on its weight
+    p.width = LayoutParams.MATCH_PARENT;
+    p.height = 1;
+    container.addView(mConsole, p);
+  }
+
+  private void buildMatchView(LinearLayout container) {
+    mMatchView = new MatchView(this);
+    LinearLayout.LayoutParams p = UITools.layoutParams(container);
+    p.weight = .3f;
+    p.width = LayoutParams.MATCH_PARENT;
+    p.height = 1;
+    container.addView(mMatchView, p);
+  }
+
   private View buildUpperViews() {
-    LinearLayout horzLayout = UITools.linearLayout(this, false);
+    LinearLayout upperView = UITools.linearLayout(this, false);
 
     LinearLayout leftColumn = UITools.linearLayout(this, true);
+    buildMatchView(leftColumn);
+    buildConsole(leftColumn);
 
-    {
-      mMatchView = new MatchView(this);
-      LinearLayout.LayoutParams p = UITools.layoutParams(leftColumn);
-      p.weight = 1;
-      p.width = LayoutParams.MATCH_PARENT;
-      p.height = 1;
-      leftColumn.addView(mMatchView, p);
-
-      View mAuxView = new UITools.OurBaseView(this);
-      mAuxView.setBackgroundColor(Color.GRAY);
-      p = UITools.layoutParams(leftColumn);
-      // Have the match view occupy 1/3 of the available space
-      p.weight = 2f;
-      p.width = LayoutParams.MATCH_PARENT;
-      p.height = 1;
-      leftColumn.addView(mAuxView, p);
-    }
-
-    {
-      TextView tv = new TextView(this);
-      tv.setBackgroundColor(Color.LTGRAY);
-      tv.setTypeface(Typeface.MONOSPACE);
-      tv.setTextSize(18);
-      tv.setPadding(10, 10, 10, 10);
-      mConsole = tv;
-
-      LinearLayout.LayoutParams p = UITools.layoutParams(leftColumn);
-      p.weight = .7f;
-      p.width = LayoutParams.MATCH_PARENT;
-//      p.gravity = Gravity.CENTER;
-      p.height = 40;
-      leftColumn.addView(mConsole, p);
-    }
-
-    LinearLayout.LayoutParams p = UITools.layoutParams(horzLayout);
+    LinearLayout.LayoutParams p = UITools.layoutParams(upperView);
     p.weight = 1f;
     p.width = 1;
-    horzLayout.addView(leftColumn, p);
+    upperView.addView(leftColumn, p);
 
     mTouchView = new TouchView(this, this);
     mTouchView.setGestureSet(mFilterGestureLibrary);
 
     mTouchView.setBackgroundColor(Color.BLUE);
-    p = UITools.layoutParams(horzLayout);
+    p = UITools.layoutParams(upperView);
     p.weight = 2f;
-    horzLayout.addView(mTouchView, p);
-    return horzLayout;
+    upperView.addView(mTouchView, p);
+    return upperView;
   }
 
   private void setConsoleText(String text) {
@@ -165,10 +159,10 @@ public class GestActivity extends MyActivity implements
         if (mNormalizedStrokeSet == null)
           return;
         addGestureToLibrary(name, mNormalizedStrokeSet);
-        setConsoleText("saving set as name '" + name + "'");
-        mNameWidget.setText("");
-        dumpStrokeSet(mNormalizedStrokeSet, name);
+        String json = dumpStrokeSet(mNormalizedStrokeSet, name);
         clearRegisteredSet();
+        setConsoleText("Storing:\n\n" + json);
+        mNameWidget.setText("");
       }
     });
     addButton("ZeroDist", new OnClickListener() {
@@ -214,14 +208,16 @@ public class GestActivity extends MyActivity implements
 
   }
 
-  private void dumpStrokeSet(StrokeSet originalSet, String name) {
+  private String dumpStrokeSet(StrokeSet originalSet, String name) {
+    String json = null;
     StrokeSet set = originalSet.normalize(12);
     try {
-      String s = set.toJSON(name);
-      pr("\n" + s);
+      json = set.toJSON(name);
+      pr("\n" + json);
     } catch (JSONException e) {
       die(e);
     }
+    return json;
   }
 
   // Length of strokes normalized for small version within multilength library
