@@ -5,6 +5,6 @@
   }
    
   ,{"name":"redo",
-    "source":["undo","reverse"]
+    "uses":["undo","reverse"]
  	}
 ]

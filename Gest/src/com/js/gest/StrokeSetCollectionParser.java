@@ -41,7 +41,6 @@ class StrokeSetCollectionParser {
   public void parse(String script, StrokeSetCollection collection)
       throws JSONException {
 
-    mStrokeSetCollection = collection;
     JSONArray array = JSONTools.parseArray(script);
 
     // Pass 1: read all of the entries into our map
@@ -55,6 +54,19 @@ class StrokeSetCollectionParser {
     processStrokeReferences();
 
     processAliases();
+
+    populateOutputSet(collection);
+  }
+
+  private void populateOutputSet(StrokeSetCollection collection) {
+    for (String name : mNamedSets.keySet()) {
+      ParseEntry parseEntry = mNamedSets.get(name);
+      StrokeSetEntry entry = parseEntry.strokeSetEntry();
+      if (entry.strokeSet() == null)  
+        die("entry has no stroke set for parse entry "+name);
+      collection.put(name, entry.strokeSet(),
+          entry.hasAlias() ? entry.aliasName() : null);
+    }
   }
 
   private static void quote(StringBuilder sb, String text) {
@@ -136,7 +148,6 @@ class StrokeSetCollectionParser {
         throw new JSONException("Duplicate name: " + name);
       ParseEntry parseEntry = new ParseEntry(name, map);
       mNamedSets.put(name, parseEntry);
-      mStrokeSetCollection.map().put(name, parseEntry.strokeSetEntry());
     }
   }
 
@@ -147,7 +158,7 @@ class StrokeSetCollectionParser {
       if (strokes == null)
         continue;
       StrokeSet strokeSet = parseStrokeSet(name, strokes);
-      entry.strokeSetEntry().addStrokeSet(strokeSet);
+      entry.strokeSetEntry().setStrokeSet(strokeSet);
     }
   }
 
@@ -176,7 +187,7 @@ class StrokeSetCollectionParser {
         throw new JSONException("No strokes found for: " + usesName);
 
       StrokeSet strokeSet = modifyExistingStrokeSet(name, usesSet, options);
-      strokeSetEntry.addStrokeSet(strokeSet);
+      strokeSetEntry.setStrokeSet(strokeSet);
     }
   }
 
@@ -189,7 +200,7 @@ class StrokeSetCollectionParser {
       ParseEntry targetEntry = mNamedSets.get(aliasName);
       if (targetEntry == null)
         throw new JSONException("alias references unknown entry: " + name);
-      entry.strokeSetEntry().setAlias(targetEntry.strokeSetEntry());
+      entry.strokeSetEntry().setAliasName(aliasName);
     }
   }
 
@@ -284,7 +295,6 @@ class StrokeSetCollectionParser {
   }
 
   private Map<String, ParseEntry> mNamedSets;
-  private StrokeSetCollection mStrokeSetCollection;
   private int mUniquePrefixIndex;
 
   private static class ParseEntry {

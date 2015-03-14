@@ -19,7 +19,8 @@ class StrokeNormalizer {
   }
 
   /**
-   * Normalize a stroke set to have arbitrary length
+   * Normalize a stroke set to have arbitrary length; if length is already
+   * desired length, returns original set
    */
   public static StrokeSet normalize(StrokeSet originalSet,
       int desiredStrokeLength) {
@@ -106,7 +107,7 @@ class StrokeNormalizer {
       // Advance to next interpolation point, or next source element,
       // whichever is first
       DataPoint nextStrokePoint = originalStroke.get(cursor + 1);
-      
+
       if (nextInterpolationTime < nextStrokePoint.getTime()) {
         // generate a new interpolation point
         currentTime = nextInterpolationTime;

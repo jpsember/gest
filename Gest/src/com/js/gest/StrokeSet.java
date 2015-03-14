@@ -125,35 +125,6 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
     return StrokeSetCollectionParser.strokeSetToJSON(this, name);
   }
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder("StrokeSet\n");
-    for (int strokeIndex = 0; strokeIndex < mStrokes.size(); strokeIndex++) {
-      Stroke stroke = mStrokes.get(strokeIndex);
-
-      // Display which current id corresponds to this stroke, or '-' if none
-      String strokeIdString = "-";
-      for (int mapStrokeId : mStrokeIdToIndexMap.keySet()) {
-        int mapStrokeIndex = mStrokeIdToIndexMap.get(mapStrokeId);
-        if (mapStrokeIndex == strokeIndex) {
-          strokeIdString = "" + mapStrokeId;
-          break;
-        }
-      }
-      sb.append(" id:" + strokeIdString + " #:" + strokeIndex + " ");
-      for (int i = 0; i < stroke.size(); i++) {
-        DataPoint pt = stroke.get(i);
-        sb.append(d((int) pt.getPoint().x, 4));
-        if (i > 16) {
-          sb.append("...");
-          break;
-        }
-      }
-      sb.append("\n");
-    }
-    return sb.toString();
-  }
-
   public Iterator<Stroke> iterator() {
     return mStrokes.iterator();
   }

@@ -78,6 +78,7 @@ public class TouchView extends UITools.OurBaseView implements
   @Override
   public void strokeSetExtended(StrokeSet strokeSet) {
     mTouchStrokeSet = strokeSet;
+    // If this stroke set has just started, clear any old displayed version
     if (strokeSet.length() == 1) {
       mDisplayStrokeSet = null;
     }

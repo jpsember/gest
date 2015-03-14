@@ -1,33 +1,9 @@
 package com.js.gest;
 
-import java.util.HashMap;
-import java.util.Map;
-import static com.js.basic.Tools.*;
-
 class StrokeSetEntry {
 
-  /**
-   * Get stroke set of longest length
-   */
   public StrokeSet strokeSet() {
-    StrokeSet best = null;
-    for (StrokeSet set : mStrokeSetMap.values()) {
-      if (best == null || best.length() < set.length())
-        best = set;
-    }
-    if (best == null)
-      throw new IllegalStateException("set is empty");
-    return best;
-  }
-
-  public StrokeSet strokeSet(int desiredStrokeLength) {
-    if (desiredStrokeLength == 0)
-      return strokeSet();
-    StrokeSet set = mStrokeSetMap.get(desiredStrokeLength);
-    if (set == null)
-      throw new IllegalArgumentException("no stroke set '" + name()
-          + "' of length " + desiredStrokeLength + " within " + nameOf(this));
-    return set;
+    return mStrokeSet;
   }
 
   public String name() {
@@ -38,13 +14,13 @@ class StrokeSetEntry {
    * Get the name of the stroke set this one is an alias of; returns our name if
    * we are not an alias
    */
-  public String aliasName() {
+  String aliasName() {
     if (mAliasName == null)
       return mName;
     return mAliasName;
   }
 
-  public boolean hasAlias() {
+  boolean hasAlias() {
     return mAliasName != null;
   }
 
@@ -52,16 +28,15 @@ class StrokeSetEntry {
     mName = name;
   }
 
-  void addStrokeSet(StrokeSet strokeSet) {
-    mStrokeSetMap.put(strokeSet.length(), strokeSet);
+  void setStrokeSet(StrokeSet strokeSet) {
+    mStrokeSet = strokeSet;
   }
 
-  void setAlias(StrokeSetEntry strokeSetEntry) {
-    mAliasName = strokeSetEntry.aliasName();
+  void setAliasName(String name) {
+    mAliasName = name;
   }
 
   private String mAliasName;
   private String mName;
-  // Map of stroke sets, keyed by normalization length
-  private Map<Integer, StrokeSet> mStrokeSetMap = new HashMap();
+  private StrokeSet mStrokeSet;
 }

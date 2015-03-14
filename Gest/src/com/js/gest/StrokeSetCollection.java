@@ -36,25 +36,33 @@ public class StrokeSetCollection {
   }
 
   /**
-   * Get named StrokeSet; returns longest set with that name
+   * Get named StrokeSet, if it exists
    */
   public StrokeSet getStrokeSet(String name) {
-    warning("multiple resolutions is probably an unnecessary complication in retrospect");
     StrokeSetEntry entry = getSetEntry(name);
     if (entry == null)
       return null;
-    return entry.strokeSet(0);
+    return entry.strokeSet();
   }
 
-  public void add(String name, StrokeSet set) {
+  public int strokeLength() {
+    return mStrokeLength;
+  }
+
+  public void put(String name, StrokeSet set, String aliasName) {
     if (set == null)
       throw new IllegalArgumentException();
-    StrokeSetEntry entry = mEntriesMap.get(name);
-    if (entry == null) {
-      entry = new StrokeSetEntry(name);
-      mEntriesMap.put(name, entry);
+
+    // If the library is currently empty, set its length to the length of this
+    // set's strokes
+    if (mEntriesMap.isEmpty()) {
+      mStrokeLength = set.length();
     }
-    entry.addStrokeSet(set);
+
+    StrokeSetEntry entry = new StrokeSetEntry(name);
+    entry.setStrokeSet(set);
+    entry.setAliasName(aliasName);
+    mEntriesMap.put(name, entry);
   }
 
   public Match findMatch(StrokeSet inputSet, MatcherParameters param) {
@@ -68,11 +76,10 @@ public class StrokeSetCollection {
     TreeSet<Match> results = new TreeSet();
     for (String setName : mEntriesMap.keySet()) {
       StrokeSetEntry entry = mEntriesMap.get(setName);
-      StrokeSet set2 = entry.strokeSet(inputSet.length());
-      if (set2.size() != inputSet.size())
+      StrokeSet set = entry.strokeSet();
+      if (set.size() != inputSet.size())
         continue;
-
-      StrokeSetMatcher m = new StrokeSetMatcher(set2, inputSet, param);
+      StrokeSetMatcher m = new StrokeSetMatcher(set, inputSet, param);
       Match match = new Match(entry, m.similarity());
       results.add(match);
       // If second entry is an alias of the first, throw it out; there's no need
@@ -115,13 +122,10 @@ public class StrokeSetCollection {
     }
 
     /**
-     * Get StrokeSet that matches a particular stroke length
-     * 
-     * @param desiredStrokeLength
+     * Get StrokeSet
      */
-    public StrokeSet strokeSet(int desiredStrokeLength) {
-      unimp("if 0, get maximum");
-      return setEntry().strokeSet(desiredStrokeLength);
+    public StrokeSet strokeSet() {
+      return setEntry().strokeSet();
     }
 
     @Override
@@ -145,7 +149,7 @@ public class StrokeSetCollection {
     @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
-      sb.append(d(cost()));
+      sb.append(d(cost()).substring(4));
       sb.append(' ');
       sb.append(setEntry().name());
       if (setEntry().hasAlias())
@@ -158,5 +162,17 @@ public class StrokeSetCollection {
 
   }
 
+  public StrokeSetCollection buildWithStrokeLength(int strokeLength) {
+    StrokeSetCollection library = new StrokeSetCollection();
+    for (String name : map().keySet()) {
+      StrokeSetEntry entry = map().get(name);
+      StrokeSet set2 = entry.strokeSet().normalize(strokeLength);
+      library.put(name, set2, entry.aliasName());
+    }
+    return library;
+  }
+
   private Map<String, StrokeSetEntry> mEntriesMap = new HashMap();
+  private int mStrokeLength;
+
 }

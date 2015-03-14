@@ -204,7 +204,7 @@ public class GestActivity extends MyActivity implements
       @Override
       public void onClick(View v) {
         if (!((CheckBox) v).isChecked()) {
-          mMultiLengthLibrary = null;
+          mLowResolutionLibrary = null;
         }
       }
     });
@@ -226,10 +226,8 @@ public class GestActivity extends MyActivity implements
   private static final int SMALL_STROKE_SET_LENGTH = 10;
 
   private void addGestureToLibrary(String name, StrokeSet set) {
-    mGestureLibrary.add(name, set);
-    if (mMultiLengthLibrary != null) {
-      generateMultiLengthSets(name, set, mMultiLengthLibrary);
-    }
+    mGestureLibrary.put(name, set, null);
+    mLowResolutionLibrary = null;
   }
 
   private View buildContentView() {
@@ -291,50 +289,36 @@ public class GestActivity extends MyActivity implements
       sb.append("\n");
     }
     if (goodFit) {
-      mMatchView.setStrokeSet(match.strokeSet(sourceSet.length()));
+      mMatchView.setStrokeSet(match.strokeSet());
     } else
       mMatchView.setStrokeSet(null);
 
     return sb.toString();
   }
 
-  private void generateMultiLengthSets(String name, StrokeSet originalSet,
-      StrokeSetCollection destination) {
-    mMultiLengthLibrary.add(name, originalSet);
-    // Generate a lower resolution version
-    StrokeSet set2 = originalSet.normalize(SMALL_STROKE_SET_LENGTH);
-    mMultiLengthLibrary.add(name, set2);
-  }
-
   private void performMatch() {
     if (mMultiLengthCheckBox.isChecked()) {
-      if (mMultiLengthLibrary == null) {
-        mMultiLengthLibrary = new StrokeSetCollection();
-        for (String name : mGestureLibrary.map().keySet()) {
-          StrokeSet set = mGestureLibrary.getStrokeSet(name);
-          generateMultiLengthSets(name, set, mMultiLengthLibrary);
-        }
+      if (mLowResolutionLibrary == null) {
+        mLowResolutionLibrary = mGestureLibrary
+            .buildWithStrokeLength(SMALL_STROKE_SET_LENGTH);
       }
     }
 
-    if (mMultiLengthLibrary == null) {
-      String result = performMatchWithLibrary(mNormalizedStrokeSet,
-          mGestureLibrary);
-      setConsoleText(result);
-    } else {
-      int[] lengths = { 0, SMALL_STROKE_SET_LENGTH };
-      StringBuilder sb = new StringBuilder();
-      for (int length : lengths) {
-        StrokeSet source = mNormalizedStrokeSet;
-        if (source.length() != length)
-          source = source.normalize(length);
-        String result = performMatchWithLibrary(source, mMultiLengthLibrary);
-        sb.append("Length " + source.length() + ":\n");
-        sb.append(result);
+    StringBuilder sb = new StringBuilder();
+    for (int pass = 0; pass < 2; pass++) {
+      if (pass == 1 && !mMultiLengthCheckBox.isChecked())
+        continue;
+      if (pass == 1)
         sb.append("\n");
-      }
-      setConsoleText(sb.toString());
+      StrokeSetCollection library = (pass == 0) ? mGestureLibrary
+          : mLowResolutionLibrary;
+      sb.append("Length " + library.strokeLength() + ":\n");
+      StrokeSet source = mNormalizedStrokeSet;
+      source = source.normalize(library.strokeLength());
+      String result = performMatchWithLibrary(source, library);
+      sb.append(result);
     }
+    setConsoleText(sb.toString());
   }
 
   private StrokeSetCollection readGesturesFromFile(String filename) {
@@ -355,7 +339,7 @@ public class GestActivity extends MyActivity implements
   }
 
   private StrokeSetCollection mGestureLibrary;
-  private StrokeSetCollection mMultiLengthLibrary;
+  private StrokeSetCollection mLowResolutionLibrary;
   // The gesture set to be used by the filter (for test purposes)
   private StrokeSetCollection mFilterGestureLibrary;
   private TouchView mTouchView;
