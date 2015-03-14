@@ -14,63 +14,52 @@ import android.graphics.Paint;
  */
 public class StrokeRenderer {
 
-	public StrokeRenderer() {
-		Paint p = new Paint();
-		mPaintOutline = p;
-		p.setColor(Color.WHITE);
-		p.setStrokeWidth(1.2f);
-		p.setStyle(Paint.Style.STROKE);
+  public StrokeRenderer() {
+    Paint p = new Paint();
+    mPaintOutline = p;
+    p.setColor(Color.WHITE);
+    p.setStrokeWidth(1.2f);
+    p.setStyle(Paint.Style.STROKE);
 
-		p = new Paint();
-		mPaintFill = p;
-		p.setColor(Color.WHITE);
-		p.setStrokeWidth(3.4f);
-	}
+    p = new Paint();
+    mPaintFill = p;
+    p.setColor(Color.WHITE);
+    p.setStrokeWidth(3.4f);
+  }
 
-	public void startRender(Canvas c) {
-		mCanvas = c;
-	}
+  public void startRender(Canvas c) {
+    mCanvas = c;
+  }
 
-	public void stopRender() {
-		mCanvas = null;
-	}
+  public void stopRender() {
+    mCanvas = null;
+  }
 
-	public void drawStrokeSet(StrokeSet mStrokeSet, boolean small,
-			float circleScale) {
-		for (Stroke s : mStrokeSet) {
-			drawStroke(s, small, circleScale);
-		}
-	}
+  public void drawStrokeSet(StrokeSet set, Rect bounds, boolean detailed) {
+    for (Stroke s : set) {
+      drawStroke(s, bounds, detailed);
+    }
+  }
 
-	private void drawStroke(Stroke s, boolean small, float circleScale) {
-		float scaleFactor = small ? 0.3f : 1.0f;
+  private void drawStroke(Stroke s, Rect bounds, boolean detailed) {
+    float px = 0, py = 0;
+    for (int i = 0; i < s.size(); i++) {
+      Point point = s.getPoint(i);
+      float x = point.x;
+      float y = point.y;
+      y = bounds.endY() - (y - bounds.y);
+      if (i != 0)
+        mCanvas.drawLine(px, py, x, y, mPaintFill);
+      px = x;
+      py = y;
+      if (detailed) {
+        mCanvas.drawCircle(px, py, 8, mPaintOutline);
+      }
+    }
+  }
 
-		Point prevPoint = null;
-		for (int i = 0; i < s.size(); i++) {
-			Point point = s.getPoint(i);
-			point = new Point(point.x, mCanvas.getHeight() - point.y);
-			if (prevPoint != null) {
-				drawLine(prevPoint, point, mPaintFill);
-			}
-			if (!small)
-				mCanvas.drawCircle(point.x, point.y, 8 * scaleFactor * circleScale,
-						mPaintOutline);
-			prevPoint = point;
-		}
-
-	}
-
-	private void drawLine(Point p1, Point p2, Paint paint) {
-		mCanvas.drawLine(p1.x, p1.y, p2.x, p2.y, paint);
-	}
-
-	public void drawRect(Rect r) {
-		for (int i = 0; i < 4; i++)
-			drawLine(r.corner(i), r.corner((i + 1) % 4), mPaintOutline);
-	}
-
-	private Paint mPaintFill;
-	private Paint mPaintOutline;
-	private Canvas mCanvas;
+  private Paint mPaintFill;
+  private Paint mPaintOutline;
+  private Canvas mCanvas;
 
 }

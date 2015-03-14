@@ -9,6 +9,7 @@ import com.js.gest.GestureEventFilter;
 import com.js.gest.StrokeSet;
 import com.js.gest.StrokeSetCollection;
 import com.js.android.MyTouchListener;
+import com.js.basic.Rect;
 
 import static com.js.basic.Tools.*;
 
@@ -48,15 +49,20 @@ public class TouchView extends UITools.OurBaseView implements
     mEventFilter.setGestures(gestures);
   }
 
+  private void onDrawAux() {
+    if (mTouchStrokeSet != null) {
+      StrokeSet set = mTouchStrokeSet;
+      Rect r = new Rect(0, 0, getWidth(), getHeight());
+      if (mDisplayStrokeSet != null)
+        set = mDisplayStrokeSet;
+      mRenderer.drawStrokeSet(set, r, true);
+    }
+  }
+
   @Override
   public void onDraw(Canvas canvas) {
     mRenderer.startRender(canvas);
-    if (mTouchStrokeSet != null) {
-      StrokeSet set = mTouchStrokeSet;
-      if (mDisplayStrokeSet != null)
-        set = mDisplayStrokeSet;
-      mRenderer.drawStrokeSet(set, false, 1.0f);
-    }
+    onDrawAux();
     mRenderer.stopRender();
   }
 
