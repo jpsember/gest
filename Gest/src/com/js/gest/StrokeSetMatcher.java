@@ -44,13 +44,15 @@ class StrokeSetMatcher {
         float cost = mStrokeMatcher.cost();
         totalCost += cost;
       }
-      mSimilarity = totalCost;
+      mSimilarity = Math.min(totalCost, StrokeMatcher.INFINITE_COST);
       mSimilarityFound = true;
     }
     return mSimilarity;
   }
 
   public float normalizedCost(float rawCost) {
+    if (rawCost >= StrokeMatcher.INFINITE_COST)
+      return StrokeMatcher.INFINITE_COST;
 
     // Get average (raw) stroke cost
     rawCost /= mStrokeA.size();

@@ -70,6 +70,9 @@ public class StrokeMatcher {
    * @param rawCost
    */
   public float normalizedCost(float rawCost) {
+    if (rawCost >= StrokeMatcher.INFINITE_COST)
+      return StrokeMatcher.INFINITE_COST;
+
     if (mStrokeA == null)
       throw new IllegalStateException();
     // Divide by the path length, to get approximately the average cost per data
