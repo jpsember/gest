@@ -24,6 +24,10 @@ import static com.js.basic.Tools.*;
  */
 public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 
+  static final String KEY_NAME = "name";
+  static final String KEY_ALIAS = "alias";
+  static final String KEY_STROKES = "strokes";
+
   public StrokeSet() {
   }
 
@@ -131,7 +135,32 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
   }
 
   public String toJSON() throws JSONException {
-    return StrokeSetCollectionParser.strokeSetToJSON(this);
+    assertNamed();
+    StringBuilder sb = new StringBuilder(",{");
+    quote(sb, KEY_NAME);
+    sb.append(':');
+    quote(sb, name());
+    sb.append(',');
+    if (hasAlias()) {
+      quote(sb, KEY_ALIAS);
+      sb.append(':');
+      quote(sb, aliasName());
+    }
+    quote(sb, KEY_STROKES);
+    sb.append(":[");
+    for (int i = 0; i < size(); i++) {
+      if (i != 0)
+        sb.append(',');
+      sb.append(get(i).toJSONArray());
+    }
+    sb.append("]}\n");
+    return sb.toString();
+  }
+
+  private static void quote(StringBuilder sb, String text) {
+    sb.append('"');
+    sb.append(text);
+    sb.append('"');
   }
 
   public Iterator<Stroke> iterator() {

@@ -33,13 +33,9 @@ class StrokeSetCollectionParser {
    * 
    * </pre>
    */
-  private static final String KEY_NAME = "name";
-  private static final String KEY_ALIAS = "alias";
   private static final String KEY_USES = "uses";
-  private static final String KEY_STROKES = "strokes";
 
-  public void parse(String script, GestureSet collection)
-      throws JSONException {
+  public void parse(String script, GestureSet collection) throws JSONException {
 
     JSONArray array = JSONTools.parseArray(script);
 
@@ -67,32 +63,8 @@ class StrokeSetCollectionParser {
     }
   }
 
-  private static void quote(StringBuilder sb, String text) {
-    sb.append('"');
-    sb.append(text);
-    sb.append('"');
-  }
-
-  public static String strokeSetToJSON(StrokeSet set) throws JSONException {
-    set.assertNamed();
-    StringBuilder sb = new StringBuilder(",{");
-    quote(sb, KEY_NAME);
-    sb.append(':');
-    quote(sb, set.name());
-    sb.append(',');
-    quote(sb, KEY_STROKES);
-    sb.append(":[");
-    for (int i = 0; i < set.size(); i++) {
-      if (i != 0)
-        sb.append(',');
-      sb.append(set.get(i).toJSONArray());
-    }
-    sb.append("]}\n");
-    return sb.toString();
-  }
-
   private String generateNameForAlias(JSONObject map) throws JSONException {
-    String originalName = map.optString(KEY_ALIAS);
+    String originalName = map.optString(StrokeSet.KEY_ALIAS);
     if (originalName.isEmpty())
       throw new JSONException("Entry has no name and is not an alias:\n" + map);
     String name = "_" + mUniquePrefixIndex + "_" + originalName;
@@ -111,12 +83,12 @@ class StrokeSetCollectionParser {
    * 
    */
   private void preprocessEntry(JSONObject map) throws JSONException {
-    Object aliasObject = map.opt(KEY_ALIAS);
+    Object aliasObject = map.opt(StrokeSet.KEY_ALIAS);
     if (aliasObject != null) {
       if (aliasObject instanceof JSONArray) {
         JSONArray array = (JSONArray) aliasObject;
         String originalName = array.getString(0);
-        map.put(KEY_ALIAS, originalName);
+        map.put(StrokeSet.KEY_ALIAS, originalName);
         map.put(KEY_USES, array);
       }
     }
@@ -134,11 +106,11 @@ class StrokeSetCollectionParser {
       // If it has a NAME entry, use it; otherwise, it must have an alias; take
       // the name of the alias and prepend a unique prefix, and store that as
       // the name
-      String name = map.optString(KEY_NAME);
+      String name = map.optString(StrokeSet.KEY_NAME);
       if (name.isEmpty()) {
         name = generateNameForAlias(map);
       } else {
-        if (map.has(KEY_ALIAS))
+        if (map.has(StrokeSet.KEY_ALIAS))
           throw new JSONException("Entry has both a name and an alias");
       }
 
@@ -152,7 +124,7 @@ class StrokeSetCollectionParser {
   private void processStrokes() throws JSONException {
     for (String name : mNamedSets.keySet()) {
       ParseEntry entry = mNamedSets.get(name);
-      JSONArray strokes = entry.map().optJSONArray(KEY_STROKES);
+      JSONArray strokes = entry.map().optJSONArray(StrokeSet.KEY_STROKES);
       if (strokes == null)
         continue;
       StrokeSet strokeSet = parseStrokeSet(entry.strokeSet(), strokes);
@@ -192,7 +164,7 @@ class StrokeSetCollectionParser {
   private void processAliases() throws JSONException {
     for (String name : mNamedSets.keySet()) {
       ParseEntry entry = mNamedSets.get(name);
-      String aliasName = entry.map().optString(KEY_ALIAS);
+      String aliasName = entry.map().optString(StrokeSet.KEY_ALIAS);
       if (aliasName.isEmpty())
         continue;
       ParseEntry targetEntry = mNamedSets.get(aliasName);
