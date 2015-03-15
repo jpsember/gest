@@ -9,7 +9,8 @@ import com.js.basic.Point;
 
 class StrokeSetMatcher {
 
-  public StrokeSetMatcher(StrokeSet a, StrokeSet b, MatcherParameters param) {
+  public void setArguments(StrokeSet a, StrokeSet b, MatcherParameters param) {
+    mSimilarity = null;
     mStrokeA = frozen(a);
     mStrokeB = frozen(b);
     if (param == null)
@@ -20,6 +21,10 @@ class StrokeSetMatcher {
           "Different number of strokes in each set");
   }
 
+  public void setCostCutoff(float cutoff) {
+    mCostCutoff = cutoff;
+  }
+  
   public float similarity() {
     if (mSimilarity == null) {
       int[] bOrder = calcBestOrderForB();
@@ -28,8 +33,9 @@ class StrokeSetMatcher {
       for (int i = 0; i < numberOfStrokes; i++) {
         Stroke sa = mStrokeA.get(i);
         Stroke sb = mStrokeB.get(bOrder[i]);
-        StrokeMatcher m = new StrokeMatcher(sa, sb, mParam);
-        float cost = m.similarity();
+        mStrokeMatcher.setArguments(sa, sb, mParam);
+        mStrokeMatcher.setCostCutoff(mCostCutoff);
+        float cost = mStrokeMatcher.similarity();
         totalCost += cost;
       }
       mSimilarity = totalCost / numberOfStrokes;
@@ -114,6 +120,8 @@ class StrokeSetMatcher {
     }
   }
 
+  private float mCostCutoff;
+  private StrokeMatcher mStrokeMatcher = new StrokeMatcher();
   private StrokeSet mStrokeA;
   private StrokeSet mStrokeB;
   private MatcherParameters mParam;

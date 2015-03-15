@@ -7,66 +7,68 @@ import com.js.basic.Point;
 import com.js.gest.MatcherParameters;
 import com.js.gest.Stroke;
 import com.js.gest.StrokeMatcher;
-import com.js.gest.StrokeSet;
 import com.js.testUtils.*;
 
 public class StrokeMatcherTest extends MyTestCase {
 
-	private Stroke buildStroke(String script) throws JSONException {
-		JSONArray a = new JSONArray(script);
-		return Stroke.parseJSONArray(a);
-	}
+  private Stroke buildStroke(String script) throws JSONException {
+    JSONArray a = new JSONArray(script);
+    return Stroke.parseJSONArray(a);
+  }
 
-	public void testEmptyStroke() {
-		Stroke s = new Stroke();
-		assertTrue(s.isEmpty());
-	}
+  public void testEmptyStroke() {
+    Stroke s = new Stroke();
+    assertTrue(s.isEmpty());
+  }
 
-	public void testNonEmptyStroke() {
-		Stroke s = new Stroke();
-		s.addPoint(5, new Point(20, 30));
-		assertFalse(s.isEmpty());
-	}
+  public void testNonEmptyStroke() {
+    Stroke s = new Stroke();
+    s.addPoint(5, new Point(20, 30));
+    assertFalse(s.isEmpty());
+  }
 
-	private static final String str1 = "[0, 0,0, 1, 100,0]";
-	private static final String str2 = "[0, 0,128, 1,100,128]";
+  private static final String str1 = "[0, 0,0, 1, 100,0]";
+  private static final String str2 = "[0, 0,128, 1,100,128]";
 
-	public void testPerfectMatch() throws JSONException {
-		match(str1, str1, 0, null);
-	}
+  public void testPerfectMatch() throws JSONException {
+    match(str1, str1, 0, null);
+  }
 
-	private void match(String str1, String str2, float expectedSimilarity,
-			MatcherParameters p) throws JSONException {
-		Stroke stroke1 = buildStroke(str1);
-		Stroke stroke2 = buildStroke(str2);
-		StrokeMatcher m = new StrokeMatcher(stroke1, stroke2, null);
-		float f = m.similarity();
-		assertEqualsFloat(expectedSimilarity, f);
-	}
+  private void match(String str1, String str2, float expectedSimilarity,
+      MatcherParameters p) throws JSONException {
+    Stroke stroke1 = buildStroke(str1);
+    Stroke stroke2 = buildStroke(str2);
 
-	public void testParallelLines() throws JSONException {
-		// The best path is to advance equally along both, and they're 128 apart,
-		// which is 1/2 the scale factor
-		match(str1, str2, 0.5f, null);
-		match(str2, str1, 0.5f, null);
+    StrokeMatcher m = new StrokeMatcher();
+    m.setArguments(stroke1, stroke2, null);
+    float f = m.similarity();
+    assertEqualsFloat(expectedSimilarity, f);
+  }
 
-	}
+  public void testParallelLines() throws JSONException {
+    // The best path is to advance equally along both, and they're 128 apart,
+    // which is 1/2 the scale factor
+    float exp = 0.5493420958f;
+    match(str1, str2, exp, null);
+    match(str2, str1, exp, null);
+  }
 
-	public void testAFirst() throws JSONException {
-		// We expect the path to advance along A until it reaches B's starting
-		// point,
-		// then advance together
-		String str1 = "[0, 0,0,  1, 16,0, 2,32,0, 3,48,0, 4,64,0, 5,80,0, 6,96,0]";
-		String str2 = "[0, 80,0, 1, 80,0, 2,80,0, 3,80,0, 4,80,0, 5,80,0, 6,96,0]";
+  public void testAFirst() throws JSONException {
+    // We expect the path to advance along A until it reaches B's starting
+    // point,
+    // then advance together
+    String str1 = "[0, 0,0,  1, 16,0, 2,32,0, 3,48,0, 4,64,0, 5,80,0, 6,96,0]";
+    String str2 = "[0, 80,0, 1, 80,0, 2,80,0, 3,80,0, 4,80,0, 5,80,0, 6,96,0]";
 
-		float unscaledCost = 80 * 80 + 64 * 64 + 48 * 48 + 32 * 32 + 16 * 16;
-		float scaledCost = unscaledCost / 13; // total columns
-		scaledCost = (float) Math.sqrt(scaledCost);
-		scaledCost /= StrokeSet.STANDARD_WIDTH;
-		match(str1, str2, scaledCost, null);
+    // Verify that symmetric matching yields same result
+    match(str2, str1, 0.17519122362f, null);
+  }
 
-		// Verify that symmetric matching yields same result
-		match(str2, str1, scaledCost, null);
-	}
+  public void testRoughMatch() throws JSONException {
+    String str1 = "[0,0,1,  1,23,40,  2,47,80,  3,99,169,  4,151,239, 5,161,207, 6,208,98,  7,255,13]";
+    String str2 = "[0,0,93, 1,15,142, 2,72,176, 3,103,134, 4,162,154, 5,213,175, 6,242,134, 7,255,76]";
+
+    match(str1, str2, 0.2954623997f, null);
+  }
 
 }

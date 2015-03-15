@@ -114,7 +114,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
     // Calculate bounds, now that frozen
     mBounds = calculateBounds();
     if (mBounds == null)
-      throw new IllegalStateException("set has no points");
+      throw new IllegalStateException("set " + name() + " has no points");
     for (Stroke s : mStrokes)
       s.freeze();
     super.freeze();

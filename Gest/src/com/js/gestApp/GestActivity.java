@@ -1,13 +1,11 @@
 package com.js.gestApp;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.json.JSONException;
 
 import com.js.android.MyActivity;
 import com.js.android.UITools;
-import com.js.basic.Files;
 import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
 import com.js.gest.GestureSet;
@@ -324,21 +322,15 @@ public class GestActivity extends MyActivity implements
     setConsoleText(sb.toString());
   }
 
-  private GestureSet readGesturesFromFile(String filename) {
-    GestureSet c = null;
+  private void prepareGestureLibrary() {
     try {
-      InputStream stream = getClass().getResourceAsStream(filename);
-      String json = Files.readString(stream);
-      c = GestureSet.parseJSON(json);
+      mGestureLibrary = GestureSet.readFromClassResource(getClass(),
+          "basic_gestures.json");
+      mFilterGestureLibrary = GestureSet.readFromClassResource(getClass(),
+          "small_gesture_set.json");
     } catch (Exception e) {
       die(e);
     }
-    return c;
-  }
-
-  private void prepareGestureLibrary() {
-    mGestureLibrary = readGesturesFromFile("basic_gestures.json");
-    mFilterGestureLibrary = readGesturesFromFile("small_gesture_set.json");
   }
 
   private GestureSet mGestureLibrary;

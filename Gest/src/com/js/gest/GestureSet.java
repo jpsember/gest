@@ -1,5 +1,7 @@
 package com.js.gest;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -8,16 +10,24 @@ import java.util.TreeSet;
 
 import org.json.JSONException;
 
+import com.js.basic.Files;
+
 import static com.js.basic.Tools.*;
 
 public class GestureSet {
 
   public static GestureSet parseJSON(String script) throws JSONException {
-
-    StrokeSetCollectionParser p = new StrokeSetCollectionParser();
+    GestureSetParser p = new GestureSetParser();
     GestureSet collection = new GestureSet();
     p.parse(script, collection);
     return collection;
+  }
+
+  public static GestureSet readFromClassResource(Class klass, String filename)
+      throws IOException, JSONException {
+    InputStream stream = klass.getResourceAsStream(filename);
+    String json = Files.readString(stream);
+    return GestureSet.parseJSON(json);
   }
 
   /**
@@ -73,14 +83,23 @@ public class GestureSet {
     if (resultsList != null)
       resultsList.clear();
     TreeSet<Match> results = new TreeSet();
+    StrokeSetMatcher m = new StrokeSetMatcher();
+    float costCutoff = Float.MAX_VALUE;
     for (String setName : mEntriesMap.keySet()) {
       StrokeSet set = mEntriesMap.get(setName);
       if (set.size() != inputSet.size())
         continue;
-      StrokeSetMatcher m = new StrokeSetMatcher(set, inputSet, param);
+      m.setArguments(set, inputSet, param);
+      m.setCostCutoff(costCutoff);
       Match match = new Match(set, m.similarity());
       results.add(match);
-      // If second entry is an alias of the first, throw it out; there's no need
+
+      // Update the cutoff value
+      float newLimit = match.cost() * 3;
+      costCutoff = Math.min(newLimit, costCutoff);
+
+      // If second entry is an alias of the first, throw it out; there's no
+      // need
       // to keep it, since it shouldn't affect a match decision
       if (results.size() >= 2) {
         Iterator<Match> iter = results.iterator();
