@@ -8,8 +8,6 @@ import com.js.gest.MatcherParameters;
 import com.js.gest.Stroke;
 import com.js.gest.StrokeMatcher;
 import com.js.testUtils.*;
-import static com.js.basic.Tools.*;
-
 
 public class StrokeMatcherTest extends MyTestCase {
 

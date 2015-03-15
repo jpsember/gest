@@ -10,6 +10,7 @@ public class MatcherParameters extends Freezable.Mutable {
 
   public MatcherParameters() {
     setZeroDistanceThreshold(StrokeSet.STANDARD_WIDTH * .01f);
+    setMaximumCostRatio(1.6f);
   }
 
   public void setZeroDistanceThreshold(float threshold) {
@@ -19,6 +20,20 @@ public class MatcherParameters extends Freezable.Mutable {
 
   public float zeroDistanceThreshold() {
     return mZeroDistanceThreshold;
+  }
+
+  /**
+   * Get the maximum cost ratio. The matcher multiples this value by the
+   * previous lowest cost gesture recognized, to use as an upper bound on
+   * subsequent matching attempts
+   */
+  public float maximumCostRatio() {
+    return mMaximumCostRatio;
+  }
+
+  public void setMaximumCostRatio(float ratio) {
+    mutate();
+    mMaximumCostRatio = ratio;
   }
 
   @Override
@@ -36,5 +51,5 @@ public class MatcherParameters extends Freezable.Mutable {
   }
 
   private float mZeroDistanceThreshold;
-
+  private float mMaximumCostRatio;
 }

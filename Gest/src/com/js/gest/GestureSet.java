@@ -86,6 +86,8 @@ public class GestureSet {
       List<Match> resultsList) {
     if (mTrace)
       pr("GestureSet findMatch");
+    if (param == null)
+      param = MatcherParameters.DEFAULT;
     if (resultsList != null)
       resultsList.clear();
     TreeSet<Match> results = new TreeSet();
@@ -105,7 +107,7 @@ public class GestureSet {
       // Scale the raw cost by the number of strokes since the cost of the set
       // is the sum of the costs of the individual strokes.
       float newLimit = m.cost() / inputSet.size();
-      newLimit *= 2.0f;
+      newLimit *= param.maximumCostRatio();
       maximumCost = Math.min(newLimit, maximumCost);
       if (mTrace)
         pr(" gesture: " + d(setName, "15p") + " cost:" + dumpCost(m.cost())
