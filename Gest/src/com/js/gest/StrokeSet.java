@@ -24,6 +24,13 @@ import static com.js.basic.Tools.*;
  */
 public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 
+  public StrokeSet() {
+  }
+
+  public StrokeSet(String name) {
+    setName(name);
+  }
+
   /**
    * Normalize this stroke set to default length
    */
@@ -62,12 +69,14 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
     s.addPoint(eventTime - mInitialEventTime, pt);
   }
 
-  public static StrokeSet buildFromStrokes(List<Stroke> strokes) {
+  public static StrokeSet buildFromStrokes(List<Stroke> strokes,
+      StrokeSet metaDataSource) {
     StrokeSet s = new StrokeSet();
+    if (metaDataSource != null)
+      s.inheritMetaDataFrom(metaDataSource);
     for (Stroke stroke : strokes) {
       s.mStrokes.add(stroke);
     }
-    s.freeze();
     return s;
   }
 
@@ -121,8 +130,8 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
     return mStrokes.isEmpty();
   }
 
-  public String toJSON(String name) throws JSONException {
-    return StrokeSetCollectionParser.strokeSetToJSON(this, name);
+  public String toJSON() throws JSONException {
+    return StrokeSetCollectionParser.strokeSetToJSON(this);
   }
 
   public Iterator<Stroke> iterator() {
@@ -148,8 +157,9 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
 
   @Override
   public Freezable getMutableCopy() {
-    assertFrozen();
     StrokeSet s = new StrokeSet();
+    s.mName = mName;
+    s.mAliasName = mAliasName;
     for (Stroke st : mStrokes) {
       s.mStrokes.add(mutableCopyOf(st));
     }
@@ -215,10 +225,52 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
     return transformedSet;
   }
 
+  public String name() {
+    return mName;
+  }
+
+  public void setName(String name) {
+    mutate();
+    mName = name;
+  }
+
+  public void setAliasName(String aliasName) {
+    mutate();
+    mAliasName = aliasName;
+  }
+
+  /**
+   * Get the name of the stroke set this one is an alias of; returns our name if
+   * we are not an alias
+   */
+  String aliasName() {
+    if (mAliasName == null)
+      return mName;
+    return mAliasName;
+  }
+
+  boolean hasAlias() {
+    return mAliasName != null;
+  }
+
+  public void assertNamed() {
+    if (mName == null)
+      throw new IllegalStateException();
+  }
+
+  public void inheritMetaDataFrom(StrokeSet source) {
+    mutate();
+    mName = source.mName;
+    mAliasName = source.mAliasName;
+  }
+
+  private String mAliasName;
+  private String mName;
   private ArrayList<Stroke> mStrokes = new ArrayList();
   private Rect mBounds;
 
   // Only used when mutable
   private float mInitialEventTime;
   private Map<Integer, Integer> mStrokeIdToIndexMap = new HashMap();
+
 }

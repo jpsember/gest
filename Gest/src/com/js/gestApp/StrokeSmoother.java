@@ -35,7 +35,8 @@ public class StrokeSmoother {
         Stroke smoothed = smoothStroke(s);
         smoothedList.add(smoothed);
       }
-      mSmoothed = StrokeSet.buildFromStrokes(smoothedList);
+      mSmoothed = StrokeSet.buildFromStrokes(smoothedList,mSet);
+      mSmoothed.freeze();
     }
     return mSmoothed;
   }

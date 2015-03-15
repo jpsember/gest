@@ -24,45 +24,30 @@ public class StrokeSetCollection {
   /**
    * Get the map containing the entries
    */
-  public Map<String, StrokeSetEntry> map() {
+  public Map<String, StrokeSet> map() {
     return mEntriesMap;
-  }
-
-  /**
-   * Convenience method for map().get()
-   */
-  StrokeSetEntry getSetEntry(String name) {
-    return map().get(name);
   }
 
   /**
    * Get named StrokeSet, if it exists
    */
   public StrokeSet getStrokeSet(String name) {
-    StrokeSetEntry entry = getSetEntry(name);
-    if (entry == null)
-      return null;
-    return entry.strokeSet();
+    return map().get(name);
   }
 
   public int strokeLength() {
     return mStrokeLength;
   }
 
-  public void put(String name, StrokeSet set, String aliasName) {
-    if (set == null)
-      throw new IllegalArgumentException();
-
+  public void add(StrokeSet set) {
+    set = frozen(set);
+    set.assertNamed();
     // If the library is currently empty, set its length to the length of this
     // set's strokes
     if (mEntriesMap.isEmpty()) {
       mStrokeLength = set.length();
     }
-
-    StrokeSetEntry entry = new StrokeSetEntry(name);
-    entry.setStrokeSet(set);
-    entry.setAliasName(aliasName);
-    mEntriesMap.put(name, entry);
+    mEntriesMap.put(set.name(), set);
   }
 
   public Match findMatch(StrokeSet inputSet, MatcherParameters param) {
@@ -75,12 +60,11 @@ public class StrokeSetCollection {
       resultsList.clear();
     TreeSet<Match> results = new TreeSet();
     for (String setName : mEntriesMap.keySet()) {
-      StrokeSetEntry entry = mEntriesMap.get(setName);
-      StrokeSet set = entry.strokeSet();
+      StrokeSet set = mEntriesMap.get(setName);
       if (set.size() != inputSet.size())
         continue;
       StrokeSetMatcher m = new StrokeSetMatcher(set, inputSet, param);
-      Match match = new Match(entry, m.similarity());
+      Match match = new Match(set, m.similarity());
       results.add(match);
       // If second entry is an alias of the first, throw it out; there's no need
       // to keep it, since it shouldn't affect a match decision
@@ -88,7 +72,7 @@ public class StrokeSetCollection {
         Iterator<Match> iter = results.iterator();
         Match m1 = iter.next();
         Match m2 = iter.next();
-        if (m1.setEntry().aliasName() == m2.setEntry().aliasName()) {
+        if (m1.strokeSet().aliasName() == m2.strokeSet().aliasName()) {
           results.remove(m2);
         }
       }
@@ -108,8 +92,9 @@ public class StrokeSetCollection {
   }
 
   public static class Match implements Comparable {
-    public Match(StrokeSetEntry set, float cost) {
-      mStrokeSetEntry = set;
+    Match(StrokeSet set, float cost) {
+      set.assertNamed();
+      mStrokeSet = set;
       mCost = cost;
     }
 
@@ -117,15 +102,11 @@ public class StrokeSetCollection {
       return mCost;
     }
 
-    StrokeSetEntry setEntry() {
-      return mStrokeSetEntry;
-    }
-
     /**
      * Get StrokeSet
      */
     public StrokeSet strokeSet() {
-      return setEntry().strokeSet();
+      return mStrokeSet;
     }
 
     @Override
@@ -133,13 +114,13 @@ public class StrokeSetCollection {
       Match m = (Match) another;
       int diff = (int) Math.signum(this.cost() - m.cost());
       if (diff == 0) {
-        diff = String.CASE_INSENSITIVE_ORDER.compare(this.setEntry().name(), m
-            .setEntry().name());
+        diff = String.CASE_INSENSITIVE_ORDER.compare(this.strokeSet().name(), m
+            .strokeSet().name());
         if (diff != 0) {
           warning("comparisons matched exactly, this is unlikely: "
-              + this.setEntry().name()
+              + this.strokeSet().name()
               + " / "
-              + m.setEntry().name()
+              + m.strokeSet().name()
               + "\n and may be indicative of a spelling mistake in the 'source' options");
         }
       }
@@ -151,13 +132,13 @@ public class StrokeSetCollection {
       StringBuilder sb = new StringBuilder();
       sb.append(d(cost()).substring(4));
       sb.append(' ');
-      sb.append(setEntry().name());
-      if (setEntry().hasAlias())
-        sb.append(" --> " + setEntry().aliasName());
+      sb.append(strokeSet().name());
+      if (strokeSet().hasAlias())
+        sb.append(" --> " + strokeSet().aliasName());
       return sb.toString();
     }
 
-    private StrokeSetEntry mStrokeSetEntry;
+    private StrokeSet mStrokeSet;
     private float mCost;
 
   }
@@ -165,14 +146,14 @@ public class StrokeSetCollection {
   public StrokeSetCollection buildWithStrokeLength(int strokeLength) {
     StrokeSetCollection library = new StrokeSetCollection();
     for (String name : map().keySet()) {
-      StrokeSetEntry entry = map().get(name);
-      StrokeSet set2 = entry.strokeSet().normalize(strokeLength);
-      library.put(name, set2, entry.aliasName());
+      StrokeSet entry = map().get(name);
+      StrokeSet set2 = entry.normalize(strokeLength);
+      library.add(set2);
     }
     return library;
   }
 
-  private Map<String, StrokeSetEntry> mEntriesMap = new HashMap();
+  private Map<String, StrokeSet> mEntriesMap = new HashMap();
   private int mStrokeLength;
 
 }

@@ -61,11 +61,9 @@ class StrokeSetCollectionParser {
   private void populateOutputSet(StrokeSetCollection collection) {
     for (String name : mNamedSets.keySet()) {
       ParseEntry parseEntry = mNamedSets.get(name);
-      StrokeSetEntry entry = parseEntry.strokeSetEntry();
-      if (entry.strokeSet() == null)  
-        die("entry has no stroke set for parse entry "+name);
-      collection.put(name, entry.strokeSet(),
-          entry.hasAlias() ? entry.aliasName() : null);
+      StrokeSet entry = parseEntry.strokeSet();
+      entry.freeze();
+      collection.add(entry);
     }
   }
 
@@ -75,12 +73,12 @@ class StrokeSetCollectionParser {
     sb.append('"');
   }
 
-  public static String strokeSetToJSON(StrokeSet set, String name)
-      throws JSONException {
+  public static String strokeSetToJSON(StrokeSet set) throws JSONException {
+    set.assertNamed();
     StringBuilder sb = new StringBuilder(",{");
     quote(sb, KEY_NAME);
     sb.append(':');
-    quote(sb, name);
+    quote(sb, set.name());
     sb.append(',');
     quote(sb, KEY_STROKES);
     sb.append(":[");
@@ -157,15 +155,14 @@ class StrokeSetCollectionParser {
       JSONArray strokes = entry.map().optJSONArray(KEY_STROKES);
       if (strokes == null)
         continue;
-      StrokeSet strokeSet = parseStrokeSet(name, strokes);
-      entry.strokeSetEntry().setStrokeSet(strokeSet);
+      StrokeSet strokeSet = parseStrokeSet(entry.strokeSet(), strokes);
+      entry.setStrokeSet(strokeSet);
     }
   }
 
   private void processStrokeReferences() throws JSONException {
     for (String name : mNamedSets.keySet()) {
       ParseEntry parseEntry = mNamedSets.get(name);
-      StrokeSetEntry strokeSetEntry = parseEntry.strokeSetEntry();
 
       Set<String> options = new HashSet();
       String usesName = null;
@@ -182,12 +179,13 @@ class StrokeSetCollectionParser {
       ParseEntry usesEntry = mNamedSets.get(usesName);
       if (usesEntry == null)
         throw new JSONException("No set found: " + usesName);
-      StrokeSet usesSet = usesEntry.strokeSetEntry().strokeSet();
+      StrokeSet usesSet = usesEntry.strokeSet();
       if (usesSet == null)
         throw new JSONException("No strokes found for: " + usesName);
 
-      StrokeSet strokeSet = modifyExistingStrokeSet(name, usesSet, options);
-      strokeSetEntry.setStrokeSet(strokeSet);
+      StrokeSet strokeSet2 = modifyExistingStrokeSet(parseEntry.strokeSet(),
+          usesSet, options);
+      parseEntry.setStrokeSet(strokeSet2);
     }
   }
 
@@ -200,24 +198,25 @@ class StrokeSetCollectionParser {
       ParseEntry targetEntry = mNamedSets.get(aliasName);
       if (targetEntry == null)
         throw new JSONException("alias references unknown entry: " + name);
-      entry.strokeSetEntry().setAliasName(aliasName);
+      StrokeSet set = mutableCopyOf(entry.strokeSet());
+      set.setAliasName(aliasName);
+      entry.setStrokeSet(set);
     }
   }
 
-  private static StrokeSet parseStrokeSet(String name, JSONArray array)
+  private static StrokeSet parseStrokeSet(StrokeSet set, JSONArray array)
       throws JSONException {
 
     List<Stroke> strokes = new ArrayList();
     if (array.length() == 0)
-      throw new JSONException("no strokes defined for " + name);
+      throw new JSONException("no strokes defined for " + set.name());
     for (int i = 0; i < array.length(); i++) {
-      JSONArray setEntry = array.getJSONArray(i);
-      Stroke stroke = Stroke.parseJSONArray(setEntry);
+      JSONArray strokeArray = array.getJSONArray(i);
+      Stroke stroke = Stroke.parseJSONArray(strokeArray);
       strokes.add(stroke);
     }
-    StrokeSet set = StrokeSet.buildFromStrokes(strokes);
-    set = normalizeStrokeSet(set);
-    return set;
+    set = StrokeSet.buildFromStrokes(strokes, set);
+    return normalizeStrokeSet(set);
   }
 
   private static StrokeSet normalizeStrokeSet(StrokeSet set) {
@@ -252,7 +251,7 @@ class StrokeSetCollectionParser {
    * 'flipvert' : flip around x axis
    * 
    */
-  private StrokeSet modifyExistingStrokeSet(String setName, StrokeSet usesSet,
+  private StrokeSet modifyExistingStrokeSet(StrokeSet set, StrokeSet usesSet,
       Set<String> options) {
     if (sLegalOptions == null) {
       sLegalOptions = new HashSet();
@@ -261,7 +260,7 @@ class StrokeSetCollectionParser {
       sLegalOptions.add("flipvert");
     }
     if (!sLegalOptions.containsAll(options))
-      throw new IllegalArgumentException("illegal options for " + setName
+      throw new IllegalArgumentException("illegal options for " + set.name()
           + ": " + d(options));
 
     boolean reverse = options.contains("reverse");
@@ -291,7 +290,8 @@ class StrokeSetCollectionParser {
       for (DataPoint pt : workList)
         modifiedStroke.addPoint(pt);
     }
-    return StrokeSet.buildFromStrokes(modifiedStrokes);
+    set = StrokeSet.buildFromStrokes(modifiedStrokes, set);
+    return set;
   }
 
   private Map<String, ParseEntry> mNamedSets;
@@ -299,7 +299,7 @@ class StrokeSetCollectionParser {
 
   private static class ParseEntry {
     public ParseEntry(String name, JSONObject jsonMap) {
-      mEntry = new StrokeSetEntry(name);
+      mStrokeSet = new StrokeSet(name);
       mJSONMap = jsonMap;
     }
 
@@ -307,11 +307,15 @@ class StrokeSetCollectionParser {
       return mJSONMap;
     }
 
-    public StrokeSetEntry strokeSetEntry() {
-      return mEntry;
+    public StrokeSet strokeSet() {
+      return mStrokeSet;
     }
 
-    private StrokeSetEntry mEntry;
+    public void setStrokeSet(StrokeSet set) {
+      mStrokeSet = set;
+    }
+
+    private StrokeSet mStrokeSet;
     private JSONObject mJSONMap;
   }
 

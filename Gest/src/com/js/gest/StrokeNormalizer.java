@@ -59,7 +59,9 @@ class StrokeNormalizer {
         Stroke normalized = normalizeStroke(s);
         normalizedList.add(normalized);
       }
-      mNormalizedStrokeSet = StrokeSet.buildFromStrokes(normalizedList);
+      mNormalizedStrokeSet = StrokeSet.buildFromStrokes(normalizedList,
+          mOriginalStrokeSet);
+      mNormalizedStrokeSet.freeze();
     }
     return mNormalizedStrokeSet;
   }

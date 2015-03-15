@@ -306,7 +306,7 @@ public class GestureEventFilter extends MyTouchListener {
       if (match.cost() >= 0.15f)
         break;
       mMatch = match;
-      mListener.processGesture(mMatch.setEntry().aliasName());
+      mListener.processGesture(mMatch.strokeSet().aliasName());
     } while (false);
   }
 

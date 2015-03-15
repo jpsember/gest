@@ -167,8 +167,11 @@ public class GestActivity extends MyActivity implements
           return;
         if (mNormalizedStrokeSet == null)
           return;
-        addGestureToLibrary(name, mNormalizedStrokeSet);
-        String json = dumpStrokeSet(mNormalizedStrokeSet, name);
+        StrokeSet set = mutableCopyOf(mNormalizedStrokeSet);
+        set.setName(name);
+        set.freeze();
+        addGestureToLibrary(set);
+        String json = dumpStrokeSet(set);
         clearRegisteredSet();
         setConsoleText("Storing:\n\n" + json);
         mNameWidget.setText("");
@@ -210,11 +213,11 @@ public class GestActivity extends MyActivity implements
     });
   }
 
-  private String dumpStrokeSet(StrokeSet originalSet, String name) {
+  private String dumpStrokeSet(StrokeSet set) {
     String json = null;
-    StrokeSet set = originalSet.normalize(12);
+    set = set.normalize(12);
     try {
-      json = set.toJSON(name);
+      json = set.toJSON();
       pr("\n" + json);
     } catch (JSONException e) {
       die(e);
@@ -225,8 +228,9 @@ public class GestActivity extends MyActivity implements
   // Length of strokes normalized for small version within multilength library
   private static final int SMALL_STROKE_SET_LENGTH = 10;
 
-  private void addGestureToLibrary(String name, StrokeSet set) {
-    mGestureLibrary.put(name, set, null);
+  private void addGestureToLibrary(StrokeSet set) {
+    set.assertFrozen();
+    mGestureLibrary.add(set);
     mLowResolutionLibrary = null;
   }
 
