@@ -6,7 +6,7 @@ import java.io.InputStream;
 import org.json.JSONException;
 
 import com.js.basic.Files;
-import com.js.gest.StrokeSetCollection;
+import com.js.gest.GestureSet;
 import com.js.testUtils.MyTestCase;
 
 public class StrokeSetCollectionTest extends MyTestCase {
@@ -23,18 +23,18 @@ public class StrokeSetCollectionTest extends MyTestCase {
 
   public void testJSON() throws JSONException {
     String json = readJSON("strokes.txt");
-    StrokeSetCollection c = StrokeSetCollection.parseJSON(json);
-    assertNotNull(c.getStrokeSet("a"));
-    assertNull(c.getStrokeSet("b"));
-    assertNotNull(c.getStrokeSet("undo"));
-    assertNotNull(c.getStrokeSet("twofingerswipe"));
+    GestureSet c = GestureSet.parseJSON(json);
+    assertNotNull(c.get("a"));
+    assertNull(c.get("b"));
+    assertNotNull(c.get("undo"));
+    assertNotNull(c.get("twofingerswipe"));
   }
 
   public void testJSONBadAliases() throws JSONException {
     String json = readJSON("bad_aliases.txt");
 
     try {
-      StrokeSetCollection.parseJSON(json);
+      GestureSet.parseJSON(json);
       fail();
     } catch (JSONException e) {
       assertTrue(e.getMessage().contains("alias references unknown entry"));
@@ -43,6 +43,6 @@ public class StrokeSetCollectionTest extends MyTestCase {
 
   public void testJSONSource() throws JSONException {
     String json = readJSON("strokes3.txt");
-    StrokeSetCollection.parseJSON(json);
+    GestureSet.parseJSON(json);
   }
 }

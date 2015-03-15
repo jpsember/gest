@@ -10,31 +10,37 @@ import org.json.JSONException;
 
 import static com.js.basic.Tools.*;
 
-public class StrokeSetCollection {
+public class GestureSet {
 
-  public static StrokeSetCollection parseJSON(String script)
-      throws JSONException {
+  public static GestureSet parseJSON(String script) throws JSONException {
 
     StrokeSetCollectionParser p = new StrokeSetCollectionParser();
-    StrokeSetCollection collection = new StrokeSetCollection();
+    GestureSet collection = new GestureSet();
     p.parse(script, collection);
     return collection;
   }
 
   /**
-   * Get the map containing the entries
+   * Get the map containing the gestures
    */
-  public Map<String, StrokeSet> map() {
+  private Map<String, StrokeSet> map() {
     return mEntriesMap;
   }
 
   /**
-   * Get named StrokeSet, if it exists
+   * Get gesture
+   * 
+   * @param name
+   *          name of gesture to look for
+   * @return gesture, or null
    */
-  public StrokeSet getStrokeSet(String name) {
+  public StrokeSet get(String name) {
     return map().get(name);
   }
 
+  /**
+   * Get the length of the strokes used in this set's gestures
+   */
   public int strokeLength() {
     return mStrokeLength;
   }
@@ -50,12 +56,20 @@ public class StrokeSetCollection {
     mEntriesMap.put(set.name(), set);
   }
 
-  public Match findMatch(StrokeSet inputSet, MatcherParameters param) {
-    return findMatch(inputSet, null, param);
-  }
-
-  public Match findMatch(StrokeSet inputSet, List<Match> resultsList,
-      MatcherParameters param) {
+  /**
+   * Find a match for a gesture, if possible
+   * 
+   * @param inputSet
+   *          gesture to examine
+   * @param param
+   *          parameters for match, or null to use defaults
+   * @param resultsList
+   *          optional list of highest candidate gestures; if not null, they
+   *          will be returned in this list
+   * @return match found, or null
+   */
+  public Match findMatch(StrokeSet inputSet, MatcherParameters param,
+      List<Match> resultsList) {
     if (resultsList != null)
       resultsList.clear();
     TreeSet<Match> results = new TreeSet();
@@ -143,8 +157,8 @@ public class StrokeSetCollection {
 
   }
 
-  public StrokeSetCollection buildWithStrokeLength(int strokeLength) {
-    StrokeSetCollection library = new StrokeSetCollection();
+  public GestureSet buildWithStrokeLength(int strokeLength) {
+    GestureSet library = new GestureSet();
     for (String name : map().keySet()) {
       StrokeSet entry = map().get(name);
       StrokeSet set2 = entry.normalize(strokeLength);

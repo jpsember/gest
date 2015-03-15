@@ -38,7 +38,7 @@ class StrokeSetCollectionParser {
   private static final String KEY_USES = "uses";
   private static final String KEY_STROKES = "strokes";
 
-  public void parse(String script, StrokeSetCollection collection)
+  public void parse(String script, GestureSet collection)
       throws JSONException {
 
     JSONArray array = JSONTools.parseArray(script);
@@ -58,7 +58,7 @@ class StrokeSetCollectionParser {
     populateOutputSet(collection);
   }
 
-  private void populateOutputSet(StrokeSetCollection collection) {
+  private void populateOutputSet(GestureSet collection) {
     for (String name : mNamedSets.keySet()) {
       ParseEntry parseEntry = mNamedSets.get(name);
       StrokeSet entry = parseEntry.strokeSet();

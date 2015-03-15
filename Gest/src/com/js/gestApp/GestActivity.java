@@ -10,8 +10,8 @@ import com.js.android.UITools;
 import com.js.basic.Files;
 import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
-import com.js.gest.StrokeSetCollection;
-import com.js.gest.StrokeSetCollection.Match;
+import com.js.gest.GestureSet;
+import com.js.gest.GestureSet.Match;
 import com.js.gest.GestureEventFilter;
 
 import android.content.res.Configuration;
@@ -261,14 +261,13 @@ public class GestActivity extends MyActivity implements
   private static final float[] sZeroDistValues = { .01f, .02f, .04f, .06f,
       .08f, .12f, .22f, 0f };
 
-  private String performMatchWithLibrary(StrokeSet sourceSet,
-      StrokeSetCollection library) {
+  private String performMatchWithLibrary(StrokeSet sourceSet, GestureSet library) {
 
     MatcherParameters p = new MatcherParameters();
     p.setZeroDistanceThreshold(calcZeroDistValue() * StrokeSet.STANDARD_WIDTH);
 
-    ArrayList<StrokeSetCollection.Match> matches = new ArrayList();
-    Match match = library.findMatch(sourceSet, matches, p);
+    ArrayList<GestureSet.Match> matches = new ArrayList();
+    Match match = library.findMatch(sourceSet, p, matches);
     if (match == null) {
       return "No match found";
     }
@@ -314,7 +313,7 @@ public class GestActivity extends MyActivity implements
         continue;
       if (pass == 1)
         sb.append("\n");
-      StrokeSetCollection library = (pass == 0) ? mGestureLibrary
+      GestureSet library = (pass == 0) ? mGestureLibrary
           : mLowResolutionLibrary;
       sb.append("Length " + library.strokeLength() + ":\n");
       StrokeSet source = mNormalizedStrokeSet;
@@ -325,12 +324,12 @@ public class GestActivity extends MyActivity implements
     setConsoleText(sb.toString());
   }
 
-  private StrokeSetCollection readGesturesFromFile(String filename) {
-    StrokeSetCollection c = null;
+  private GestureSet readGesturesFromFile(String filename) {
+    GestureSet c = null;
     try {
       InputStream stream = getClass().getResourceAsStream(filename);
       String json = Files.readString(stream);
-      c = StrokeSetCollection.parseJSON(json);
+      c = GestureSet.parseJSON(json);
     } catch (Exception e) {
       die(e);
     }
@@ -342,10 +341,10 @@ public class GestActivity extends MyActivity implements
     mFilterGestureLibrary = readGesturesFromFile("small_gesture_set.json");
   }
 
-  private StrokeSetCollection mGestureLibrary;
-  private StrokeSetCollection mLowResolutionLibrary;
+  private GestureSet mGestureLibrary;
+  private GestureSet mLowResolutionLibrary;
   // The gesture set to be used by the filter (for test purposes)
-  private StrokeSetCollection mFilterGestureLibrary;
+  private GestureSet mFilterGestureLibrary;
   private TouchView mTouchView;
   // Stroke set from user touch event
   private StrokeSet mTouchStrokeSet;
