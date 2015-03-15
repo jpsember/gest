@@ -66,6 +66,10 @@ public class GestureSet {
     mEntriesMap.put(set.name(), set);
   }
 
+  public void setTraceStatus(boolean trace) {
+    mTrace = trace;
+  }
+
   /**
    * Find a match for a gesture, if possible
    * 
@@ -80,23 +84,33 @@ public class GestureSet {
    */
   public Match findMatch(StrokeSet inputSet, MatcherParameters param,
       List<Match> resultsList) {
+    if (mTrace)
+      pr("GestureSet findMatch");
     if (resultsList != null)
       resultsList.clear();
     TreeSet<Match> results = new TreeSet();
     StrokeSetMatcher m = new StrokeSetMatcher();
-    float costCutoff = Float.MAX_VALUE;
+    float maximumCost = StrokeMatcher.INFINITE_COST;
     for (String setName : mEntriesMap.keySet()) {
       StrokeSet set = mEntriesMap.get(setName);
       if (set.size() != inputSet.size())
         continue;
       m.setArguments(set, inputSet, param);
-      m.setCostCutoff(costCutoff);
-      Match match = new Match(set, m.similarity());
+      m.setMaximumCost(maximumCost);
+      Match match = new Match(set, m.normalizedCost(m.cost()));
       results.add(match);
 
-      // Update the cutoff value
-      float newLimit = match.cost() * 3;
-      costCutoff = Math.min(newLimit, costCutoff);
+      // Update the cutoff value to be some small multiple of the smallest (raw)
+      // cost yet seen.
+      // Scale the raw cost by the number of strokes since the cost of the set
+      // is the sum of the costs of the individual strokes.
+      float newLimit = m.cost() / inputSet.size();
+      newLimit *= 2.0f;
+      maximumCost = Math.min(newLimit, maximumCost);
+      if (mTrace)
+        pr(" gesture: " + d(setName, "15p") + " cost:" + dumpCost(m.cost())
+            + " max:" + dumpCost(maximumCost) + " cells %:"
+            + d((int) (100 * m.strokeMatcher().cellsExaminedRatio())));
 
       // If second entry is an alias of the first, throw it out; there's no
       // need
@@ -124,6 +138,15 @@ public class GestureSet {
     return results.first();
   }
 
+  /**
+   * Utility method for converting a (raw) cost value to a string
+   */
+  private static String dumpCost(float cost) {
+    if (cost >= StrokeMatcher.INFINITE_COST)
+      return " ********";
+    return d(((int) cost), 8);
+  }
+
   public static class Match implements Comparable {
     Match(StrokeSet set, float cost) {
       set.assertNamed();
@@ -149,13 +172,6 @@ public class GestureSet {
       if (diff == 0) {
         diff = String.CASE_INSENSITIVE_ORDER.compare(this.strokeSet().name(), m
             .strokeSet().name());
-        if (diff != 0) {
-          warning("comparisons matched exactly, this is unlikely: "
-              + this.strokeSet().name()
-              + " / "
-              + m.strokeSet().name()
-              + "\n and may be indicative of a spelling mistake in the 'source' options");
-        }
       }
       return diff;
     }
@@ -188,5 +204,6 @@ public class GestureSet {
 
   private Map<String, StrokeSet> mEntriesMap = new HashMap();
   private int mStrokeLength;
+  private boolean mTrace;
 
 }

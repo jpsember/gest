@@ -8,6 +8,8 @@ import com.js.gest.MatcherParameters;
 import com.js.gest.Stroke;
 import com.js.gest.StrokeMatcher;
 import com.js.testUtils.*;
+import static com.js.basic.Tools.*;
+
 
 public class StrokeMatcherTest extends MyTestCase {
 
@@ -41,7 +43,7 @@ public class StrokeMatcherTest extends MyTestCase {
 
     StrokeMatcher m = new StrokeMatcher();
     m.setArguments(stroke1, stroke2, null);
-    float f = m.similarity();
+    float f = m.normalizedCost(m.cost());
     assertEqualsFloat(expectedSimilarity, f);
   }
 

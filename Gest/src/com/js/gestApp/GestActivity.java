@@ -261,6 +261,8 @@ public class GestActivity extends MyActivity implements
 
   private String performMatchWithLibrary(StrokeSet sourceSet, GestureSet library) {
 
+    library.setTraceStatus(true);
+    
     MatcherParameters p = new MatcherParameters();
     p.setZeroDistanceThreshold(calcZeroDistValue() * StrokeSet.STANDARD_WIDTH);
 

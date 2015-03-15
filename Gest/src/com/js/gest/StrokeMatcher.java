@@ -15,8 +15,20 @@ import com.js.gest.Stroke.DataPoint;
  */
 public class StrokeMatcher {
 
+  /**
+   * A value representing 'infinite' cost. It should not be so large that it
+   * can't be safely doubled or tripled without overflowing
+   */
+  public static final float INFINITE_COST = Float.MAX_VALUE / 100;
+
+  /**
+   * Prepare matcher for new pair of strokes. Also resets cost cutoff
+   * 
+   * @param a
+   * @param b
+   * @param parameters
+   */
   public void setArguments(Stroke a, Stroke b, MatcherParameters parameters) {
-    mSimilarityFound = false;
     mStrokeA = frozen(a);
     mStrokeB = frozen(b);
     if (mStrokeA.size() != mStrokeB.size())
@@ -25,18 +37,60 @@ public class StrokeMatcher {
       parameters = MatcherParameters.DEFAULT;
     mParameters = parameters;
     prepareTable();
+    setMaximumCost(INFINITE_COST);
+    mCostCalculated = false;
   }
 
-  public void setCostCutoff(float costCutoff) {
-    if (costCutoff <= 0)
-      costCutoff = Float.MAX_VALUE;
-    mCostCutoff = costCutoff;
+  /**
+   * Set upper bound on the cost. The algorithm will exit early if it determines
+   * the cost will exceed this bound
+   */
+  public void setMaximumCost(float maximumCost) {
+    mMaximumCost = maximumCost;
   }
 
-  public float similarity() {
-    if (!mSimilarityFound)
+  /**
+   * Determine the cost, or distance, between the two strokes. This is a 'raw'
+   * value, i.e., without normalizing by the stroke length or the size of the
+   * stroke's bounding rectangle
+   */
+  public float cost() {
+    if (!mCostCalculated) {
+      if (mStrokeA == null)
+        throw new IllegalStateException();
       calculateSimilarity();
-    return mSimilarity;
+    }
+    return mRawCost;
+  }
+
+  /**
+   * Determine a normalized cost value. This is a 'raw' cost, scaled so it is
+   * independent of the length of the strokes, or their bounding rectangle
+   * 
+   * @param rawCost
+   */
+  public float normalizedCost(float rawCost) {
+    if (mStrokeA == null)
+      throw new IllegalStateException();
+    // Divide by the path length, to get approximately the average cost per data
+    // point
+    float c = rawCost / mTableSize;
+    // Take square root, since costs at each point were based on squared
+    // distances
+    c = (float) Math.sqrt(c);
+    // Scale by the width of the standard rectangle
+    c /= StrokeSet.STANDARD_WIDTH;
+    return c;
+  }
+
+  /**
+   * For diagnostic / test purposes, calculate the ratio of actual cells
+   * examined to the potential total cells examined by this matcher
+   */
+  public float cellsExaminedRatio() {
+    if (mTotalCellCount == 0)
+      return 0;
+    return ((float) mActualCellsExamined) / mTotalCellCount;
   }
 
   private void prepareTable() {
@@ -70,26 +124,37 @@ public class StrokeMatcher {
    * where possible moves are from (x-1,y), (x-1,y-1), or (x,y-1).
    */
   private void calculateSimilarity() {
+    mTotalCellCount += mTable.length;
+
     float startCost = comparePoints(0, 0);
     storeCost(0, 0, startCost);
 
+    mCostCalculated = true;
+    mRawCost = INFINITE_COST;
+
     int tableSize = mTableSize;
     for (int x = 1; x < tableSize; x++) {
+      float minCost = INFINITE_COST;
       for (int j = 0; j <= x; j++) {
-        processCell(x - j, j);
+        minCost = Math.min(minCost, processCell(x - j, j));
+      }
+      if (minCost >= mMaximumCost) {
+        return;
       }
     }
     for (int y = 1; y < tableSize; y++) {
+      float minCost = INFINITE_COST;
       for (int j = y; j < tableSize; j++) {
-        processCell(tableSize - 1 + y - j, j);
+        minCost = Math.min(minCost, processCell(tableSize - 1 + y - j, j));
+      }
+      if (minCost >= mMaximumCost) {
+        return;
       }
     }
-
-    mSimilarity = cost();
-    mSimilarityFound = true;
+    mRawCost = mTable[mTable.length - 1];
   }
 
-  private void processCell(int a, int b) {
+  private float processCell(int a, int b) {
     int abIndex = cellIndex(a, b);
     float bestCost;
     float abCost = comparePoints(a, b);
@@ -108,16 +173,7 @@ public class StrokeMatcher {
       bestCost = mTable[abIndex - mTableSize] + abCost;
     }
     mTable[abIndex] = bestCost;
-  }
-
-  private float cost() {
-    float c = mTable[mTable.length - 1];
-    // Divide by the path length
-    c /= mTableSize;
-    c = (float) Math.sqrt(c);
-    // Scale by the width of the standard rectangle
-    c /= StrokeSet.STANDARD_WIDTH;
-    return c;
+    return bestCost;
   }
 
   private float comparePoints(int aIndex, int bIndex) {
@@ -125,7 +181,7 @@ public class StrokeMatcher {
     DataPoint elemB = mStrokeB.get(bIndex);
     Point posA = elemA.getPoint();
     Point posB = elemB.getPoint();
-
+    mActualCellsExamined++;
     float dist;
     dist = MyMath.squaredDistanceBetween(posA, posB);
     if (dist < mParameters.zeroDistanceThreshold()
@@ -134,12 +190,14 @@ public class StrokeMatcher {
     return dist;
   }
 
-  private float mCostCutoff = Float.MAX_VALUE;
   private int mTableSize;
   private float[] mTable;
   private Stroke mStrokeA;
   private Stroke mStrokeB;
-  private boolean mSimilarityFound;
+  private boolean mCostCalculated;
   private MatcherParameters mParameters;
-  private float mSimilarity;
+  private float mRawCost;
+  private float mMaximumCost;
+  private int mActualCellsExamined;
+  private int mTotalCellCount;
 }

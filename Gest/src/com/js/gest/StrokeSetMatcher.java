@@ -10,9 +10,11 @@ import com.js.basic.Point;
 class StrokeSetMatcher {
 
   public void setArguments(StrokeSet a, StrokeSet b, MatcherParameters param) {
-    mSimilarity = null;
+    mSimilarityFound = false;
     mStrokeA = frozen(a);
     mStrokeB = frozen(b);
+    setMaximumCost(StrokeMatcher.INFINITE_COST);
+
     if (param == null)
       param = MatcherParameters.DEFAULT;
     mParam = param;
@@ -21,12 +23,16 @@ class StrokeSetMatcher {
           "Different number of strokes in each set");
   }
 
-  public void setCostCutoff(float cutoff) {
-    mCostCutoff = cutoff;
+  /**
+   * Set upper bound on the cost. The algorithm will exit early if it determines
+   * the cost will exceed this bound
+   */
+  public void setMaximumCost(float maximumCost) {
+    mMaximumCost = maximumCost;
   }
-  
-  public float similarity() {
-    if (mSimilarity == null) {
+
+  public float cost() {
+    if (!mSimilarityFound) {
       int[] bOrder = calcBestOrderForB();
       float totalCost = 0;
       int numberOfStrokes = mStrokeA.size();
@@ -34,13 +40,30 @@ class StrokeSetMatcher {
         Stroke sa = mStrokeA.get(i);
         Stroke sb = mStrokeB.get(bOrder[i]);
         mStrokeMatcher.setArguments(sa, sb, mParam);
-        mStrokeMatcher.setCostCutoff(mCostCutoff);
-        float cost = mStrokeMatcher.similarity();
+        mStrokeMatcher.setMaximumCost(mMaximumCost);
+        float cost = mStrokeMatcher.cost();
         totalCost += cost;
       }
-      mSimilarity = totalCost / numberOfStrokes;
+      mSimilarity = totalCost;
+      mSimilarityFound = true;
     }
     return mSimilarity;
+  }
+
+  public float normalizedCost(float rawCost) {
+
+    // Get average (raw) stroke cost
+    rawCost /= mStrokeA.size();
+
+    // Calculate normalized average
+    return mStrokeMatcher.normalizedCost(rawCost);
+  }
+
+  /**
+   * Get the matcher used to compare individual strokes
+   */
+  StrokeMatcher strokeMatcher() {
+    return mStrokeMatcher;
   }
 
   private int[] calcBestOrderForB() {
@@ -120,12 +143,13 @@ class StrokeSetMatcher {
     }
   }
 
-  private float mCostCutoff;
   private StrokeMatcher mStrokeMatcher = new StrokeMatcher();
   private StrokeSet mStrokeA;
   private StrokeSet mStrokeB;
+  private float mMaximumCost = StrokeMatcher.INFINITE_COST;
   private MatcherParameters mParam;
-  private Float mSimilarity;
+  private boolean mSimilarityFound;
+  private float mSimilarity;
   private int[] mPermuteArray;
   private ArrayList<int[]> mPermutations;
 }
