@@ -2,8 +2,10 @@ package com.js.gest;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Queue;
+import java.util.Deque;
+import java.util.Iterator;
 
+import com.js.android.MyActivity;
 import com.js.android.MyTouchListener;
 import com.js.android.UITools;
 import com.js.basic.MyMath;
@@ -19,10 +21,7 @@ public class GestureEventFilter extends MyTouchListener {
 
   // User must move by a certain distance within this time in order to switch
   // from BUFFERING to RECORDING (instead of to FORWARDING)
-  private static final int BUFFERING_TIME_MS = 100;
-  // Minimum distance finger must move by end of buffering time to be
-  // interpreted as a gesture
-  private static final float MIN_GESTURE_DISTANCE = .5f * BUFFERING_TIME_MS;
+  private static final int BUFFERING_TIME_MS = 200;
 
   private static final int STATE_UNATTACHED = 0;
   private static final int STATE_DORMANT = 1;
@@ -32,7 +31,11 @@ public class GestureEventFilter extends MyTouchListener {
   private static final int STATE_STOPPED = 5;
 
   public GestureEventFilter() {
+    // Enable this line to print diagnostic information:
     // mTraceActive = true;
+
+    // Enable this line to display gesture vs. non-gesture decision:
+    mTracker = new DecisionTracker();
   }
 
   public void setListener(Listener listener) {
@@ -159,35 +162,56 @@ public class GestureEventFilter extends MyTouchListener {
     }, (long) (BUFFERING_TIME_MS * 1.5));
   }
 
+  private static Point rawLocation(MotionEvent event) {
+    return new Point(event.getRawX(), event.getRawY());
+  }
+
+  private static float elapsedTime(MotionEvent event1, MotionEvent event2) {
+    return (event2.getEventTime() - event1.getEventTime()) / 1000.0f;
+  }
+
   private void processBufferingState(MotionEvent event) {
 
-    MotionEvent startEvent = mEventQueue.peek();
-    // Has enough time elapsed since start event to make a decision about
-    // whether it's a gesture event?
-    long elapsed = 0;
-    if (startEvent != null)
-      elapsed = event.getEventTime() - startEvent.getEventTime();
-    if (elapsed > BUFFERING_TIME_MS) {
-      Point pt0 = new Point(startEvent.getRawX(), startEvent.getRawY());
-      Point pt = new Point(event.getRawX(), event.getRawY());
-      float distance = MyMath.distanceBetween(pt0, pt);
-      pr("  ...distance=" + d(distance));
-      unimp("use a distance that's proportional to the device density");
-      if (distance > MIN_GESTURE_DISTANCE) {
+    if (mTracker != null)
+      mTracker.addEvent(event);
+
+    // Attempt to decide whether it's a gesture or not
+    final int MIN_STEPS = 3;
+    if (mEventQueue.size() >= 1 + MIN_STEPS) {
+      Iterator<MotionEvent> iter = mEventQueue.iterator();
+      MotionEvent prevEvent = iter.next();
+      float totalVelocity = 0;
+      for (int i = 0; i < MIN_STEPS; i++) {
+        MotionEvent currEvent = iter.next();
+        float time = elapsedTime(prevEvent, currEvent);
+        float distance = MyMath.distanceBetween(rawLocation(prevEvent),
+            rawLocation(currEvent));
+        float distanceInInches = distance
+            / MyActivity.getResolutionInfo().inchesToPixelsUI(1);
+        totalVelocity += distanceInInches / time;
+        prevEvent = currEvent;
+      }
+      float avgVelocity = totalVelocity / MIN_STEPS;
+      boolean isGesture = (avgVelocity > 1.2f);
+      if (mTracker != null) {
+        mTracker.print(" avg velocity (inches/sec): " + d(avgVelocity));
+        mTracker.setDecision(isGesture);
+      }
+      if (isGesture) {
         setState(STATE_RECORDING);
         processRecordingState(event);
       } else {
         setState(STATE_FORWARDING);
         processForwardingState(event);
       }
+      return;
+    }
+
+    if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+      setState(STATE_FORWARDING);
+      processForwardingState(event);
     } else {
-      // pr("  ...not enough elapsed time, continuing to buffer");
-      if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-        setState(STATE_FORWARDING);
-        processForwardingState(event);
-      } else {
-        bufferEvent(event);
-      }
+      bufferEvent(event);
     }
   }
 
@@ -301,8 +325,13 @@ public class GestureEventFilter extends MyTouchListener {
     do {
       if (match == null)
         break;
-      if (match.cost() >= 0.15f)
-        break;
+      // If the match cost is significantly less than the second best, make a
+      // decision
+      if (matches.size() >= 2) {
+        Match match2 = matches.get(1);
+        if (match.cost() * 1.5f > match2.cost())
+          break;
+      }
       mMatch = match;
       mListener.processGesture(mMatch.strokeSet().aliasName());
     } while (false);
@@ -322,6 +351,47 @@ public class GestureEventFilter extends MyTouchListener {
     void processGesture(String gestureName);
   }
 
+  /**
+   * For diagnosing gesture filter decision
+   */
+  private class DecisionTracker {
+    public void clear() {
+      mBuffer.setLength(0);
+    }
+
+    public void setDecision(boolean isGesture) {
+      print(" is gesture: " + d(isGesture));
+
+      System.out.println("\n----------------");
+      System.out.println(mBuffer);
+      System.out.println("\n");
+    }
+
+    public void addEvent(MotionEvent event) {
+      MotionEvent startEvent = mEventQueue.peekFirst();
+      if (startEvent == null)
+        startEvent = event;
+      Point loc = rawLocation(event);
+      MotionEvent prevEvent = mEventQueue.peekLast();
+      if (prevEvent == null) {
+        clear();
+        print("Initial event: " + UITools.dump(event));
+        return;
+      }
+      float timeSincePrev = elapsedTime(prevEvent, event);
+      Point prevLoc = rawLocation(prevEvent);
+      float velocity = MyMath.distanceBetween(loc, prevLoc) / timeSincePrev;
+      print(" t:" + d(timeSincePrev) + " v:" + d(velocity));
+    }
+
+    private void print(String message) {
+      mBuffer.append(message);
+      mBuffer.append('\n');
+    }
+
+    private StringBuilder mBuffer = new StringBuilder();
+  }
+
   // Stroke set from user touch event
   private StrokeSet mTouchStrokeSet;
   private Listener mListener;
@@ -329,9 +399,10 @@ public class GestureEventFilter extends MyTouchListener {
 
   private static Handler sHandler = new Handler();
   private boolean mTraceActive;
-  private Queue<MotionEvent> mEventQueue = new ArrayDeque();
+  private Deque<MotionEvent> mEventQueue = new ArrayDeque();
   private boolean mPassingEventFlag;
   private int mState;
   private GestureSet mStrokeSetCollection;
   private Match mMatch;
+  private DecisionTracker mTracker;
 }
