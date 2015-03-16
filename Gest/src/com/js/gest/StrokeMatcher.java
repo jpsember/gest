@@ -2,6 +2,8 @@ package com.js.gest;
 
 import static com.js.basic.Tools.*;
 
+import java.util.Arrays;
+
 import com.js.basic.MyMath;
 import com.js.basic.Point;
 import com.js.gest.Stroke.DataPoint;
@@ -35,7 +37,11 @@ public class StrokeMatcher {
       throw new IllegalArgumentException("stroke lengths mismatch");
     if (parameters == null)
       parameters = MatcherParameters.DEFAULT;
-    mParameters = parameters;
+    mParameters = frozen(parameters);
+    // We must have a positive window size, otherwise the algorithm will abort
+    // since some slices will produce infinite costs
+    if (mParameters.windowSize() <= 0)
+      throw new IllegalArgumentException("bad window size");
     prepareTable();
     setMaximumCost(INFINITE_COST);
     mCostCalculated = false;
@@ -56,7 +62,7 @@ public class StrokeMatcher {
     if (!mCostCalculated) {
       if (mStrokeA == null)
         throw new IllegalStateException();
-      calculateSimilarity();
+      performAlgorithm();
     }
     return mCost;
   }
@@ -73,11 +79,19 @@ public class StrokeMatcher {
 
   private void prepareTable() {
     if (mTableSize != mStrokeA.size()) {
+      mWindowSize = -1;
       mTableSize = mStrokeA.size();
       int tableCells = mTableSize * mTableSize;
       mTable = new float[tableCells];
-
       mCostNormalizationFactor = 1.0f / (2 * mTableSize);
+    }
+    if (mWindowSize != mParameters.windowSize()) {
+      mWindowSize = mParameters.windowSize();
+      // Fill all cells with infinite cost, since with a window, we may be
+      // referencing cells we haven't otherwise visited
+      Arrays.fill(mTable, INFINITE_COST);
+      int n = mTableSize - (2 * mWindowSize + 1);
+      mMaxCellsExamined = (mTableSize * mTableSize) - (n * (n + 1));
     }
   }
 
@@ -103,31 +117,61 @@ public class StrokeMatcher {
    * Each cell (x,y) in the table stores the lowest cost leading to that cell,
    * where possible moves are from (x-1,y), (x-1,y-1), or (x,y-1).
    */
-  private void calculateSimilarity() {
-    mTotalCellCount += mTable.length;
+  private void performAlgorithm() {
+    mTotalCellCount += mMaxCellsExamined;
 
     // Multiply bottom left cost by 2, for symmetric weighting, since it
     // conceptually represents advancement to the first point in both A and B
     float startCost = comparePoints(0, 0) * 2;
     storeCost(0, 0, startCost);
 
+    // In case we exit early due to maximum cost exceeded,
+    // set an infinite cost as the output
     mCostCalculated = true;
     mCost = INFINITE_COST;
 
+    int windowSize = mWindowSize;
     int tableSize = mTableSize;
+
+    // Do the bottom left triangle
     for (int x = 1; x < tableSize; x++) {
       float minCost = INFINITE_COST;
-      for (int j = 0; j <= x; j++) {
+      int jMin, jMax;
+      int overflow = 2 * windowSize - x;
+      if (overflow >= 0) {
+        jMin = 0;
+        jMax = x + 1;
+      } else {
+        jMin = -(overflow - 1) / 2;
+        jMax = x + 1 + (overflow - 1) / 2;
+      }
+      for (int j = jMin; j < jMax; j++) {
         minCost = Math.min(minCost, processCell(x - j, j));
       }
       if (minCost >= mMaximumCost) {
         return;
       }
     }
-    for (int y = 1; y < tableSize; y++) {
+
+    // Do the top right triangle. For simplicity, use the same code as the
+    // previous example, and do a flip of the cell coordinates only at
+    // processCell() time (but reverse the order of the outer loop so we sweep
+    // in the correct direction)
+
+    for (int x = tableSize - 2; x >= 0; x--) {
       float minCost = INFINITE_COST;
-      for (int j = y; j < tableSize; j++) {
-        minCost = Math.min(minCost, processCell(tableSize - 1 + y - j, j));
+      int jMin, jMax;
+      int overflow = 2 * windowSize - x;
+      if (overflow >= 0) {
+        jMin = 0;
+        jMax = x + 1;
+      } else {
+        jMin = -(overflow - 1) / 2;
+        jMax = x + 1 + (overflow - 1) / 2;
+      }
+      for (int j = jMin; j < jMax; j++) {
+        minCost = Math.min(minCost,
+            processCell(tableSize - 1 - (x - j), tableSize - 1 - j));
       }
       if (minCost >= mMaximumCost) {
         return;
@@ -187,4 +231,6 @@ public class StrokeMatcher {
   private float mMaximumCost;
   private int mActualCellsExamined;
   private int mTotalCellCount;
+  private int mWindowSize;
+  private int mMaxCellsExamined;
 }

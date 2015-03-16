@@ -12,7 +12,7 @@ public class MatcherParameters extends Freezable.Mutable {
     setZeroDistanceThreshold(StrokeSet.STANDARD_WIDTH * .01f);
     setMaximumCostRatio(1.6f);
     setWindowSize(Math
-        .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .10f));
+        .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .20f));
   }
 
   public void setZeroDistanceThreshold(float threshold) {
