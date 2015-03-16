@@ -11,6 +11,8 @@ public class MatcherParameters extends Freezable.Mutable {
   public MatcherParameters() {
     setZeroDistanceThreshold(StrokeSet.STANDARD_WIDTH * .01f);
     setMaximumCostRatio(1.6f);
+    setWindowSize(Math
+        .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .10f));
   }
 
   public void setZeroDistanceThreshold(float threshold) {
@@ -36,10 +38,21 @@ public class MatcherParameters extends Freezable.Mutable {
     mMaximumCostRatio = ratio;
   }
 
+  public void setWindowSize(int windowSize) {
+    mutate();
+    mWindowSize = windowSize;
+  }
+
+  public int windowSize() {
+    return mWindowSize;
+  }
+
   @Override
   public Freezable getMutableCopy() {
     MatcherParameters m = new MatcherParameters();
     m.setZeroDistanceThreshold(zeroDistanceThreshold());
+    m.setMaximumCostRatio(maximumCostRatio());
+    m.setWindowSize(windowSize());
     return m;
   }
 
@@ -47,9 +60,12 @@ public class MatcherParameters extends Freezable.Mutable {
   public String toString() {
     StringBuilder sb = new StringBuilder("MatcherParameters");
     sb.append("\n zero threshold: " + d(zeroDistanceThreshold()));
+    sb.append("\n max cost ratio: " + d(maximumCostRatio()));
+    sb.append("\n    window size: " + d(windowSize()));
     return sb.toString();
   }
 
+  private int mWindowSize;
   private float mZeroDistanceThreshold;
   private float mMaximumCostRatio;
 }
