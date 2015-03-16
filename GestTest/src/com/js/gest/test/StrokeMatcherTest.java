@@ -45,9 +45,7 @@ public class StrokeMatcherTest extends MyTestCase {
   }
 
   public void testParallelLines() throws JSONException {
-    // The best path is to advance equally along both, and they're 128 apart,
-    // which is 1/2 the scale factor
-    float exp = 0.5493420958f;
+    float exp = 16384.0f;
     match(str1, str2, exp, null);
     match(str2, str1, exp, null);
   }
@@ -60,14 +58,14 @@ public class StrokeMatcherTest extends MyTestCase {
     String str2 = "[0, 80,0, 1, 80,0, 2,80,0, 3,80,0, 4,80,0, 5,80,0, 6,96,0]";
 
     // Verify that symmetric matching yields same result
-    match(str2, str1, 0.17519122362f, null);
+    match(str2, str1, 1462.85717f, null);
   }
 
   public void testRoughMatch() throws JSONException {
     String str1 = "[0,0,1,  1,23,40,  2,47,80,  3,99,169,  4,151,239, 5,161,207, 6,208,98,  7,255,13]";
     String str2 = "[0,0,93, 1,15,142, 2,72,176, 3,103,134, 4,162,154, 5,213,175, 6,242,134, 7,255,76]";
 
-    match(str1, str2, 0.2954623997f, null);
+    match(str1, str2, 3747.0625f, null);
   }
 
 }

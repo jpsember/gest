@@ -144,10 +144,11 @@ public class GestActivity extends MyActivity implements
       b.setOnClickListener(listener);
   }
 
-  private CheckBox addCheckBox(String label, OnClickListener listener) {
+  private CheckBox addCheckBox(LinearLayout container, String label,
+      OnClickListener listener) {
     CheckBox checkBox = new CheckBox(this);
     checkBox.setText(label);
-    mControlView.addView(checkBox, UITools.layoutParams(mControlView));
+    container.addView(checkBox, UITools.layoutParams(container));
     if (listener != null)
       checkBox.setOnClickListener(listener);
     return checkBox;
@@ -186,21 +187,26 @@ public class GestActivity extends MyActivity implements
     ctrlView.addView(name, p);
     mNameWidget = name;
 
-    mSmoothingCheckBox = addCheckBox("Smoothing", new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        strokeSetExtended(mTouchStrokeSet);
-      }
-    });
+    LinearLayout optionsPanel = UITools.linearLayout(this, true);
+    ctrlView.addView(optionsPanel, UITools.layoutParams(ctrlView));
+   
+    mSmoothingCheckBox = addCheckBox(optionsPanel, "Smoothing",
+        new OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            strokeSetExtended(mTouchStrokeSet);
+          }
+        });
 
-    mMultiLengthCheckBox = addCheckBox("Multilength", new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        if (!((CheckBox) v).isChecked()) {
-          mLowResolutionLibrary = null;
-        }
-      }
-    });
+    mMultiLengthCheckBox = addCheckBox(optionsPanel, "Multilength",
+        new OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            if (!((CheckBox) v).isChecked()) {
+              mLowResolutionLibrary = null;
+            }
+          }
+        });
   }
 
   private String dumpStrokeSet(StrokeSet set) {

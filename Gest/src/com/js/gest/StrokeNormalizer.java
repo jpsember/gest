@@ -133,7 +133,7 @@ class StrokeNormalizer {
       }
     }
     // Add fragment's end point
-    normalizedStroke.addPoint(originalStroke.last());
+    normalizedStroke.addPoint(originalStroke.get(originalStroke.size()-1));
     return normalizedStroke;
   }
 
