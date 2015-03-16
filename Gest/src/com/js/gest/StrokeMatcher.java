@@ -167,8 +167,9 @@ public class StrokeMatcher {
         float prevCost = mTable[abIndex - mTableSize] + abCost;
         if (bestCost > prevCost)
           bestCost = prevCost;
-        // Multiply cost by root(2), since we're moving diagonally
-        prevCost = mTable[abIndex - mTableSize - 1] + abCost * 1.41421356237f;
+        // Multiply cost by 2, since we're moving diagonally (this is symmetric
+        // weighting, as described in the literature)
+        prevCost = mTable[abIndex - mTableSize - 1] + abCost * 2;
         if (bestCost > prevCost)
           bestCost = prevCost;
       }
