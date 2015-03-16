@@ -102,7 +102,7 @@ public class GestureSet {
 
       mMatcher.setArguments(gesture, inputSet, param);
       setMaximumCost(gesture);
-      Match match = new Match(gesture, mMatcher.normalizedCost(mMatcher.cost()));
+      Match match = new Match(gesture, mMatcher.cost());
       results.add(match);
 
       updateAliasLowCostMap(gesture);
@@ -233,7 +233,7 @@ public class GestureSet {
     @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
-      sb.append(d(cost()).substring(4));
+      sb.append(d((int) cost()));
       sb.append(' ');
       sb.append(strokeSet().name());
       if (strokeSet().hasAlias())

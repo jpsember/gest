@@ -50,17 +50,6 @@ class StrokeSetMatcher {
     return mSimilarity;
   }
 
-  public float normalizedCost(float rawCost) {
-    if (rawCost >= StrokeMatcher.INFINITE_COST)
-      return StrokeMatcher.INFINITE_COST;
-
-    // Get average (raw) stroke cost
-    rawCost /= mStrokeA.size();
-
-    // Calculate normalized average
-    return mStrokeMatcher.normalizedCost(rawCost);
-  }
-
   /**
    * Get the matcher used to compare individual strokes
    */

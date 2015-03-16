@@ -41,8 +41,7 @@ public class StrokeMatcherTest extends MyTestCase {
 
     StrokeMatcher m = new StrokeMatcher();
     m.setArguments(stroke1, stroke2, null);
-    float f = m.normalizedCost(m.cost());
-    assertEqualsFloat(expectedSimilarity, f);
+    assertEqualsFloat(expectedSimilarity, m.cost());
   }
 
   public void testParallelLines() throws JSONException {

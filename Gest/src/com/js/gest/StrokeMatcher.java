@@ -50,9 +50,7 @@ public class StrokeMatcher {
   }
 
   /**
-   * Determine the cost, or distance, between the two strokes. This is a 'raw'
-   * value, i.e., without normalizing by the stroke length or the size of the
-   * stroke's bounding rectangle
+   * Determine the cost, or distance, between the two strokes
    */
   public float cost() {
     if (!mCostCalculated) {
@@ -60,30 +58,7 @@ public class StrokeMatcher {
         throw new IllegalStateException();
       calculateSimilarity();
     }
-    return mRawCost;
-  }
-
-  /**
-   * Determine a normalized cost value. This is a 'raw' cost, scaled so it is
-   * independent of the length of the strokes, or their bounding rectangle
-   * 
-   * @param rawCost
-   */
-  public float normalizedCost(float rawCost) {
-    if (rawCost >= StrokeMatcher.INFINITE_COST)
-      return StrokeMatcher.INFINITE_COST;
-
-    if (mStrokeA == null)
-      throw new IllegalStateException();
-    // Divide by the path length, to get approximately the average cost per data
-    // point
-    float c = rawCost / mTableSize;
-    // Take square root, since costs at each point were based on squared
-    // distances
-    c = (float) Math.sqrt(c);
-    // Scale by the width of the standard rectangle
-    c /= StrokeSet.STANDARD_WIDTH;
-    return c;
+    return mCost;
   }
 
   /**
@@ -97,10 +72,12 @@ public class StrokeMatcher {
   }
 
   private void prepareTable() {
-    mTableSize = mStrokeA.size();
-    int tableCells = mTableSize * mTableSize;
-    if (mTable == null || mTable.length != tableCells) {
+    if (mTableSize != mStrokeA.size()) {
+      mTableSize = mStrokeA.size();
+      int tableCells = mTableSize * mTableSize;
       mTable = new float[tableCells];
+
+      mCostNormalizationFactor = 1.0f / (2 * mTableSize);
     }
   }
 
@@ -129,11 +106,13 @@ public class StrokeMatcher {
   private void calculateSimilarity() {
     mTotalCellCount += mTable.length;
 
-    float startCost = comparePoints(0, 0);
+    // Multiply bottom left cost by 2, for symmetric weighting, since it
+    // conceptually represents advancement to the first point in both A and B
+    float startCost = comparePoints(0, 0) * 2;
     storeCost(0, 0, startCost);
 
     mCostCalculated = true;
-    mRawCost = INFINITE_COST;
+    mCost = INFINITE_COST;
 
     int tableSize = mTableSize;
     for (int x = 1; x < tableSize; x++) {
@@ -154,7 +133,7 @@ public class StrokeMatcher {
         return;
       }
     }
-    mRawCost = mTable[mTable.length - 1];
+    mCost = mTable[mTable.length - 1];
   }
 
   private float processCell(int a, int b) {
@@ -191,6 +170,7 @@ public class StrokeMatcher {
     if (dist < mParameters.zeroDistanceThreshold()
         * mParameters.zeroDistanceThreshold())
       dist = 0;
+    dist *= mCostNormalizationFactor;
     return dist;
   }
 
@@ -199,8 +179,11 @@ public class StrokeMatcher {
   private Stroke mStrokeA;
   private Stroke mStrokeB;
   private boolean mCostCalculated;
+  private float mCost;
   private MatcherParameters mParameters;
-  private float mRawCost;
+  // Scaling factor to apply to a distance before storing in cell, so that sum
+  // of entire path is normalized
+  private float mCostNormalizationFactor;
   private float mMaximumCost;
   private int mActualCellsExamined;
   private int mTotalCellCount;
