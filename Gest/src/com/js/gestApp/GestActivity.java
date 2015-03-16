@@ -175,14 +175,6 @@ public class GestActivity extends MyActivity implements
         mNameWidget.setText("");
       }
     });
-    addButton("ZeroDist", new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        mZeroDistIndex++;
-        pr("zero dist threshold now " + d(calcZeroDistValue()));
-        strokeSetExtended(mTouchStrokeSet);
-      }
-    });
 
     EditText name = new EditText(this);
     name.setSingleLine();
@@ -252,19 +244,11 @@ public class GestActivity extends MyActivity implements
     setConsoleText(null);
   }
 
-  private float calcZeroDistValue() {
-    return sZeroDistValues[mZeroDistIndex % sZeroDistValues.length];
-  }
-
-  private static final float[] sZeroDistValues = { .01f, .02f, .04f, .06f,
-      .08f, .12f, .22f, 0f };
-
   private String performMatchWithLibrary(StrokeSet sourceSet, GestureSet library) {
 
     library.setTraceStatus(true);
-    
+
     MatcherParameters p = new MatcherParameters();
-    p.setZeroDistanceThreshold(calcZeroDistValue() * StrokeSet.STANDARD_WIDTH);
 
     ArrayList<GestureSet.Match> matches = new ArrayList();
     Match match = library.findMatch(sourceSet, p, matches);
@@ -350,6 +334,5 @@ public class GestActivity extends MyActivity implements
   private EditText mNameWidget;
   private CheckBox mSmoothingCheckBox;
   private CheckBox mMultiLengthCheckBox;
-  private int mZeroDistIndex;
 
 }
