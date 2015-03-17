@@ -120,7 +120,6 @@ public class GestActivity extends MyActivity implements
     upperView.addView(auxContainer, p);
 
     mTouchView = new TouchView(this, this);
-    mTouchView.setGestureSet(mFilterGestureLibrary);
 
     p = UITools.layoutParams(upperView);
     setStretch(upperView, p, 2f);
@@ -189,7 +188,7 @@ public class GestActivity extends MyActivity implements
 
     LinearLayout optionsPanel = UITools.linearLayout(this, true);
     ctrlView.addView(optionsPanel, UITools.layoutParams(ctrlView));
-   
+
     mSmoothingCheckBox = addCheckBox(optionsPanel, "Smoothing",
         new OnClickListener() {
           @Override
@@ -318,8 +317,6 @@ public class GestActivity extends MyActivity implements
     try {
       mGestureLibrary = GestureSet.readFromClassResource(getClass(),
           "basic_gestures.json");
-      mFilterGestureLibrary = GestureSet.readFromClassResource(getClass(),
-          "small_gesture_set.json");
     } catch (Exception e) {
       die(e);
     }
@@ -327,8 +324,6 @@ public class GestActivity extends MyActivity implements
 
   private GestureSet mGestureLibrary;
   private GestureSet mLowResolutionLibrary;
-  // The gesture set to be used by the filter (for test purposes)
-  private GestureSet mFilterGestureLibrary;
   private TouchView mTouchView;
   // Stroke set from user touch event
   private StrokeSet mTouchStrokeSet;

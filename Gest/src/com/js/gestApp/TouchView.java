@@ -8,7 +8,6 @@ import android.view.MotionEvent;
 import com.js.android.UITools;
 import com.js.gest.GestureEventFilter;
 import com.js.gest.StrokeSet;
-import com.js.gest.GestureSet;
 import com.js.android.MyTouchListener;
 import com.js.basic.Rect;
 
@@ -45,10 +44,6 @@ public class TouchView extends UITools.OurBaseView implements
     };
     touchListener.setView(this);
     return touchListener;
-  }
-
-  public void setGestureSet(GestureSet gestures) {
-    mEventFilter.setGestures(gestures);
   }
 
   private void onDrawAux() {
