@@ -90,6 +90,12 @@ public class Rect {
     setTo(source.left, source.bottom, source.width(), source.height());
   }
 
+  public android.graphics.Rect toAndroid() {
+    android.graphics.Rect androidRect = new android.graphics.Rect();
+    androidRect.set((int) x, (int) y, (int) width, (int) height);
+    return androidRect;
+  }
+
   public Point bottomRight() {
     return new Point(endX(), y);
   }
