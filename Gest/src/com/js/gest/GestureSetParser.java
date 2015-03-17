@@ -36,10 +36,10 @@ class GestureSetParser {
 
   public void parse(String script, GestureSet collection) throws JSONException {
 
-    JSONArray array = JSONTools.parseArray(script);
+    mParsedArray = JSONTools.parseArray(script);
 
     // Pass 1: read all of the entries into our map
-    populateMapFromArray(array);
+    populateMapFromArray();
 
     // Pass 2: process all entries which contain actual strokes, instead of
     // referencing others
@@ -72,12 +72,39 @@ class GestureSetParser {
   }
 
   /**
-   * Perform preprocessing on a gesture entry, if appropriate
+   * Perform preprocessing on a gesture entry, if appropriate. These are
+   * rewritings that allow the user more flexibility in the JSON representation
+   * of a gesture.
    * 
-   * "alias":["name", options,....] =>
+   * <pre>
    * 
-   * "alias":"name", "uses":["name", options, ...]
+   * Generate alias 
+   * --------------------------
+   * "alias":["NAME", options,....] =>
+   *      "alias":"NAME", "uses":["NAME", options, ...]
    * 
+   * Allow reversed versions 
+   * --------------------------
+   * { "name":"NAME", "reverse":true, ... } =>
+   *    { "name":"NAME", ... },
+   *    { "alias":["NAME", "reverse"] }
+   * 
+   * Generate flipped versions
+   * --------------------------
+   * { "name":"NAME", "fliphorz":true, ... } =>
+   *    { "name":"NAME", ... },
+   *    { "alias":["NAME", "fliphorz"] }
+   * 
+   * { "name":"NAME", "flipvert":true, ... } =>
+   *    { "name":"NAME", ... },
+   *    { "alias":["NAME", "flipvert"] }
+   *    
+   * { "name":"NAME", "flipboth":true, ... } =>
+   *    { "name":"NAME", ... },
+   *    { "alias":["NAME", "fliphorz", "flipvert"] }
+   * 
+   * 
+   * </pre>
    */
   private void preprocessEntry(JSONObject map) throws JSONException {
     Object aliasObject = map.opt(StrokeSet.KEY_ALIAS);
@@ -89,14 +116,45 @@ class GestureSetParser {
         map.put(KEY_USES, array);
       }
     }
+
+    for (String aliasOption : sAliasOptions) {
+      if (!map.optBoolean(aliasOption))
+        continue;
+
+      String name = map.optString(StrokeSet.KEY_NAME);
+      if (name.isEmpty())
+        throw new JSONException("missing name");
+      JSONObject newObject = new JSONObject();
+      JSONArray array = new JSONArray();
+      array.put(name);
+      if (aliasOption.equals("flipboth")) {
+        array.put("fliphorz");
+        array.put("flipvert");
+      } else
+        array.put(aliasOption);
+      map.remove(aliasOption);
+      newObject.put(StrokeSet.KEY_ALIAS, array);
+      mParsedArray.put(newObject);
+    }
   }
 
-  private void populateMapFromArray(JSONArray array) throws JSONException {
+  private static String[] sAliasOptions = { "reverse", "fliphorz", "flipvert",
+      "flipboth" };
+
+  private void populateMapFromArray() throws JSONException {
+    final boolean SHOW_PREPROCESSING = false;
+
+    if (SHOW_PREPROCESSING) {
+      pr("before preprocessed:\n");
+      for (int i = 0; i < mParsedArray.length(); i++)
+        pr(mParsedArray.get(i));
+    }
 
     mNamedSets = new HashMap();
 
-    for (int i = 0; i < array.length(); i++) {
-      JSONObject map = array.getJSONObject(i);
+    // The array may grow as we perform rewritings, so avoid using an iterator
+    for (int i = 0; i < mParsedArray.length(); i++) {
+      JSONObject map = mParsedArray.getJSONObject(i);
 
       preprocessEntry(map);
 
@@ -116,6 +174,12 @@ class GestureSetParser {
       ParseEntry parseEntry = new ParseEntry(name, map);
       mNamedSets.put(name, parseEntry);
     }
+    if (SHOW_PREPROCESSING) {
+      pr("preprocessed:\n");
+      for (int i = 0; i < mParsedArray.length(); i++)
+        pr(mParsedArray.get(i));
+    }
+
   }
 
   private void processStrokes() throws JSONException {
@@ -258,6 +322,7 @@ class GestureSetParser {
 
   private Map<String, ParseEntry> mNamedSets;
   private int mUniquePrefixIndex;
+  private JSONArray mParsedArray;
 
   private static class ParseEntry {
     public ParseEntry(String name, JSONObject jsonMap) {
