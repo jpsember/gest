@@ -114,11 +114,12 @@ public class GestureSet {
       float newLimit = mMatcher.cost() / inputSet.size();
       newLimit *= param.maximumCostRatio();
       mMaximumCost = Math.min(newLimit, mMaximumCost);
-      if (mTrace)
+      if (mTrace) {
         pr(" gesture: " + d(gestureName, "15p") + " cost:"
             + dumpCost(mMatcher.cost()) + " max:" + dumpCost(mMaximumCost)
             + " cells %:"
             + d((int) (100 * mMatcher.strokeMatcher().cellsExaminedRatio())));
+      }
 
       removeExtraneousAliasFromResults(results);
 
@@ -236,8 +237,6 @@ public class GestureSet {
       sb.append(d((int) cost()));
       sb.append(' ');
       sb.append(strokeSet().name());
-      if (strokeSet().hasAlias())
-        sb.append(" --> " + strokeSet().aliasName());
       return sb.toString();
     }
 
