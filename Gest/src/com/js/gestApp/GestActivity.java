@@ -105,13 +105,12 @@ public class GestActivity extends MyActivity implements
     container.addView(mMatchView, p);
   }
 
-  private boolean mLandscape;
-
   private View buildUpperViews() {
-    mLandscape = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-    LinearLayout upperView = UITools.linearLayout(this, !mLandscape);
+    boolean landscapeFlag;
+    landscapeFlag = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+    LinearLayout upperView = UITools.linearLayout(this, !landscapeFlag);
 
-    LinearLayout auxContainer = UITools.linearLayout(this, mLandscape);
+    LinearLayout auxContainer = UITools.linearLayout(this, landscapeFlag);
     buildMatchView(auxContainer);
     buildConsole(auxContainer);
 
@@ -124,6 +123,12 @@ public class GestActivity extends MyActivity implements
     p = UITools.layoutParams(upperView);
     setStretch(upperView, p, 2f);
     upperView.addView(mTouchView, p);
+
+    p = UITools.layoutParams(upperView);
+    setStretch(upperView, p, 1.5f);
+    mExperimentView = new ExperimentView(this);
+    upperView.addView(mExperimentView, p);
+
     return upperView;
   }
 
@@ -335,5 +340,5 @@ public class GestActivity extends MyActivity implements
   private EditText mNameWidget;
   private CheckBox mSmoothingCheckBox;
   private CheckBox mMultiLengthCheckBox;
-
+  private ExperimentView mExperimentView;
 }
