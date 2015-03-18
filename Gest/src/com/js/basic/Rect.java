@@ -92,7 +92,7 @@ public class Rect {
 
   public android.graphics.Rect toAndroid() {
     android.graphics.Rect androidRect = new android.graphics.Rect();
-    androidRect.set((int) x, (int) y, (int) width, (int) height);
+    androidRect.set((int) x, (int) y, (int)(x+ width), (int) (y+height));
     return androidRect;
   }
 

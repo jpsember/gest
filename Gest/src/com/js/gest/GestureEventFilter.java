@@ -10,11 +10,15 @@ import com.js.android.MyTouchListener;
 import com.js.android.UITools;
 import com.js.basic.MyMath;
 import com.js.basic.Point;
+import com.js.basic.Rect;
 import com.js.basic.Tools;
 import com.js.gest.GestureSet.Match;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.Handler;
 import android.view.MotionEvent;
+import android.view.View;
 import static com.js.basic.Tools.*;
 
 public class GestureEventFilter extends MyTouchListener {
@@ -36,6 +40,42 @@ public class GestureEventFilter extends MyTouchListener {
 
     // Enable this line to display gesture vs. non-gesture decision:
     mTracker = new DecisionTracker();
+  }
+
+  /**
+   * Have event filter operate in 'floating view' mode. A small translucent
+   * rectangle is drawn in the view, and gestures must be started within it
+   */
+  public void setFloatingViewMode() {
+    mFloatingViewMode = true;
+  }
+
+  public void draw(Canvas canvas) {
+    if (!mFloatingViewMode)
+      return;
+    Rect r = getFloatingViewBounds();
+    Paint p = new Paint();
+    p.setColor(0x40800020);
+    p.setStrokeWidth(1.2f);
+    pr("drawing rect " + r);
+    canvas.drawRect(r.toAndroid(), p);
+  }
+
+  private Rect getFloatingViewBounds() {
+    if (!mFloatingViewMode)
+      throw new IllegalStateException();
+    if (mFloatingViewBounds == null) {
+      View view = getView();
+      Rect r = new Rect(0, 0, view.getWidth(), view.getHeight());
+      float size = Math.min(r.width, r.height) / 2;
+      float ASPECT_RATIO = .7f;
+      r = new Rect(r.endX() - size, r.endY() - size * ASPECT_RATIO, size, size
+          * ASPECT_RATIO);
+      float PADDING = 16;
+      r.inset(PADDING, PADDING);
+      mFloatingViewBounds = r;
+    }
+    return mFloatingViewBounds;
   }
 
   public void setListener(Listener listener) {
@@ -405,4 +445,6 @@ public class GestureEventFilter extends MyTouchListener {
   private GestureSet mStrokeSetCollection;
   private Match mMatch;
   private DecisionTracker mTracker;
+  private boolean mFloatingViewMode;
+  private Rect mFloatingViewBounds;
 }

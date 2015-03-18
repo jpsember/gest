@@ -1,6 +1,5 @@
 package com.js.gestApp;
 
-import static com.js.basic.Tools.pr;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -25,6 +24,7 @@ public class ExperimentView extends UITools.OurBaseView implements
     MyTouchListener touchListener = buildTouchListener();
 
     mEventFilter = new GestureEventFilter();
+    mEventFilter.setFloatingViewMode();
     mEventFilter.prependTo(touchListener);
     mEventFilter.setListener(this);
   }
@@ -48,6 +48,7 @@ public class ExperimentView extends UITools.OurBaseView implements
   @Override
   public void onDraw(Canvas canvas) {
     onDrawAux(canvas);
+    mEventFilter.draw(canvas);
   }
 
   private void onDrawAux(Canvas canvas) {
@@ -75,7 +76,7 @@ public class ExperimentView extends UITools.OurBaseView implements
       if (t >= 1)
         t = 2 - t;
       Point pti = MyMath.interpolateBetween(pt1, pt2, t);
-      Rect r = new Rect(pti.x, pti.y, pti.x + 20, pti.y + 20);
+      Rect r = new Rect(pti.x, pti.y, 20, 20);
       canvas.drawRect(r.toAndroid(), mPaintFill);
     }
   }

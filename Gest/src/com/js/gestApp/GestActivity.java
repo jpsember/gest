@@ -125,7 +125,7 @@ public class GestActivity extends MyActivity implements
     upperView.addView(mTouchView, p);
 
     p = UITools.layoutParams(upperView);
-    setStretch(upperView, p, 1.5f);
+    setStretch(upperView, p, 2.5f);
     mExperimentView = new ExperimentView(this);
     upperView.addView(mExperimentView, p);
 
