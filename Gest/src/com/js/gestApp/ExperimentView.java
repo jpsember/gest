@@ -21,7 +21,7 @@ public class ExperimentView extends UITools.OurBaseView implements
   public ExperimentView(Context context, GestureSet gestures,
       GestureEventFilter.Listener listener) {
     super(context);
-    setBackgroundColor(0xFFc0c0a0);
+    setBackgroundColor(0xFFe0e0e0);
 
     MyTouchListener touchListener = buildTouchListener();
 

@@ -10,14 +10,11 @@ import com.js.android.MyTouchListener;
 import com.js.android.UITools;
 import com.js.basic.MyMath;
 import com.js.basic.Point;
-import com.js.basic.Rect;
 import com.js.gest.GestureSet.Match;
 
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.os.Handler;
 import android.view.MotionEvent;
-import android.view.View;
 import static com.js.basic.Tools.*;
 
 public class GestureEventFilter extends MyTouchListener {
@@ -46,34 +43,24 @@ public class GestureEventFilter extends MyTouchListener {
    * rectangle is drawn in the view, and gestures must be started within it
    */
   public void setFloatingViewMode() {
+    if (floatingViewMode())
+      throw new IllegalStateException();
     mFloatingViewMode = true;
+  }
+
+  private GesturePanel floatingPanel() {
+    if (!floatingViewMode())
+      throw new IllegalStateException();
+    if (mGesturePanel == null) {
+      mGesturePanel = new GesturePanel(getView());
+    }
+    return mGesturePanel;
   }
 
   public void draw(Canvas canvas) {
     if (!floatingViewMode())
       return;
-    Rect r = getFloatingViewBounds();
-    Paint p = new Paint();
-    p.setColor(0x40800020);
-    p.setStrokeWidth(1.2f);
-    canvas.drawRect(r.toAndroid(), p);
-  }
-
-  private Rect getFloatingViewBounds() {
-    if (!floatingViewMode())
-      throw new IllegalStateException();
-    if (mFloatingViewBounds == null) {
-      View view = getView();
-      Rect r = new Rect(0, 0, view.getWidth(), view.getHeight());
-      float size = Math.min(r.width, r.height) / 2;
-      float ASPECT_RATIO = .7f;
-      r = new Rect(r.endX() - size, r.endY() - size * ASPECT_RATIO, size, size
-          * ASPECT_RATIO);
-      float PADDING = 16;
-      r.inset(PADDING, PADDING);
-      mFloatingViewBounds = r;
-    }
-    return mFloatingViewBounds;
+    floatingPanel().draw(canvas);
   }
 
   public void setListener(Listener listener) {
@@ -170,7 +157,7 @@ public class GestureEventFilter extends MyTouchListener {
     }
   }
 
-  private boolean floatingViewMode() {
+  public boolean floatingViewMode() {
     return mFloatingViewMode;
   }
 
@@ -221,9 +208,8 @@ public class GestureEventFilter extends MyTouchListener {
 
     if (floatingViewMode()) {
       if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-        Rect r = getFloatingViewBounds();
         Point touchLoc = new Point(event.getX(), event.getY());
-        if (r.contains(touchLoc)) {
+        if (floatingPanel().containsPoint(touchLoc)) {
           setState(STATE_RECORDING);
           processRecordingState(event);
         } else {
@@ -463,5 +449,5 @@ public class GestureEventFilter extends MyTouchListener {
   private Match mMatch;
   private DecisionTracker mTracker;
   private boolean mFloatingViewMode;
-  private Rect mFloatingViewBounds;
+  private GesturePanel mGesturePanel;
 }
