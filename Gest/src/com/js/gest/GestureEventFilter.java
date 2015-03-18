@@ -28,7 +28,8 @@ public class GestureEventFilter extends MyTouchListener {
   private static final int STATE_BUFFERING = 2;
   private static final int STATE_RECORDING = 3;
   private static final int STATE_FORWARDING = 4;
-  private static final int STATE_STOPPED = 5;
+  private static final int STATE_IGNORING = 5;
+  private static final int STATE_STOPPED = 6;
 
   public GestureEventFilter() {
     // Enable this line to print diagnostic information:
@@ -96,7 +97,7 @@ public class GestureEventFilter extends MyTouchListener {
   }
 
   private final static String[] sStateNames = { "UNATTACHED", "DORMANT",
-      "BUFFERING", "RECORDING", "FORWARDING", "STOPPED" };
+      "BUFFERING", "RECORDING", "FORWARDING", "IGNORING", "STOPPED" };
 
   private static String stateName(int state) {
     return sStateNames[state];
@@ -157,6 +158,15 @@ public class GestureEventFilter extends MyTouchListener {
     }
   }
 
+  private void disposeBufferedEvents() {
+    while (true) {
+      MotionEvent event = mEventQueue.poll();
+      if (event == null)
+        break;
+      event.recycle();
+    }
+  }
+
   public boolean floatingViewMode() {
     return mFloatingViewMode;
   }
@@ -210,8 +220,16 @@ public class GestureEventFilter extends MyTouchListener {
       if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
         Point touchLoc = new Point(event.getX(), event.getY());
         if (floatingPanel().containsPoint(touchLoc)) {
-          setState(STATE_RECORDING);
-          processRecordingState(event);
+
+          // If panel is minimized, maximize it, and ignore the rest of this
+          // touch sequence
+          if (floatingPanel().isMinimized()) {
+            floatingPanel().setMinimized(false);
+            setState(STATE_IGNORING);
+          } else {
+            setState(STATE_RECORDING);
+            processRecordingState(event);
+          }
         } else {
           setState(STATE_FORWARDING);
           processForwardingState(event);
@@ -277,6 +295,13 @@ public class GestureEventFilter extends MyTouchListener {
     }
   }
 
+  private void processIgnoringState(MotionEvent event) {
+    disposeBufferedEvents();
+    if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+      setState(STATE_DORMANT);
+    }
+  }
+
   private void processStoppedState(MotionEvent event) {
     bufferEvent(event);
     flushBufferedEvents();
@@ -295,6 +320,9 @@ public class GestureEventFilter extends MyTouchListener {
       break;
     case STATE_FORWARDING:
       processForwardingState(event);
+      break;
+    case STATE_IGNORING:
+      processIgnoringState(event);
       break;
     case STATE_STOPPED:
       processStoppedState(event);
@@ -361,6 +389,12 @@ public class GestureEventFilter extends MyTouchListener {
 
   private void performMatch() {
     if (mTouchStrokeSet.isTap()) {
+      // If panel is maximized, minimize it
+      if (floatingViewMode()) {
+        floatingPanel().setMinimized(true);
+        return;
+      }
+
       mListener.processGesture(GestureSet.GESTURE_TAP);
       return;
     }

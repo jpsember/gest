@@ -12,6 +12,7 @@ import static com.js.basic.Tools.*;
 public class GesturePanel {
 
   private static final float PADDING = 16.0f;
+  private static final float MINIMIZED_HEIGHT = 32;
 
   /**
    * Constructor
@@ -61,7 +62,7 @@ public class GesturePanel {
   }
 
   private Rect getBounds() {
-    if (mFloatingViewBounds == null) {
+    if (mViewBoundsNormal == null) {
       View view = mContainer;
 
       float minWidth = 340;
@@ -74,11 +75,29 @@ public class GesturePanel {
           width, height);
 
       rect.inset(PADDING, PADDING);
-      mFloatingViewBounds = rect;
+      mViewBoundsNormal = rect;
+
+      mViewBoundsMinimized = new Rect(rect.x, rect.endY() - MINIMIZED_HEIGHT,
+          rect.width, MINIMIZED_HEIGHT);
     }
-    return mFloatingViewBounds;
+    return isMinimized() ? mViewBoundsMinimized : mViewBoundsNormal;
   }
 
-  private Rect mFloatingViewBounds;
+  public boolean isMinimized() {
+    return mMinimized;
+  }
+
+  public void setMinimized(boolean state) {
+    if (mMinimized == state)
+      return;
+
+    mMinimized = state;
+    mContainer.invalidate();
+  }
+
+  private Rect mViewBoundsNormal;
+  private Rect mViewBoundsMinimized;
   private View mContainer;
+  private boolean mMinimized;
+
 }
