@@ -11,13 +11,15 @@ import com.js.basic.MyMath;
 import com.js.basic.Point;
 import com.js.basic.Rect;
 import com.js.gest.GestureEventFilter;
+import com.js.gest.GestureSet;
 import com.js.gest.StrokeSet;
 import static com.js.basic.Tools.*;
 
 public class ExperimentView extends UITools.OurBaseView implements
     GestureEventFilter.Listener {
 
-  public ExperimentView(Context context) {
+  public ExperimentView(Context context, GestureSet gestures,
+      GestureEventFilter.Listener listener) {
     super(context);
     setBackgroundColor(0xFFc0c0a0);
 
@@ -27,6 +29,10 @@ public class ExperimentView extends UITools.OurBaseView implements
     mEventFilter.setFloatingViewMode();
     mEventFilter.prependTo(touchListener);
     mEventFilter.setListener(this);
+
+    mEventFilter.setGestures(gestures);
+    mEventFilter.setListener(listener);
+
   }
 
   private MyTouchListener buildTouchListener() {

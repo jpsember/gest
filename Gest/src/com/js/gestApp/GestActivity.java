@@ -126,7 +126,17 @@ public class GestActivity extends MyActivity implements
 
     p = UITools.layoutParams(upperView);
     setStretch(upperView, p, 2.5f);
-    mExperimentView = new ExperimentView(this);
+    mExperimentView = new ExperimentView(this, mGestureLibrary,
+        new GestureEventFilter.Listener() {
+          @Override
+          public void strokeSetExtended(StrokeSet strokeSet) {
+          }
+
+          @Override
+          public void processGesture(String gestureName) {
+            pr("process gesture: " + gestureName);
+          }
+        });
     upperView.addView(mExperimentView, p);
 
     return upperView;

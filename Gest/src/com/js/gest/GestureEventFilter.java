@@ -11,7 +11,6 @@ import com.js.android.UITools;
 import com.js.basic.MyMath;
 import com.js.basic.Point;
 import com.js.basic.Rect;
-import com.js.basic.Tools;
 import com.js.gest.GestureSet.Match;
 
 import android.graphics.Canvas;
@@ -39,7 +38,7 @@ public class GestureEventFilter extends MyTouchListener {
     // mTraceActive = true;
 
     // Enable this line to display gesture vs. non-gesture decision:
-    mTracker = new DecisionTracker();
+    // mTracker = new DecisionTracker();
   }
 
   /**
@@ -51,18 +50,17 @@ public class GestureEventFilter extends MyTouchListener {
   }
 
   public void draw(Canvas canvas) {
-    if (!mFloatingViewMode)
+    if (!floatingViewMode())
       return;
     Rect r = getFloatingViewBounds();
     Paint p = new Paint();
     p.setColor(0x40800020);
     p.setStrokeWidth(1.2f);
-    pr("drawing rect " + r);
     canvas.drawRect(r.toAndroid(), p);
   }
 
   private Rect getFloatingViewBounds() {
-    if (!mFloatingViewMode)
+    if (!floatingViewMode())
       throw new IllegalStateException();
     if (mFloatingViewBounds == null) {
       View view = getView();
@@ -105,9 +103,9 @@ public class GestureEventFilter extends MyTouchListener {
     mListener = null;
   }
 
-  private void pr(Object message) {
+  private void trace(Object message) {
     if (mTraceActive)
-      Tools.pr(message);
+      pr(message);
   }
 
   private final static String[] sStateNames = { "UNATTACHED", "DORMANT",
@@ -122,7 +120,7 @@ public class GestureEventFilter extends MyTouchListener {
   }
 
   private void setState(int s) {
-    pr("Set state from " + stateName(mState) + " to " + stateName(s));
+    trace("Set state from " + stateName(mState) + " to " + stateName(s));
     mState = s;
   }
 
@@ -146,7 +144,7 @@ public class GestureEventFilter extends MyTouchListener {
     // original handler
     mPassingEventFlag = true;
     if (mEventQueue.size() > 1)
-      pr("    flushing " + mEventQueue.size() + " buffered events");
+      trace("    flushing " + mEventQueue.size() + " buffered events");
     while (true) {
       MotionEvent event = mEventQueue.poll();
       if (event == null)
@@ -162,7 +160,7 @@ public class GestureEventFilter extends MyTouchListener {
    */
   private void flushGestureEvents() {
     if (mEventQueue.size() > 1)
-      pr("    processing " + mEventQueue.size() + " gesture events");
+      trace("    processing " + mEventQueue.size() + " gesture events");
     while (true) {
       MotionEvent event = mEventQueue.poll();
       if (event == null)
@@ -172,11 +170,17 @@ public class GestureEventFilter extends MyTouchListener {
     }
   }
 
+  private boolean floatingViewMode() {
+    return mFloatingViewMode;
+  }
+
   private void processDormantState(MotionEvent event) {
     if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-      // Post an event to switch to FORWARDING automatically in case user
-      // doesn't trigger any further events for a while
-      postForwardTestEvent();
+      if (!floatingViewMode()) {
+        // Post an event to switch to FORWARDING automatically in case user
+        // doesn't trigger any further events for a while
+        postForwardTestEvent();
+      }
       setState(STATE_BUFFERING);
       processBufferingState(event);
     } else {
@@ -193,7 +197,7 @@ public class GestureEventFilter extends MyTouchListener {
     sHandler.postDelayed(new Runnable() {
       @Override
       public void run() {
-        pr("Timer task fired, state= " + stateName(state()));
+        trace("Timer task fired, state= " + stateName(state()));
         if (state() == STATE_BUFFERING) {
           setState(STATE_FORWARDING);
           flushBufferedEvents();
@@ -215,36 +219,52 @@ public class GestureEventFilter extends MyTouchListener {
     if (mTracker != null)
       mTracker.addEvent(event);
 
-    // Attempt to decide whether it's a gesture or not
-    final int MIN_STEPS = 3;
-    if (mEventQueue.size() >= 1 + MIN_STEPS) {
-      Iterator<MotionEvent> iter = mEventQueue.iterator();
-      MotionEvent prevEvent = iter.next();
-      float totalVelocity = 0;
-      for (int i = 0; i < MIN_STEPS; i++) {
-        MotionEvent currEvent = iter.next();
-        float time = elapsedTime(prevEvent, currEvent);
-        float distance = MyMath.distanceBetween(rawLocation(prevEvent),
-            rawLocation(currEvent));
-        float distanceInInches = distance
-            / MyActivity.getResolutionInfo().inchesToPixelsUI(1);
-        totalVelocity += distanceInInches / time;
-        prevEvent = currEvent;
+    if (floatingViewMode()) {
+      if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+        Rect r = getFloatingViewBounds();
+        Point touchLoc = new Point(event.getX(), event.getY());
+        if (r.contains(touchLoc)) {
+          setState(STATE_RECORDING);
+          processRecordingState(event);
+        } else {
+          setState(STATE_FORWARDING);
+          processForwardingState(event);
+        }
+        return;
       }
-      float avgVelocity = totalVelocity / MIN_STEPS;
-      boolean isGesture = (avgVelocity > 1.2f);
-      if (mTracker != null) {
-        mTracker.print(" avg velocity (inches/sec): " + d(avgVelocity));
-        mTracker.setDecision(isGesture);
+    } else {
+
+      // Attempt to decide whether it's a gesture or not
+      final int MIN_STEPS = 3;
+      if (mEventQueue.size() >= 1 + MIN_STEPS) {
+        Iterator<MotionEvent> iter = mEventQueue.iterator();
+        MotionEvent prevEvent = iter.next();
+        float totalVelocity = 0;
+        for (int i = 0; i < MIN_STEPS; i++) {
+          MotionEvent currEvent = iter.next();
+          float time = elapsedTime(prevEvent, currEvent);
+          float distance = MyMath.distanceBetween(rawLocation(prevEvent),
+              rawLocation(currEvent));
+          float distanceInInches = distance
+              / MyActivity.getResolutionInfo().inchesToPixelsUI(1);
+          totalVelocity += distanceInInches / time;
+          prevEvent = currEvent;
+        }
+        float avgVelocity = totalVelocity / MIN_STEPS;
+        boolean isGesture = (avgVelocity > 1.2f);
+        if (mTracker != null) {
+          mTracker.print(" avg velocity (inches/sec): " + d(avgVelocity));
+          mTracker.setDecision(isGesture);
+        }
+        if (isGesture) {
+          setState(STATE_RECORDING);
+          processRecordingState(event);
+        } else {
+          setState(STATE_FORWARDING);
+          processForwardingState(event);
+        }
+        return;
       }
-      if (isGesture) {
-        setState(STATE_RECORDING);
-        processRecordingState(event);
-      } else {
-        setState(STATE_FORWARDING);
-        processForwardingState(event);
-      }
-      return;
     }
 
     if (event.getActionMasked() == MotionEvent.ACTION_UP) {
@@ -299,10 +319,10 @@ public class GestureEventFilter extends MyTouchListener {
 
   @Override
   public boolean onTouch(MotionEvent event) {
-    pr("GestureEventFilter, onTouch event " + UITools.dump(event)
+    trace("GestureEventFilter, onTouch event " + UITools.dump(event)
         + ", passing events: " + d(mPassingEventFlag));
     if (event.getActionMasked() != MotionEvent.ACTION_MOVE)
-      pr("onTouch: " + UITools.dump(event) + " state " + stateName(state()));
+      trace("onTouch: " + UITools.dump(event) + " state " + stateName(state()));
 
     // If we're forwarding events to the original handler, do so
     if (mPassingEventFlag) {
@@ -362,19 +382,16 @@ public class GestureEventFilter extends MyTouchListener {
 
     ArrayList<GestureSet.Match> matches = new ArrayList();
     Match match = mStrokeSetCollection.findMatch(set, null, matches);
-    do {
-      if (match == null)
-        break;
-      // If the match cost is significantly less than the second best, make a
-      // decision
-      if (matches.size() >= 2) {
-        Match match2 = matches.get(1);
-        if (match.cost() * 1.5f > match2.cost())
-          break;
-      }
-      mMatch = match;
-      mListener.processGesture(mMatch.strokeSet().aliasName());
-    } while (false);
+    if (match == null)
+      return;
+    // If the match cost is significantly less than the second best, use it
+    if (matches.size() >= 2) {
+      Match match2 = matches.get(1);
+      if (match.cost() * 1.5f > match2.cost())
+        return;
+    }
+    mMatch = match;
+    mListener.processGesture(mMatch.strokeSet().aliasName());
   }
 
   public static interface Listener {
