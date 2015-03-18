@@ -100,6 +100,14 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
     return !mStrokeIdToIndexMap.isEmpty();
   }
 
+  /**
+   * Determine if this set represents a single tap
+   */
+  public boolean isTap() {
+    assertFrozen();
+    return size() == 1 && length() <= 2;
+  }
+
   @Override
   public void freeze() {
     if (isFrozen())

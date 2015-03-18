@@ -16,6 +16,8 @@ import static com.js.basic.Tools.*;
 
 public class GestureSet {
 
+  public static final String GESTURE_TAP = "*tap*";
+  
   public static GestureSet parseJSON(String script) throws JSONException {
     GestureSetParser p = new GestureSetParser();
     GestureSet collection = new GestureSet();

@@ -32,7 +32,7 @@ public class GestureEventFilter extends MyTouchListener {
 
   public GestureEventFilter() {
     // Enable this line to print diagnostic information:
-    mTraceActive = true;
+    // mTraceActive = true;
 
     // Enable this line to display gesture vs. non-gesture decision:
     // mTracker = new DecisionTracker();
@@ -347,7 +347,6 @@ public class GestureEventFilter extends MyTouchListener {
       mTouchStrokeSet.stopStroke(activeId);
       if (!mTouchStrokeSet.areStrokesActive()) {
         mTouchStrokeSet.freeze();
-
         if (mListener != null) {
           mListener.strokeSetExtended(mTouchStrokeSet);
           if (mStrokeSetCollection == null)
@@ -361,6 +360,11 @@ public class GestureEventFilter extends MyTouchListener {
   }
 
   private void performMatch() {
+    if (mTouchStrokeSet.isTap()) {
+      mListener.processGesture(GestureSet.GESTURE_TAP);
+      return;
+    }
+
     mMatch = null;
     StrokeSet set = mTouchStrokeSet;
     set = set.fitToRect(null);
