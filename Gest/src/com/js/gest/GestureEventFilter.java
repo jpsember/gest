@@ -416,6 +416,9 @@ public class GestureEventFilter extends MyTouchListener {
     }
     mMatch = match;
     mListener.processGesture(mMatch.strokeSet().aliasName());
+    if (floatingViewMode()) {
+      floatingPanel().setGesture(mMatch.strokeSet());
+    }
   }
 
   public static interface Listener {

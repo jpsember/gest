@@ -30,14 +30,6 @@ public class MatchView extends UITools.OurBaseView {
     mRenderer.startRender(canvas);
     onDrawAux();
 
-    // sRect.setTo(0, 0, this.getWidth(), this.getHeight());
-    // // Inset and center
-    // sRect.inset(10, 10);
-    // if (mRegisteredSet != null) {
-    // mRenderer.drawStrokeSet(mRegisteredSet, true, 0);
-    // mRenderer.drawRect(StrokeSet.sStandardRect);
-    // }
-
     mRenderer.stopRender();
   }
 

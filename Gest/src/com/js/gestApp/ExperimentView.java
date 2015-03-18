@@ -13,7 +13,6 @@ import com.js.basic.Rect;
 import com.js.gest.GestureEventFilter;
 import com.js.gest.GestureSet;
 import com.js.gest.StrokeSet;
-import static com.js.basic.Tools.*;
 
 public class ExperimentView extends UITools.OurBaseView implements
     GestureEventFilter.Listener {
@@ -37,13 +36,8 @@ public class ExperimentView extends UITools.OurBaseView implements
 
   private MyTouchListener buildTouchListener() {
     MyTouchListener touchListener = new MyTouchListener() {
-      // We don't need to include onTouchEvent(), but we do so to
-      // verify that we still get non-gesture-related motions
       @Override
       public boolean onTouch(MotionEvent event) {
-        if (event.getActionMasked() != MotionEvent.ACTION_MOVE)
-          pr("ExperimentView ignoring non-gesture event " + UITools.dump(event));
-        invalidate();
         return false;
       }
     };
@@ -93,7 +87,6 @@ public class ExperimentView extends UITools.OurBaseView implements
 
   @Override
   public void processGesture(String gestureName) {
-    unimp("process gesture: " + gestureName);
   }
 
   private GestureEventFilter mEventFilter;
