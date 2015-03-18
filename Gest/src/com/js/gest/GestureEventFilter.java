@@ -32,7 +32,7 @@ public class GestureEventFilter extends MyTouchListener {
 
   public GestureEventFilter() {
     // Enable this line to print diagnostic information:
-    // mTraceActive = true;
+    mTraceActive = true;
 
     // Enable this line to display gesture vs. non-gesture decision:
     // mTracker = new DecisionTracker();
