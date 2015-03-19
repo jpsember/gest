@@ -4,9 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.js.android.MyTouchListener;
-import com.js.android.UITools;
 import com.js.basic.MyMath;
 import com.js.basic.Point;
 import com.js.basic.Rect;
@@ -14,8 +14,7 @@ import com.js.gest.GestureEventFilter;
 import com.js.gest.GestureSet;
 import com.js.gest.StrokeSet;
 
-public class ExperimentView extends UITools.OurBaseView implements
-    GestureEventFilter.Listener {
+public class ExperimentView extends View implements GestureEventFilter.Listener {
 
   public ExperimentView(Context context, GestureSet gestures,
       GestureEventFilter.Listener listener) {

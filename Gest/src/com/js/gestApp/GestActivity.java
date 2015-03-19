@@ -17,6 +17,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -33,6 +34,15 @@ public class GestActivity extends MyActivity implements
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    if (false) {
+      warning("building experimental content view");
+      requestWindowFeature(Window.FEATURE_NO_TITLE);
+      // Remove notification bar
+      this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+          WindowManager.LayoutParams.FLAG_FULLSCREEN);
+      setContentView(LayoutExperiments.buildExperimentalContentView(this));
+      return;
+    }
     // To address issue #6:
     getWindow().setSoftInputMode(
         WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -70,16 +80,16 @@ public class GestActivity extends MyActivity implements
   }
 
   /**
-   * Set parameters to make a view stretch to fit available space (according to
-   * weight) in the appropriate dimension
+   * Set parameters to make a view that has no content stretch to fit available
+   * space (according to weight) in the appropriate dimension
    */
   private void setStretch(LinearLayout container, LayoutParams p, float weight) {
     if (container.getOrientation() == LinearLayout.HORIZONTAL) {
-      p.width = 1;
+      p.width = 0;
       p.height = LayoutParams.MATCH_PARENT;
     } else {
       p.width = LayoutParams.MATCH_PARENT;
-      p.height = 1;
+      p.height = 0;
     }
     p.weight = weight;
   }
@@ -351,4 +361,5 @@ public class GestActivity extends MyActivity implements
   private CheckBox mSmoothingCheckBox;
   private CheckBox mMultiLengthCheckBox;
   private ExperimentView mExperimentView;
+
 }

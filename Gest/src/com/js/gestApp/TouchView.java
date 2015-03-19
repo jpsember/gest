@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.js.android.UITools;
 import com.js.gest.GestureEventFilter;
@@ -16,8 +17,7 @@ import static com.js.basic.Tools.*;
 /**
  * View for inputting and rendering user touch sequences
  */
-public class TouchView extends UITools.OurBaseView implements
-    GestureEventFilter.Listener {
+public class TouchView extends View implements GestureEventFilter.Listener {
 
   public TouchView(Context context, GestureEventFilter.Listener listener) {
     super(context);

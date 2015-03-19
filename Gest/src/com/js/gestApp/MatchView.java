@@ -2,12 +2,12 @@ package com.js.gestApp;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.view.View;
 
-import com.js.android.UITools;
 import com.js.basic.Rect;
 import com.js.gest.StrokeSet;
 
-public class MatchView extends UITools.OurBaseView {
+public class MatchView extends View {
 
   public MatchView(Context context) {
     super(context);
