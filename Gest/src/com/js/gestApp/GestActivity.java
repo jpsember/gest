@@ -34,7 +34,7 @@ import static com.js.basic.Tools.*;
 public class GestActivity extends MyActivity implements
     GestureEventFilter.Listener {
 
-  static int PANEL_TYPE = 2;
+  static int PANEL_TYPE = 0;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -143,7 +143,7 @@ public class GestActivity extends MyActivity implements
       filter.setListener(this);
       filter.setGestures(mGestureLibrary);
 
-      View gesturePanel = filter.constructView(this);
+      View gesturePanel = filter.constructGesturePanel(this);
       filter.setView(gesturePanel);
 
       applyTestColor(gesturePanel, Color.GREEN);

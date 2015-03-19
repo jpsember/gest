@@ -75,7 +75,7 @@ public class GestureEventFilter extends MyTouchListener {
    * Construct a view to be used for displaying the gesture panel (MODE_OWNVIEW
    * only)
    */
-  public View constructView(Context context) {
+  public View constructGesturePanel(Context context) {
     if (mConstructedView)
       throw new IllegalStateException();
     if (viewMode() != MODE_OWNVIEW)
@@ -102,13 +102,13 @@ public class GestureEventFilter extends MyTouchListener {
     }
   }
 
-  private GesturePanel gesturePanel() {
+  private GesturePanelRenderer gesturePanel() {
     if (sharedViewMode())
       throw new IllegalStateException();
-    if (mGesturePanel == null) {
-      mGesturePanel = new GesturePanel(getView());
+    if (mGesturePanelRenderer == null) {
+      mGesturePanelRenderer = new GesturePanelRenderer(getView());
     }
-    return mGesturePanel;
+    return mGesturePanelRenderer;
   }
 
   private boolean sharedViewMode() {
@@ -559,7 +559,7 @@ public class GestureEventFilter extends MyTouchListener {
   private GestureSet mStrokeSetCollection;
   private Match mMatch;
   private DecisionTracker mTracker;
-  private GesturePanel mGesturePanel;
+  private GesturePanelRenderer mGesturePanelRenderer;
   private int mViewMode;
   private boolean mConstructedView;
 }

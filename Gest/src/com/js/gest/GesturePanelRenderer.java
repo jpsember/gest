@@ -12,7 +12,7 @@ import android.graphics.Path;
 import android.os.Handler;
 import android.view.View;
 
-public class GesturePanel {
+class GesturePanelRenderer {
 
   private static final float PADDING = 8.0f;
   private static final float MINIMIZED_HEIGHT = 32;
@@ -23,7 +23,7 @@ public class GesturePanel {
    * @param container
    *          the View to contain the panel
    */
-  public GesturePanel(View container) {
+  public GesturePanelRenderer(View container) {
     mContainer = container;
   }
 
