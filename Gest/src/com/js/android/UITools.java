@@ -47,61 +47,62 @@ public final class UITools {
   /**
    * Construct a LinearLayout
    * 
-   * @param context
-   * @param vertical
+   * @param verticalOrientation
    *          true if it is to have a vertical orientation
-   * @deprecated Avoid using this, since it's obscuring our understanding of
-   *             LinearLayouts; use it as a private method of your class if
-   *             desired
    */
-  public static LinearLayout linearLayout(Context context, boolean vertical) {
+  public static LinearLayout linearLayout(Context context,
+      boolean verticalOrientation) {
     LinearLayout view = new LinearLayout(context);
-    view.setOrientation(vertical ? LinearLayout.VERTICAL
+    view.setOrientation(verticalOrientation ? LinearLayout.VERTICAL
         : LinearLayout.HORIZONTAL);
-    // Give view a minimum size in each dimension, so we are more likely to
-    // detect problems with the layout (e.g. views not showing up)
-    view.setMinimumWidth(15);
-    view.setMinimumHeight(15);
-    UITools.applyDebugColors(view);
     return view;
   }
 
   /**
-   * Construct LayoutParams for child views of a LinearLayout container with a
-   * particular orientation
+   * Construct LayoutParams for child views of a LinearLayout container.
    * 
-   * @param forHorizontalLayout
-   *          if true, constructs params for a containing LinearLayout with
-   *          horizontal orientation: width wraps content, height matches
-   *          container's. If false, width matches container's, height wraps
-   *          content
-   * @deprecated Avoid using this, since it's obscuring our understanding of
-   *             LinearLayouts; use it as a private method of your class if
-   *             desired
-   */
-  public static LinearLayout.LayoutParams layoutParams(
-      boolean forHorizontalLayout) {
-    LinearLayout.LayoutParams params;
-    if (forHorizontalLayout)
-      params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-          LayoutParams.MATCH_PARENT);
-    else
-      params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-          LayoutParams.WRAP_CONTENT);
-    return params;
-  }
-
-  /**
-   * Construct LayoutParams for child views of a LinearLayout container
+   * The conventions being followed are:
+   * 
+   * If the container has horizontal orientation, then the 'matched' dimension
+   * is height, and the 'variable' dimension is width. Otherwise, matched =
+   * width and variable = height.
+   * 
+   * A view is either 'stretchable' or 'fixed' in its variable dimension. If
+   * it's fixed, it is assumed that the view has some content, e.g. so that
+   * setting WRAP_CONTENT works properly (it won't for Views that have no
+   * content; see issue #5).
+   * 
+   * Setting the weight parameter to zero indicates that the view is
+   * stretchable, whereas a positive weight indicates that it's fixed.
+   * 
+   * The LayoutParams constructed will have
+   * 
+   * a) MATCH_PARENT in their matched dimension;
+   * 
+   * b) either zero (if the view is stretchable) or WRAP_CONTENT (if it is
+   * fixed) in its variable dimension
+   * 
+   * c) weight in its weight field
    * 
    * @param container
    * @return LayoutParams appropriate to the container's orientation
-   * @deprecated Avoid using this, since it's obscuring our understanding of
-   *             LinearLayouts; use it as a private method of your class if
-   *             desired
    */
-  public static LinearLayout.LayoutParams layoutParams(LinearLayout container) {
-    return layoutParams(container.getOrientation() == LinearLayout.HORIZONTAL);
+  public static LinearLayout.LayoutParams layoutParams(LinearLayout container,
+      float weight) {
+
+    int width, height;
+    int variableSize = (weight != 0) ? 0 : LayoutParams.WRAP_CONTENT;
+    if (container.getOrientation() == LinearLayout.HORIZONTAL) {
+      width = variableSize;
+      height = LayoutParams.MATCH_PARENT;
+    } else {
+      width = LayoutParams.MATCH_PARENT;
+      height = variableSize;
+    }
+    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width,
+        height);
+    params.weight = weight;
+    return params;
   }
 
   /**

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.json.JSONException;
 
 import com.js.android.MyActivity;
+import static com.js.android.UITools.*;
 import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
 import com.js.gest.GestureSet;
@@ -24,7 +25,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.LinearLayout.LayoutParams;
 import static com.js.basic.Tools.*;
 
 public class GestActivity extends MyActivity implements
@@ -78,39 +78,6 @@ public class GestActivity extends MyActivity implements
     pr("recognized gesture " + gestureName);
   }
 
-  /**
-   * Set parameters to make a view that has no content stretch to fit available
-   * space (according to weight) in the appropriate dimension
-   */
-  private void setStretch(LinearLayout container, LayoutParams p, float weight) {
-    if (container.getOrientation() == LinearLayout.HORIZONTAL) {
-      p.width = 0;
-      p.height = LayoutParams.MATCH_PARENT;
-    } else {
-      p.width = LayoutParams.MATCH_PARENT;
-      p.height = 0;
-    }
-    p.weight = weight;
-  }
-
-  /**
-   * Construct LayoutParams for child views of a LinearLayout container. If its
-   * container has horizontal orientation, its height is MATCH_PARENT; else, its
-   * width is. The other dimension will be zero.
-   * 
-   * @param container
-   * @return LayoutParams appropriate to the container's orientation
-   */
-  private LinearLayout.LayoutParams layoutParams(LinearLayout container) {
-    boolean forHorizontalLayout = (container.getOrientation() == LinearLayout.HORIZONTAL);
-    LinearLayout.LayoutParams params = new LayoutParams(0, 0);
-    if (forHorizontalLayout)
-      params.height = LayoutParams.MATCH_PARENT;
-    else
-      params.width = LayoutParams.MATCH_PARENT;
-    return params;
-  }
-
   private void buildConsole(LinearLayout container) {
     TextView tv = new TextView(this);
     tv.setBackgroundColor(Color.LTGRAY);
@@ -120,39 +87,29 @@ public class GestActivity extends MyActivity implements
     tv.setHeight(1);
     mConsole = tv;
 
-    LinearLayout.LayoutParams p = layoutParams(container);
-    setStretch(container, p, 1.5f);
-    container.addView(mConsole, p);
+    container.addView(mConsole, layoutParams(container, 1.5f));
   }
 
   private void buildMatchView(LinearLayout container) {
     mMatchView = new MatchView(this);
-    LinearLayout.LayoutParams p = layoutParams(container);
-    setStretch(container, p, 1f);
-    container.addView(mMatchView, p);
+    container.addView(mMatchView, layoutParams(container, 1f));
   }
 
   private View buildUpperViews() {
     boolean landscapeFlag;
     landscapeFlag = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-    LinearLayout upperView = linearLayout(!landscapeFlag);
-    LinearLayout auxContainer = linearLayout(landscapeFlag);
+    LinearLayout upperView = linearLayout(this, !landscapeFlag);
+    LinearLayout auxContainer = linearLayout(this, landscapeFlag);
 
     buildMatchView(auxContainer);
     buildConsole(auxContainer);
 
-    LinearLayout.LayoutParams p = layoutParams(upperView);
-    setStretch(upperView, p, 1f);
-    upperView.addView(auxContainer, p);
+    upperView.addView(auxContainer, layoutParams(upperView, 1));
 
     mTouchView = new TouchView(this, this);
 
-    p = layoutParams(upperView);
-    setStretch(upperView, p, 2f);
-    upperView.addView(mTouchView, p);
+    upperView.addView(mTouchView, layoutParams(upperView, 2f));
 
-    p = layoutParams(upperView);
-    setStretch(upperView, p, 1.5f);
     mExperimentView = new ExperimentView(this, mGestureLibrary,
         new GestureEventFilter.Listener() {
           @Override
@@ -164,7 +121,7 @@ public class GestActivity extends MyActivity implements
             pr("process gesture: " + gestureName);
           }
         });
-    upperView.addView(mExperimentView, p);
+    upperView.addView(mExperimentView, layoutParams(upperView, 1.5f));
 
     return upperView;
   }
@@ -180,9 +137,7 @@ public class GestActivity extends MyActivity implements
   private void addButton(String label, OnClickListener listener) {
     Button b = new Button(this);
     b.setText(label);
-    LayoutParams p = layoutParams(mControlView);
-    p.width = LayoutParams.WRAP_CONTENT;
-    mControlView.addView(b, p);
+    mControlView.addView(b, layoutParams(mControlView, 0));
     if (listener != null)
       b.setOnClickListener(listener);
   }
@@ -191,29 +146,14 @@ public class GestActivity extends MyActivity implements
       OnClickListener listener) {
     CheckBox checkBox = new CheckBox(this);
     checkBox.setText(label);
-    LayoutParams p = layoutParams(container);
-    p.height = LayoutParams.WRAP_CONTENT;
-    container.addView(checkBox, p);
+    container.addView(checkBox, layoutParams(container, 0));
     if (listener != null)
       checkBox.setOnClickListener(listener);
     return checkBox;
   }
 
-  /**
-   * Construct a LinearLayout
-   * 
-   * @param vertical
-   *          true if it is to have a vertical orientation
-   */
-  private LinearLayout linearLayout(boolean vertical) {
-    LinearLayout view = new LinearLayout(this);
-    view.setOrientation(vertical ? LinearLayout.VERTICAL
-        : LinearLayout.HORIZONTAL);
-    return view;
-  }
-
   private void buildControlView() {
-    LinearLayout ctrlView = linearLayout(false);
+    LinearLayout ctrlView = linearLayout(this, false);
     mControlView = ctrlView;
 
     addButton("Save", new OnClickListener() {
@@ -240,16 +180,11 @@ public class GestActivity extends MyActivity implements
     name.setTypeface(Typeface.MONOSPACE);
     name.setTextSize(24);
     name.setCursorVisible(false); // Until issue #6 is dealt with
-    LayoutParams p = layoutParams(ctrlView);
-    p.weight = 1;
-
-    ctrlView.addView(name, p);
+    ctrlView.addView(name, layoutParams(ctrlView, 1f));
     mNameWidget = name;
 
-    LinearLayout optionsPanel = linearLayout(true);
-    p = layoutParams(ctrlView);
-    p.width = LayoutParams.WRAP_CONTENT;
-    ctrlView.addView(optionsPanel, p);
+    LinearLayout optionsPanel = linearLayout(this, true);
+    ctrlView.addView(optionsPanel, layoutParams(ctrlView, 0));
 
     mSmoothingCheckBox = addCheckBox(optionsPanel, "Smoothing",
         new OnClickListener() {
@@ -292,17 +227,12 @@ public class GestActivity extends MyActivity implements
   }
 
   private View buildContentView() {
-    LinearLayout contentView = linearLayout(true);
+    LinearLayout contentView = linearLayout(this, true);
 
-    LinearLayout.LayoutParams p = layoutParams(contentView);
-    p.weight = 1.0f;
-    contentView.addView(buildUpperViews(), p);
+    contentView.addView(buildUpperViews(), layoutParams(contentView, 1));
 
     buildControlView();
-    p = layoutParams(contentView);
-    p.height = LayoutParams.WRAP_CONTENT;
-
-    contentView.addView(mControlView, p);
+    contentView.addView(mControlView); // , layoutParams(contentView, 0));
     return contentView;
   }
 

@@ -1,6 +1,5 @@
 package com.js.gestApp;
 
-import com.js.android.UITools;
 import com.js.basic.Point;
 
 import android.content.Context;
@@ -13,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import static android.view.ViewGroup.LayoutParams.*;
 import static com.js.basic.Tools.*;
+import static com.js.android.UITools.*;
 
 /**
  * <pre>
@@ -26,7 +26,7 @@ import static com.js.basic.Tools.*;
  * 
  * 2) The View methods setMinimumWidth/Height() don't seem to have any effect, at least when used in 
  *    conjunction with some LinearLayout configurations; see buildStretchableViewWithMinimumHeight()
- *    
+ * 
  * </pre>
  * 
  */
@@ -46,7 +46,7 @@ public class LayoutExperiments {
 
   private LinearLayout linearLayout() {
     LinearLayout view = new LinearLayout(context());
-    view.setBackgroundColor(UITools.debugColor());
+    view.setBackgroundColor(debugColor());
     return view;
   }
 
@@ -129,7 +129,7 @@ public class LayoutExperiments {
   private OurView view(int color, String message) {
     OurView v = new OurView(context());
     if (color == 0)
-      color = UITools.debugColor();
+      color = debugColor();
     v.setBackgroundColor(color);
     if (message == null)
       message = "View " + nameOf(v);
@@ -298,7 +298,7 @@ public class LayoutExperiments {
     }
   }
 
-  public static String dump(LayoutParams p) {
+  public static String dump(android.view.ViewGroup.LayoutParams p) {
     StringBuilder sb = new StringBuilder("LayoutParams");
     sb.append(" width:" + layoutElement(p.width));
     sb.append(" height:" + layoutElement(p.height));
