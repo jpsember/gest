@@ -27,6 +27,7 @@ public class TouchView extends View implements GestureEventFilter.Listener {
 
     MyTouchListener touchListener = buildTouchListener();
     mEventFilter = new GestureEventFilter();
+    mEventFilter.setViewMode(GestureEventFilter.MODE_SHAREDVIEW);
     mEventFilter.prependTo(touchListener);
     mEventFilter.setListener(this);
   }

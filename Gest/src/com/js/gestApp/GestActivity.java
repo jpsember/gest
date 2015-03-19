@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.json.JSONException;
 
 import com.js.android.MyActivity;
+
 import static com.js.android.UITools.*;
 import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
@@ -95,35 +96,43 @@ public class GestActivity extends MyActivity implements
     container.addView(mMatchView, layoutParams(container, 1f));
   }
 
-  private View buildUpperViews() {
-    boolean landscapeFlag;
-    landscapeFlag = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-    LinearLayout upperView = linearLayout(this, !landscapeFlag);
+  private View buildPrimaryViews() {
+    boolean landscapeFlag = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+    LinearLayout mainContainer = linearLayout(this, !landscapeFlag);
     LinearLayout auxContainer = linearLayout(this, landscapeFlag);
 
     buildMatchView(auxContainer);
     buildConsole(auxContainer);
 
-    upperView.addView(auxContainer, layoutParams(upperView, 1));
+    mainContainer.addView(auxContainer, layoutParams(mainContainer, 1));
 
     mTouchView = new TouchView(this, this);
 
-    upperView.addView(mTouchView, layoutParams(upperView, 2f));
+    mainContainer.addView(mTouchView, layoutParams(mainContainer, 2f));
 
-    mExperimentView = new ExperimentView(this, mGestureLibrary,
-        new GestureEventFilter.Listener() {
-          @Override
-          public void strokeSetExtended(StrokeSet strokeSet) {
-          }
+    LinearLayout pair = linearLayout(this, true);
+    mainContainer.addView(pair, layoutParams(mainContainer, 1.5f));
 
-          @Override
-          public void processGesture(String gestureName) {
-            pr("process gesture: " + gestureName);
-          }
-        });
-    upperView.addView(mExperimentView, layoutParams(upperView, 1.5f));
+    View gesturePanel = new View(this);
+    applyTestColor(gesturePanel, Color.GREEN);
+    LinearLayout.LayoutParams p = layoutParams(pair, 1f);
+    pair.addView(gesturePanel, p);
+    {
+      GestureEventFilter filter = new GestureEventFilter();
+      filter.setViewMode(GestureEventFilter.MODE_OWNVIEW);
+      filter.setView(gesturePanel);
+      filter.setListener(this);
+      filter.setGestures(mGestureLibrary);
+    }
 
-    return upperView;
+    mFloatingViewContainer = new FloatingViewContainer( //
+        this, // Context
+        mGestureLibrary, // GestureSet
+        this // GestureEventFilter.Listener
+    );
+    pair.addView(mFloatingViewContainer, layoutParams(pair, 1f));
+
+    return mainContainer;
   }
 
   private void setConsoleText(String text) {
@@ -229,10 +238,10 @@ public class GestActivity extends MyActivity implements
   private View buildContentView() {
     LinearLayout contentView = linearLayout(this, true);
 
-    contentView.addView(buildUpperViews(), layoutParams(contentView, 1));
+    contentView.addView(buildPrimaryViews(), layoutParams(contentView, 1));
 
     buildControlView();
-    contentView.addView(mControlView); // , layoutParams(contentView, 0));
+    contentView.addView(mControlView);
     return contentView;
   }
 
@@ -328,6 +337,6 @@ public class GestActivity extends MyActivity implements
   private EditText mNameWidget;
   private CheckBox mSmoothingCheckBox;
   private CheckBox mMultiLengthCheckBox;
-  private ExperimentView mExperimentView;
+  private FloatingViewContainer mFloatingViewContainer;
 
 }

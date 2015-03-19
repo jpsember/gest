@@ -7,18 +7,22 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.js.android.MyTouchListener;
+import com.js.android.UITools;
 import com.js.basic.MyMath;
 import com.js.basic.Point;
 import com.js.basic.Rect;
 import com.js.gest.GestureEventFilter;
 import com.js.gest.GestureSet;
 import com.js.gest.StrokeSet;
+import static com.js.basic.Tools.*;
 
-public class ExperimentView extends View implements GestureEventFilter.Listener {
+public class FloatingViewContainer extends View implements
+    GestureEventFilter.Listener {
 
-  public ExperimentView(Context context, GestureSet gestures,
+  public FloatingViewContainer(Context context, GestureSet gestures,
       GestureEventFilter.Listener listener) {
     super(context);
+    doNothing();
     setBackgroundColor(0xFFe0e0e0);
 
     MyTouchListener touchListener = buildTouchListener();
@@ -37,6 +41,7 @@ public class ExperimentView extends View implements GestureEventFilter.Listener 
     MyTouchListener touchListener = new MyTouchListener() {
       @Override
       public boolean onTouch(MotionEvent event) {
+        pr("onTouch " + UITools.dump(event));
         return false;
       }
     };
