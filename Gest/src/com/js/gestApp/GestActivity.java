@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.json.JSONException;
 
 import com.js.android.MyActivity;
-import com.js.android.UITools;
 import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
 import com.js.gest.GestureSet;
@@ -94,6 +93,24 @@ public class GestActivity extends MyActivity implements
     p.weight = weight;
   }
 
+  /**
+   * Construct LayoutParams for child views of a LinearLayout container. If its
+   * container has horizontal orientation, its height is MATCH_PARENT; else, its
+   * width is. The other dimension will be zero.
+   * 
+   * @param container
+   * @return LayoutParams appropriate to the container's orientation
+   */
+  private LinearLayout.LayoutParams layoutParams(LinearLayout container) {
+    boolean forHorizontalLayout = (container.getOrientation() == LinearLayout.HORIZONTAL);
+    LinearLayout.LayoutParams params = new LayoutParams(0, 0);
+    if (forHorizontalLayout)
+      params.height = LayoutParams.MATCH_PARENT;
+    else
+      params.width = LayoutParams.MATCH_PARENT;
+    return params;
+  }
+
   private void buildConsole(LinearLayout container) {
     TextView tv = new TextView(this);
     tv.setBackgroundColor(Color.LTGRAY);
@@ -103,14 +120,14 @@ public class GestActivity extends MyActivity implements
     tv.setHeight(1);
     mConsole = tv;
 
-    LinearLayout.LayoutParams p = UITools.layoutParams(container);
+    LinearLayout.LayoutParams p = layoutParams(container);
     setStretch(container, p, 1.5f);
     container.addView(mConsole, p);
   }
 
   private void buildMatchView(LinearLayout container) {
     mMatchView = new MatchView(this);
-    LinearLayout.LayoutParams p = UITools.layoutParams(container);
+    LinearLayout.LayoutParams p = layoutParams(container);
     setStretch(container, p, 1f);
     container.addView(mMatchView, p);
   }
@@ -118,24 +135,24 @@ public class GestActivity extends MyActivity implements
   private View buildUpperViews() {
     boolean landscapeFlag;
     landscapeFlag = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-    LinearLayout upperView = UITools.linearLayout(this, !landscapeFlag);
+    LinearLayout upperView = linearLayout(!landscapeFlag);
+    LinearLayout auxContainer = linearLayout(landscapeFlag);
 
-    LinearLayout auxContainer = UITools.linearLayout(this, landscapeFlag);
     buildMatchView(auxContainer);
     buildConsole(auxContainer);
 
-    LinearLayout.LayoutParams p = UITools.layoutParams(upperView);
+    LinearLayout.LayoutParams p = layoutParams(upperView);
     setStretch(upperView, p, 1f);
     upperView.addView(auxContainer, p);
 
     mTouchView = new TouchView(this, this);
 
-    p = UITools.layoutParams(upperView);
+    p = layoutParams(upperView);
     setStretch(upperView, p, 2f);
     upperView.addView(mTouchView, p);
 
-    p = UITools.layoutParams(upperView);
-    setStretch(upperView, p, 2.5f);
+    p = layoutParams(upperView);
+    setStretch(upperView, p, 1.5f);
     mExperimentView = new ExperimentView(this, mGestureLibrary,
         new GestureEventFilter.Listener() {
           @Override
@@ -163,7 +180,9 @@ public class GestActivity extends MyActivity implements
   private void addButton(String label, OnClickListener listener) {
     Button b = new Button(this);
     b.setText(label);
-    mControlView.addView(b, UITools.layoutParams(mControlView));
+    LayoutParams p = layoutParams(mControlView);
+    p.width = LayoutParams.WRAP_CONTENT;
+    mControlView.addView(b, p);
     if (listener != null)
       b.setOnClickListener(listener);
   }
@@ -172,14 +191,29 @@ public class GestActivity extends MyActivity implements
       OnClickListener listener) {
     CheckBox checkBox = new CheckBox(this);
     checkBox.setText(label);
-    container.addView(checkBox, UITools.layoutParams(container));
+    LayoutParams p = layoutParams(container);
+    p.height = LayoutParams.WRAP_CONTENT;
+    container.addView(checkBox, p);
     if (listener != null)
       checkBox.setOnClickListener(listener);
     return checkBox;
   }
 
+  /**
+   * Construct a LinearLayout
+   * 
+   * @param vertical
+   *          true if it is to have a vertical orientation
+   */
+  private LinearLayout linearLayout(boolean vertical) {
+    LinearLayout view = new LinearLayout(this);
+    view.setOrientation(vertical ? LinearLayout.VERTICAL
+        : LinearLayout.HORIZONTAL);
+    return view;
+  }
+
   private void buildControlView() {
-    LinearLayout ctrlView = UITools.linearLayout(this, false);
+    LinearLayout ctrlView = linearLayout(false);
     mControlView = ctrlView;
 
     addButton("Save", new OnClickListener() {
@@ -206,13 +240,16 @@ public class GestActivity extends MyActivity implements
     name.setTypeface(Typeface.MONOSPACE);
     name.setTextSize(24);
     name.setCursorVisible(false); // Until issue #6 is dealt with
-    LinearLayout.LayoutParams p = UITools.layoutParams(ctrlView);
+    LayoutParams p = layoutParams(ctrlView);
     p.weight = 1;
+
     ctrlView.addView(name, p);
     mNameWidget = name;
 
-    LinearLayout optionsPanel = UITools.linearLayout(this, true);
-    ctrlView.addView(optionsPanel, UITools.layoutParams(ctrlView));
+    LinearLayout optionsPanel = linearLayout(true);
+    p = layoutParams(ctrlView);
+    p.width = LayoutParams.WRAP_CONTENT;
+    ctrlView.addView(optionsPanel, p);
 
     mSmoothingCheckBox = addCheckBox(optionsPanel, "Smoothing",
         new OnClickListener() {
@@ -255,14 +292,15 @@ public class GestActivity extends MyActivity implements
   }
 
   private View buildContentView() {
-    LinearLayout contentView = UITools.linearLayout(this, true);
+    LinearLayout contentView = linearLayout(true);
 
-    LinearLayout.LayoutParams p = UITools.layoutParams(contentView);
+    LinearLayout.LayoutParams p = layoutParams(contentView);
     p.weight = 1.0f;
     contentView.addView(buildUpperViews(), p);
 
     buildControlView();
-    p = UITools.layoutParams(contentView);
+    p = layoutParams(contentView);
+    p.height = LayoutParams.WRAP_CONTENT;
 
     contentView.addView(mControlView, p);
     return contentView;

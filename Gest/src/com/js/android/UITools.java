@@ -50,6 +50,9 @@ public final class UITools {
    * @param context
    * @param vertical
    *          true if it is to have a vertical orientation
+   * @deprecated Avoid using this, since it's obscuring our understanding of
+   *             LinearLayouts; use it as a private method of your class if
+   *             desired
    */
   public static LinearLayout linearLayout(Context context, boolean vertical) {
     LinearLayout view = new LinearLayout(context);
@@ -72,6 +75,9 @@ public final class UITools {
    *          horizontal orientation: width wraps content, height matches
    *          container's. If false, width matches container's, height wraps
    *          content
+   * @deprecated Avoid using this, since it's obscuring our understanding of
+   *             LinearLayouts; use it as a private method of your class if
+   *             desired
    */
   public static LinearLayout.LayoutParams layoutParams(
       boolean forHorizontalLayout) {
@@ -90,6 +96,9 @@ public final class UITools {
    * 
    * @param container
    * @return LayoutParams appropriate to the container's orientation
+   * @deprecated Avoid using this, since it's obscuring our understanding of
+   *             LinearLayouts; use it as a private method of your class if
+   *             desired
    */
   public static LinearLayout.LayoutParams layoutParams(LinearLayout container) {
     return layoutParams(container.getOrientation() == LinearLayout.HORIZONTAL);
