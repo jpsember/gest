@@ -24,7 +24,7 @@ public class ExperimentView extends View implements GestureEventFilter.Listener 
     MyTouchListener touchListener = buildTouchListener();
 
     mEventFilter = new GestureEventFilter();
-    mEventFilter.setFloatingViewMode();
+    mEventFilter.setViewMode(GestureEventFilter.MODE_FLOATINGVIEW);
     mEventFilter.prependTo(touchListener);
     mEventFilter.setListener(this);
 

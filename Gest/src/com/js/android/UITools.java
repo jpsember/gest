@@ -45,6 +45,14 @@ public final class UITools {
   }
 
   /**
+   * Apply a background color to a view, and print a warning
+   */
+  public static void applyTestColor(View view, int color) {
+    warning("applying test color to view " + nameOf(view));
+    view.setBackgroundColor(color);
+  }
+
+  /**
    * Construct a LinearLayout
    * 
    * @param verticalOrientation
@@ -55,6 +63,7 @@ public final class UITools {
     LinearLayout view = new LinearLayout(context);
     view.setOrientation(verticalOrientation ? LinearLayout.VERTICAL
         : LinearLayout.HORIZONTAL);
+    applyDebugColors(view);
     return view;
   }
 
@@ -84,15 +93,16 @@ public final class UITools {
    * 
    * c) weight in its weight field
    * 
-   * @param container
+   * @param verticalOrientation
+   *          true iff the containing LinearLayout has vertical orientation
    * @return LayoutParams appropriate to the container's orientation
    */
-  public static LinearLayout.LayoutParams layoutParams(LinearLayout container,
-      float weight) {
+  public static LinearLayout.LayoutParams layoutParams(
+      boolean verticalOrientation, float weight) {
 
     int width, height;
     int variableSize = (weight != 0) ? 0 : LayoutParams.WRAP_CONTENT;
-    if (container.getOrientation() == LinearLayout.HORIZONTAL) {
+    if (!verticalOrientation) {
       width = variableSize;
       height = LayoutParams.MATCH_PARENT;
     } else {
@@ -103,6 +113,12 @@ public final class UITools {
         height);
     params.weight = weight;
     return params;
+  }
+
+  public static LinearLayout.LayoutParams layoutParams(LinearLayout container,
+      float weight) {
+    return layoutParams(container.getOrientation() == LinearLayout.VERTICAL,
+        weight);
   }
 
   /**
@@ -141,6 +157,28 @@ public final class UITools {
     case MotionEvent.ACTION_POINTER_UP:
       sb.append("UP(" + index + ")");
       break;
+    }
+    return sb.toString();
+  }
+
+  private static String layoutElement(int n) {
+    switch (n) {
+    case LayoutParams.MATCH_PARENT:
+      return "MATCH_PARENT";
+    case LayoutParams.WRAP_CONTENT:
+      return "WRAP_CONTENT";
+    default:
+      return d(n, 11);
+    }
+  }
+
+  public static String dump(android.view.ViewGroup.LayoutParams p) {
+    StringBuilder sb = new StringBuilder("LayoutParams");
+    sb.append(" width:" + layoutElement(p.width));
+    sb.append(" height:" + layoutElement(p.height));
+    if (p instanceof LinearLayout.LayoutParams) {
+      LinearLayout.LayoutParams p2 = (LinearLayout.LayoutParams) p;
+      sb.append(" weight:" + com.js.basic.Tools.d(p2.weight));
     }
     return sb.toString();
   }
