@@ -34,7 +34,7 @@ import static com.js.basic.Tools.*;
 public class GestActivity extends MyActivity implements
     GestureEventFilter.Listener {
 
-  static int PANEL_TYPE = GestureEventFilter.MODE_SHAREDVIEW;
+  static int PANEL_TYPE = GestureEventFilter.MODE_FLOATINGVIEW;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {

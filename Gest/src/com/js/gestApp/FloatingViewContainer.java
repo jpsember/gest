@@ -11,11 +11,9 @@ import com.js.basic.Point;
 import com.js.basic.Rect;
 import com.js.gest.GestureEventFilter;
 import com.js.gest.GestureSet;
-import com.js.gest.StrokeSet;
 import static com.js.basic.Tools.*;
 
-public class FloatingViewContainer extends View implements
-    GestureEventFilter.Listener {
+public class FloatingViewContainer extends View {
 
   public FloatingViewContainer(Context context, GestureSet gestures,
       GestureEventFilter.Listener listener, MyTouchListener touchListener) {
@@ -28,10 +26,8 @@ public class FloatingViewContainer extends View implements
     mEventFilter = new GestureEventFilter();
     mEventFilter.setViewMode(GestureEventFilter.MODE_FLOATINGVIEW);
     mEventFilter.prependTo(touchListener);
-    mEventFilter.setListener(this);
-
-    mEventFilter.setGestures(gestures);
     mEventFilter.setListener(listener);
+    mEventFilter.setGestures(gestures);
 
   }
 
@@ -69,14 +65,6 @@ public class FloatingViewContainer extends View implements
       Rect r = new Rect(pti.x, pti.y, 20, 20);
       canvas.drawRect(r.toAndroid(), mPaintFill);
     }
-  }
-
-  @Override
-  public void strokeSetExtended(StrokeSet strokeSet) {
-  }
-
-  @Override
-  public void processGesture(String gestureName) {
   }
 
   private GestureEventFilter mEventFilter;
