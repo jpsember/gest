@@ -34,7 +34,7 @@ import static com.js.basic.Tools.*;
 public class GestActivity extends MyActivity implements
     GestureEventFilter.Listener {
 
-  static int PANEL_TYPE = 0;
+  static int PANEL_TYPE = GestureEventFilter.MODE_SHAREDVIEW;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -97,11 +97,6 @@ public class GestActivity extends MyActivity implements
     container.addView(mConsole, layoutParams(container, 1.5f));
   }
 
-  private void buildMatchView(LinearLayout container) {
-    mMatchView = new MatchView(this);
-    container.addView(mMatchView, layoutParams(container, 1f));
-  }
-
   private MyTouchListener buildTouchListener() {
     return new MyTouchListener() {
       @Override
@@ -120,38 +115,38 @@ public class GestActivity extends MyActivity implements
     LinearLayout mainContainer = linearLayout(this, !landscapeFlag);
     LinearLayout auxContainer = linearLayout(this, landscapeFlag);
 
-    buildMatchView(auxContainer);
+    mMatchView = new MatchView(this);
+    auxContainer.addView(mMatchView, layoutParams(auxContainer, 1f));
     buildConsole(auxContainer);
 
     mainContainer.addView(auxContainer, layoutParams(mainContainer, 1));
 
-    if (PANEL_TYPE == 0) {
+    if (PANEL_TYPE == GestureEventFilter.MODE_SHAREDVIEW) {
       mTouchView = new TouchView(this, this, buildTouchListener());
       mainContainer.addView(mTouchView, layoutParams(mainContainer, 2f));
     }
 
     LinearLayout pair = null;
 
-    if (PANEL_TYPE > 0) {
+    if (PANEL_TYPE != GestureEventFilter.MODE_SHAREDVIEW) {
       pair = linearLayout(this, true);
       mainContainer.addView(pair, layoutParams(mainContainer, 1.5f));
     }
 
-    if (PANEL_TYPE == 1) {
+    if (PANEL_TYPE == GestureEventFilter.MODE_OWNVIEW) {
       GestureEventFilter filter = new GestureEventFilter();
-      filter.setViewMode(GestureEventFilter.MODE_OWNVIEW);
+      filter.setViewMode(PANEL_TYPE);
       filter.setListener(this);
       filter.setGestures(mGestureLibrary);
 
       View gesturePanel = filter.constructGesturePanel(this);
-      filter.setView(gesturePanel);
-
       applyTestColor(gesturePanel, Color.GREEN);
+
       LinearLayout.LayoutParams p = layoutParams(pair, 1f);
       pair.addView(gesturePanel, p);
     }
 
-    if (PANEL_TYPE == 2) {
+    if (PANEL_TYPE == GestureEventFilter.MODE_FLOATINGVIEW) {
       View floatingViewContainer = new FloatingViewContainer( //
           this, // Context
           mGestureLibrary, // GestureSet
