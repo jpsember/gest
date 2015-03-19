@@ -3,11 +3,9 @@ package com.js.gestApp;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.view.MotionEvent;
 import android.view.View;
 
 import com.js.android.MyTouchListener;
-import com.js.android.UITools;
 import com.js.basic.MyMath;
 import com.js.basic.Point;
 import com.js.basic.Rect;
@@ -20,12 +18,12 @@ public class FloatingViewContainer extends View implements
     GestureEventFilter.Listener {
 
   public FloatingViewContainer(Context context, GestureSet gestures,
-      GestureEventFilter.Listener listener) {
+      GestureEventFilter.Listener listener, MyTouchListener touchListener) {
     super(context);
     doNothing();
     setBackgroundColor(0xFFe0e0e0);
 
-    MyTouchListener touchListener = buildTouchListener();
+    touchListener.setView(this);
 
     mEventFilter = new GestureEventFilter();
     mEventFilter.setViewMode(GestureEventFilter.MODE_FLOATINGVIEW);
@@ -35,18 +33,6 @@ public class FloatingViewContainer extends View implements
     mEventFilter.setGestures(gestures);
     mEventFilter.setListener(listener);
 
-  }
-
-  private MyTouchListener buildTouchListener() {
-    MyTouchListener touchListener = new MyTouchListener() {
-      @Override
-      public boolean onTouch(MotionEvent event) {
-        pr("onTouch " + UITools.dump(event));
-        return false;
-      }
-    };
-    touchListener.setView(this);
-    return touchListener;
   }
 
   @Override

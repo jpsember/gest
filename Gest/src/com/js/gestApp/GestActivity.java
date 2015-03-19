@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import org.json.JSONException;
 
 import com.js.android.MyActivity;
+import com.js.android.MyTouchListener;
+import com.js.android.UITools;
 
 import static com.js.android.UITools.*;
 import com.js.gest.MatcherParameters;
@@ -17,6 +19,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -30,6 +33,8 @@ import static com.js.basic.Tools.*;
 
 public class GestActivity extends MyActivity implements
     GestureEventFilter.Listener {
+
+  static int PANEL_TYPE = 2;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +74,8 @@ public class GestActivity extends MyActivity implements
     mNormalizedStrokeSet = smoothedSet.normalize();
     StrokeSet displayedSet = mNormalizedStrokeSet.fitToRect(mTouchStrokeSet
         .getBounds());
-    mTouchView.setDisplayStrokeSet(displayedSet);
+    if (mTouchView != null)
+      mTouchView.setDisplayStrokeSet(displayedSet);
 
     performMatch();
   }
@@ -96,6 +102,19 @@ public class GestActivity extends MyActivity implements
     container.addView(mMatchView, layoutParams(container, 1f));
   }
 
+  private MyTouchListener buildTouchListener() {
+    return new MyTouchListener() {
+      @Override
+      public boolean onTouch(MotionEvent event) {
+        if (event.getActionMasked() != MotionEvent.ACTION_MOVE)
+          pr("Detected non-gesture event: " + UITools.dump(event));
+        if (mAnimateView != null)
+          mAnimateView.invalidate();
+        return false;
+      }
+    };
+  }
+
   private View buildPrimaryViews() {
     boolean landscapeFlag = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
     LinearLayout mainContainer = linearLayout(this, !landscapeFlag);
@@ -106,31 +125,42 @@ public class GestActivity extends MyActivity implements
 
     mainContainer.addView(auxContainer, layoutParams(mainContainer, 1));
 
-    mTouchView = new TouchView(this, this);
-
-    mainContainer.addView(mTouchView, layoutParams(mainContainer, 2f));
-
-    LinearLayout pair = linearLayout(this, true);
-    mainContainer.addView(pair, layoutParams(mainContainer, 1.5f));
-
-    View gesturePanel = new View(this);
-    applyTestColor(gesturePanel, Color.GREEN);
-    LinearLayout.LayoutParams p = layoutParams(pair, 1f);
-    pair.addView(gesturePanel, p);
-    {
-      GestureEventFilter filter = new GestureEventFilter();
-      filter.setViewMode(GestureEventFilter.MODE_OWNVIEW);
-      filter.setView(gesturePanel);
-      filter.setListener(this);
-      filter.setGestures(mGestureLibrary);
+    if (PANEL_TYPE == 0) {
+      mTouchView = new TouchView(this, this, buildTouchListener());
+      mainContainer.addView(mTouchView, layoutParams(mainContainer, 2f));
     }
 
-    mFloatingViewContainer = new FloatingViewContainer( //
-        this, // Context
-        mGestureLibrary, // GestureSet
-        this // GestureEventFilter.Listener
-    );
-    pair.addView(mFloatingViewContainer, layoutParams(pair, 1f));
+    LinearLayout pair = null;
+
+    if (PANEL_TYPE > 0) {
+      pair = linearLayout(this, true);
+      mainContainer.addView(pair, layoutParams(mainContainer, 1.5f));
+    }
+
+    if (PANEL_TYPE == 1) {
+      GestureEventFilter filter = new GestureEventFilter();
+      filter.setViewMode(GestureEventFilter.MODE_OWNVIEW);
+      filter.setListener(this);
+      filter.setGestures(mGestureLibrary);
+
+      View gesturePanel = filter.constructView(this);
+      filter.setView(gesturePanel);
+
+      applyTestColor(gesturePanel, Color.GREEN);
+      LinearLayout.LayoutParams p = layoutParams(pair, 1f);
+      pair.addView(gesturePanel, p);
+    }
+
+    if (PANEL_TYPE == 2) {
+      View floatingViewContainer = new FloatingViewContainer( //
+          this, // Context
+          mGestureLibrary, // GestureSet
+          this, // GestureEventFilter.Listener
+          buildTouchListener() // MyTouchListener
+      );
+      pair.addView(floatingViewContainer, layoutParams(pair, 1f));
+      mAnimateView = floatingViewContainer;
+    }
 
     return mainContainer;
   }
@@ -337,6 +367,5 @@ public class GestActivity extends MyActivity implements
   private EditText mNameWidget;
   private CheckBox mSmoothingCheckBox;
   private CheckBox mMultiLengthCheckBox;
-  private FloatingViewContainer mFloatingViewContainer;
-
+  private View mAnimateView;
 }

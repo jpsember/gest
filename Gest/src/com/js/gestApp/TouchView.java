@@ -3,10 +3,8 @@ package com.js.gestApp;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.view.MotionEvent;
 import android.view.View;
 
-import com.js.android.UITools;
 import com.js.gest.GestureEventFilter;
 import com.js.gest.StrokeSet;
 import com.js.android.MyTouchListener;
@@ -19,32 +17,20 @@ import static com.js.basic.Tools.*;
  */
 public class TouchView extends View implements GestureEventFilter.Listener {
 
-  public TouchView(Context context, GestureEventFilter.Listener listener) {
+  public TouchView(Context context, GestureEventFilter.Listener listener,
+      MyTouchListener touchListener) {
     super(context);
+    doNothing();
     setBackgroundColor(Color.BLUE);
     mListener = listener;
     mRenderer = new StrokeRenderer();
-
-    MyTouchListener touchListener = buildTouchListener();
+    if (touchListener == null)
+      throw new IllegalArgumentException();
+    touchListener.setView(this);
     mEventFilter = new GestureEventFilter();
     mEventFilter.setViewMode(GestureEventFilter.MODE_SHAREDVIEW);
     mEventFilter.prependTo(touchListener);
     mEventFilter.setListener(this);
-  }
-
-  private MyTouchListener buildTouchListener() {
-    MyTouchListener touchListener = new MyTouchListener() {
-      // We don't need to include onTouchEvent(), but we do so to
-      // verify that we still get non-gesture-related motions
-      @Override
-      public boolean onTouch(MotionEvent event) {
-        if (event.getActionMasked() != MotionEvent.ACTION_MOVE)
-          pr("TouchView ignoring non-gesture event " + UITools.dump(event));
-        return false;
-      }
-    };
-    touchListener.setView(this);
-    return touchListener;
   }
 
   private void onDrawAux() {
