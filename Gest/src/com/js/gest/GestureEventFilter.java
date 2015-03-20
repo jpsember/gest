@@ -90,7 +90,8 @@ public class GestureEventFilter extends MyTouchListener {
     if (sharedViewMode())
       throw new IllegalStateException();
     if (mGesturePanelRenderer == null) {
-      mGesturePanelRenderer = new GesturePanelRenderer(getView());
+      mGesturePanelRenderer = new GesturePanelRenderer(getView(),
+          viewMode() == MODE_FLOATINGVIEW);
     }
     return mGesturePanelRenderer;
   }

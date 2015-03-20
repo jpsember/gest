@@ -1,5 +1,6 @@
 package com.js.gestApp;
 
+import com.js.android.UITools;
 import com.js.basic.Point;
 
 import android.content.Context;
@@ -52,7 +53,7 @@ public class LayoutExperiments {
 
   private View buildContentView() {
     View content;
-    switch (7) {
+    switch (8) {
     default:
       content = linearLayout();
       break;
@@ -76,6 +77,9 @@ public class LayoutExperiments {
       break;
     case 7:
       content = buildStretchableViewWithMinimumHeight();
+      break;
+    case 8:
+      content = buildViewWithMinimumSize();
       break;
     }
 
@@ -287,26 +291,50 @@ public class LayoutExperiments {
     return view;
   }
 
-  private static String layoutElement(int n) {
-    switch (n) {
-    case LayoutParams.MATCH_PARENT:
-      return "MATCH_PARENT";
-    case LayoutParams.WRAP_CONTENT:
-      return "WRAP_CONTENT";
-    default:
-      return d(n, 11);
-    }
+  private void addCell(LinearLayout view) {
+    View v = view(0, null);
+    LayoutParams p = params(90, MATCH_PARENT);
+    p.weight = 0;
+    view.addView(v, p);
   }
 
-  public static String dump(android.view.ViewGroup.LayoutParams p) {
-    StringBuilder sb = new StringBuilder("LayoutParams");
-    sb.append(" width:" + layoutElement(p.width));
-    sb.append(" height:" + layoutElement(p.height));
-    if (p instanceof LinearLayout.LayoutParams) {
-      LinearLayout.LayoutParams p2 = (LinearLayout.LayoutParams) p;
-      sb.append(" weight:" + d(p2.weight));
+  private View buildViewWithMinimumSize() {
+
+    // Create a layout to hold the top, middle, and lower bands
+    LinearLayout outerContainer = UITools.linearLayout(mContext, true);
+
+    // Add upper band
+    LayoutParams p0 = params(MATCH_PARENT, 100);
+    outerContainer.addView(view(Color.RED, "upper band"), p0);
+
+    // Construct the middle band, a horizontal layout
+    LinearLayout view = linearLayout();
+    view.setOrientation(LinearLayout.HORIZONTAL);
+    LayoutParams p1 = UITools.layoutParams(outerContainer, 1);
+    outerContainer.addView(view, p1);
+
+    // Add lower band
+    outerContainer.addView(view(Color.RED, "lower band"), p0);
+
+    // Populate the middle band
+    for (int pass = 1; pass <= 2; pass++) {
+      for (int i = 0; i < 3; i++)
+        addCell(view);
+
+      // The last view should be stretchable in width, and preferably height as
+      // well if its minimum height is less than the layout height
+      {
+        View v = view(0, "Stretch#" + pass);
+        applyTestColor(v, Color.CYAN);
+        LayoutParams p = params(200, 200);
+        v.setMinimumHeight(200);
+        p.weight = pass;
+        p.height = MATCH_PARENT;
+        view.addView(v, p);
+        pr("stretchable view #" + pass + " is " + nameOf(v));
+      }
     }
-    return sb.toString();
+    return outerContainer;
   }
 
   private Context mContext;

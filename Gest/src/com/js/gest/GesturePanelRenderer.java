@@ -23,8 +23,9 @@ class GesturePanelRenderer {
    * @param container
    *          the View to contain the panel
    */
-  public GesturePanelRenderer(View container) {
+  public GesturePanelRenderer(View container, boolean floating) {
     mContainer = container;
+    mFloating = floating;
   }
 
   /**
@@ -109,11 +110,13 @@ class GesturePanelRenderer {
     if (mViewBoundsNormal == null) {
       View view = mContainer;
 
-      float minWidth = 340;
-      float minHeight = 240;
+      float width = view.getWidth();
+      float height = view.getHeight();
 
-      float width = Math.min(view.getWidth(), minWidth);
-      float height = Math.min(view.getHeight(), minHeight);
+      if (mFloating) {
+        width = Math.min(width, 340);
+        height = Math.min(height, 240);
+      }
 
       Rect rect = new Rect(view.getWidth() - width, view.getHeight() - height,
           width, height);
@@ -178,4 +181,5 @@ class GesturePanelRenderer {
   private Map<String, StrokeSet> mScaledStrokeSets = new HashMap();
   private Handler mHandler = new Handler();
   private int mUniqueGestureNumber;
+  private boolean mFloating;
 }
