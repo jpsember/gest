@@ -2,10 +2,9 @@ package com.js.gestApp;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.view.View;
 
-import com.js.gest.GestureEventFilter;
+import com.js.gest.GesturePanel;
 import com.js.gest.StrokeSet;
 import com.js.android.MyTouchListener;
 import com.js.basic.Rect;
@@ -14,23 +13,25 @@ import static com.js.basic.Tools.*;
 
 /**
  * View for inputting and rendering user touch sequences
+ * 
+ * @deprecated
  */
-public class TouchView extends View implements GestureEventFilter.Listener {
+public class TouchView extends View implements GesturePanel.Listener {
 
-  public TouchView(Context context, GestureEventFilter.Listener listener,
+  public TouchView(Context context, GesturePanel.Listener listener,
       MyTouchListener touchListener) {
     super(context);
     doNothing();
-    setBackgroundColor(Color.BLUE);
-    mListener = listener;
-    mRenderer = new StrokeRenderer();
-    if (touchListener == null)
-      throw new IllegalArgumentException();
-    touchListener.setView(this);
-    mEventFilter = new GestureEventFilter();
-    mEventFilter.setViewMode(GestureEventFilter.MODE_SHAREDVIEW);
-    mEventFilter.prependTo(touchListener);
-    mEventFilter.setListener(this);
+    // setBackgroundColor(Color.BLUE);
+    // mListener = listener;
+    // mRenderer = new StrokeRenderer();
+    // if (touchListener == null)
+    // throw new IllegalArgumentException();
+    // touchListener.setView(this);
+    // mEventFilter = new GestureEventFilter();
+    // mEventFilter.setViewMode(GestureEventFilter.MODE_SHAREDVIEW);
+    // mEventFilter.prependTo(touchListener);
+    // mEventFilter.setListener(this);
   }
 
   private void onDrawAux() {
@@ -76,7 +77,6 @@ public class TouchView extends View implements GestureEventFilter.Listener {
   // Stroke set from user touch event
   private StrokeSet mTouchStrokeSet;
   private StrokeSet mDisplayStrokeSet;
-  private GestureEventFilter.Listener mListener;
+  private GesturePanel.Listener mListener;
   private StrokeRenderer mRenderer;
-  private GestureEventFilter mEventFilter;
 }

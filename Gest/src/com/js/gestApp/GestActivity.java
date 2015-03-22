@@ -5,21 +5,18 @@ import java.util.ArrayList;
 import org.json.JSONException;
 
 import com.js.android.MyActivity;
-import com.js.android.MyTouchListener;
-import com.js.android.UITools;
 
 import static com.js.android.UITools.*;
 import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
 import com.js.gest.GestureSet;
 import com.js.gest.GestureSet.Match;
-import com.js.gest.GestureEventFilter;
+import com.js.gest.GesturePanel;
 
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -31,14 +28,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import static com.js.basic.Tools.*;
 
-public class GestActivity extends MyActivity implements
-    GestureEventFilter.Listener {
-
-  static int PANEL_TYPE = GestureEventFilter.MODE_OWNVIEW;
+public class GestActivity extends MyActivity implements GesturePanel.Listener {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
     if (false) {
       warning("building experimental content view");
       requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -48,6 +43,7 @@ public class GestActivity extends MyActivity implements
       setContentView(LayoutExperiments.buildExperimentalContentView(this));
       return;
     }
+
     // To address issue #6:
     getWindow().setSoftInputMode(
         WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -70,12 +66,7 @@ public class GestActivity extends MyActivity implements
       smoothedSet = set;
     }
     smoothedSet = smoothedSet.fitToRect(null);
-
     mNormalizedStrokeSet = smoothedSet.normalize();
-    StrokeSet displayedSet = mNormalizedStrokeSet.fitToRect(mTouchStrokeSet
-        .getBounds());
-    if (mTouchView != null)
-      mTouchView.setDisplayStrokeSet(displayedSet);
 
     performMatch();
   }
@@ -97,19 +88,6 @@ public class GestActivity extends MyActivity implements
     container.addView(mConsole, layoutParams(container, 1.5f));
   }
 
-  private MyTouchListener buildTouchListener() {
-    return new MyTouchListener() {
-      @Override
-      public boolean onTouch(MotionEvent event) {
-        if (event.getActionMasked() != MotionEvent.ACTION_MOVE)
-          pr("Detected non-gesture event: " + UITools.dump(event));
-        if (mAnimateView != null)
-          mAnimateView.invalidate();
-        return false;
-      }
-    };
-  }
-
   private View buildPrimaryViews() {
     boolean landscapeFlag = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
     LinearLayout mainContainer = linearLayout(this, !landscapeFlag);
@@ -121,41 +99,16 @@ public class GestActivity extends MyActivity implements
 
     mainContainer.addView(auxContainer, layoutParams(mainContainer, 1));
 
-    if (PANEL_TYPE == GestureEventFilter.MODE_SHAREDVIEW) {
-      mTouchView = new TouchView(this, this, buildTouchListener());
-      mainContainer.addView(mTouchView, layoutParams(mainContainer, 2f));
-    }
-
     LinearLayout pair = null;
+    pair = linearLayout(this, true);
+    mainContainer.addView(pair, layoutParams(mainContainer, 1.5f));
 
-    if (PANEL_TYPE != GestureEventFilter.MODE_SHAREDVIEW) {
-      pair = linearLayout(this, true);
-      mainContainer.addView(pair, layoutParams(mainContainer, 1.5f));
-    }
+    GesturePanel gesturePanel = new GesturePanel(this);
+    gesturePanel.setListener(this);
+    gesturePanel.setGestures(mGestureLibrary);
 
-    if (PANEL_TYPE == GestureEventFilter.MODE_OWNVIEW) {
-      GestureEventFilter filter = new GestureEventFilter();
-      filter.setViewMode(PANEL_TYPE);
-      filter.setListener(this);
-      filter.setGestures(mGestureLibrary);
-
-      View gesturePanel = filter.constructGesturePanel(this);
-      applyTestColor(gesturePanel, Color.GREEN);
-
-      LinearLayout.LayoutParams p = layoutParams(pair, 1f);
-      pair.addView(gesturePanel, p);
-    }
-
-    if (PANEL_TYPE == GestureEventFilter.MODE_FLOATINGVIEW) {
-      View floatingViewContainer = new FloatingViewContainer( //
-          this, // Context
-          mGestureLibrary, // GestureSet
-          this, // GestureEventFilter.Listener
-          buildTouchListener() // MyTouchListener
-      );
-      pair.addView(floatingViewContainer, layoutParams(pair, 1f));
-      mAnimateView = floatingViewContainer;
-    }
+    LinearLayout.LayoutParams p = layoutParams(pair, 1f);
+    pair.addView(gesturePanel, p);
 
     return mainContainer;
   }
@@ -351,7 +304,6 @@ public class GestActivity extends MyActivity implements
 
   private GestureSet mGestureLibrary;
   private GestureSet mLowResolutionLibrary;
-  private TouchView mTouchView;
   // Stroke set from user touch event
   private StrokeSet mTouchStrokeSet;
   // Stroke set after registering / smoothing / normalizing
@@ -362,5 +314,4 @@ public class GestActivity extends MyActivity implements
   private EditText mNameWidget;
   private CheckBox mSmoothingCheckBox;
   private CheckBox mMultiLengthCheckBox;
-  private View mAnimateView;
 }
