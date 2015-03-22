@@ -93,8 +93,6 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
     LinearLayout mainContainer = linearLayout(this, !landscapeFlag);
     LinearLayout auxContainer = linearLayout(this, landscapeFlag);
 
-    mMatchView = new MatchView(this);
-    auxContainer.addView(mMatchView, layoutParams(auxContainer, 1f));
     buildConsole(auxContainer);
 
     mainContainer.addView(auxContainer, layoutParams(mainContainer, 1));
@@ -225,7 +223,6 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
 
   private void clearRegisteredSet() {
     mNormalizedStrokeSet = null;
-    mMatchView.setStrokeSet(null);
     setConsoleText(null);
   }
 
@@ -260,11 +257,6 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
       sb.append(m);
       sb.append("\n");
     }
-    if (goodFit) {
-      mMatchView.setStrokeSet(match.strokeSet());
-    } else
-      mMatchView.setStrokeSet(null);
-
     return sb.toString();
   }
 
@@ -308,7 +300,6 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
   private StrokeSet mTouchStrokeSet;
   // Stroke set after registering / smoothing / normalizing
   private StrokeSet mNormalizedStrokeSet;
-  private MatchView mMatchView;
   private TextView mConsole;
   private LinearLayout mControlView;
   private EditText mNameWidget;

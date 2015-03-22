@@ -80,10 +80,11 @@ public class Stroke extends Freezable.Mutable implements
     } else {
       shiftedTime = time - mStartTime;
       DataPoint elem = last(mPoints);
-      if (shiftedTime == elem.getTime())
-        shiftedTime += .005f;
-      if (shiftedTime < elem.getTime())
-        throw new IllegalArgumentException("time must be strictly increasing");
+      if (shiftedTime <= elem.getTime()) {
+        warning("time was not strictly increasing, prev was " + elem.getTime()
+            + ", current " + shiftedTime);
+        shiftedTime = elem.getTime() + .005f;
+      }
     }
     DataPoint pt = new DataPoint(shiftedTime, location);
     mPoints.add(pt);
