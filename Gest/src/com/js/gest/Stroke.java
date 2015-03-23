@@ -78,16 +78,11 @@ public class Stroke extends Freezable.Mutable implements
     if (isEmpty()) {
       mStartTime = time;
     } else {
-      shiftedTime = time - mStartTime;
-      DataPoint elem = last(mPoints);
-      if (shiftedTime <= elem.getTime()) {
-        warning("time was not strictly increasing, prev was " + elem.getTime()
-            + ", current " + shiftedTime);
-        shiftedTime = elem.getTime() + .005f;
-      }
+      DataPoint previousDataPoint = last(mPoints);
+      shiftedTime = Math.max(previousDataPoint.getTime() + 0.001f, time
+          - mStartTime);
     }
-    DataPoint pt = new DataPoint(shiftedTime, location);
-    mPoints.add(pt);
+    mPoints.add(new DataPoint(shiftedTime, location));
   }
 
   // Divide stroke point time values by this to get time in seconds
