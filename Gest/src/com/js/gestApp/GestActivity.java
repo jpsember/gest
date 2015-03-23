@@ -97,22 +97,17 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
 
     buildConsole(auxContainer);
 
+    mGesturePanel = new GesturePanel(this);
+    mGesturePanel.setListener(this);
+    mGesturePanel.setGestures(mGestureLibrary);
+
     mainContainer.addView(auxContainer, layoutParams(mainContainer, 1));
-    mTouchView = new TouchView(this, new TouchView.Listener() {
-      @Override
-      public void receivedStrokeSet(StrokeSet set) {
-        mGesturePanel.setEnteredStrokeSet(set);
-      }
-    });
+    mTouchView = new TouchView(this, mGesturePanel);
     mainContainer.addView(mTouchView, layoutParams(mainContainer, 2f));
 
     LinearLayout pair = null;
     pair = linearLayout(this, true);
     mainContainer.addView(pair, layoutParams(mainContainer, 1.5f));
-
-    mGesturePanel = new GesturePanel(this);
-    mGesturePanel.setListener(this);
-    mGesturePanel.setGestures(mGestureLibrary);
 
     LinearLayout.LayoutParams p = layoutParams(pair, 1f);
     pair.addView(mGesturePanel, p);

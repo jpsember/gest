@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.js.gest.GesturePanel;
 import com.js.gest.StrokeSet;
 import com.js.basic.Point;
 import com.js.basic.Rect;
@@ -18,16 +19,10 @@ import static com.js.basic.Tools.*;
  */
 public class TouchView extends View {
 
-  public static interface Listener {
-    /**
-     * Called when user has entered a complete StrokeSet
-     */
-    void receivedStrokeSet(StrokeSet set);
-  }
-
-  public TouchView(Context context, Listener listener) {
+  public TouchView(Context context, GesturePanel gesturePanel) {
     super(context);
     doNothing();
+    mGesturePanel = gesturePanel;
     setBackgroundColor(Color.BLUE);
     mRenderer = new StrokeRenderer();
     setOnTouchListener(new OnTouchListener() {
@@ -49,7 +44,6 @@ public class TouchView extends View {
         return true;
       }
     });
-    mListener = listener;
   }
 
   private void onDrawAux() {
@@ -128,7 +122,7 @@ public class TouchView extends View {
       mTouchStrokeSet.stopStroke(activeId);
       if (!mTouchStrokeSet.areStrokesActive()) {
         mTouchStrokeSet.freeze();
-        mListener.receivedStrokeSet(mTouchStrokeSet);
+        mGesturePanel.setEnteredStrokeSet(mTouchStrokeSet);
       }
     }
     invalidate();
@@ -138,7 +132,7 @@ public class TouchView extends View {
   private StrokeSet mTouchStrokeSet;
   private long mStartEventTimeMillis;
   private boolean mReceivingGesture;
-  private Listener mListener;
+  private GesturePanel mGesturePanel;
   private StrokeSet mDisplayStrokeSet;
   private StrokeRenderer mRenderer;
 }
