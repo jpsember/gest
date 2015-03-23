@@ -57,16 +57,9 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
       return;
     if (!set.isFrozen())
       return;
-    mTouchStrokeSet = set;
 
-    StrokeSet smoothedSet = set;
-    if (mSmoothingCheckBox.isChecked()) {
-      StrokeSmoother s = new StrokeSmoother(set);
-      set = s.getSmoothedSet();
-      smoothedSet = set;
-    }
-    smoothedSet = smoothedSet.fitToRect(null);
-    mNormalizedStrokeSet = smoothedSet.normalize();
+    set = set.fitToRect(null);
+    mNormalizedStrokeSet = set.normalize();
     if (mTouchView != null)
       mTouchView.setDisplayStrokeSet(mNormalizedStrokeSet);
 
@@ -174,14 +167,6 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
 
     LinearLayout optionsPanel = linearLayout(this, true);
     ctrlView.addView(optionsPanel, layoutParams(ctrlView, 0));
-
-    mSmoothingCheckBox = addCheckBox(optionsPanel, "Smoothing",
-        new OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            strokeSetExtended(mTouchStrokeSet);
-          }
-        });
 
     mMultiLengthCheckBox = addCheckBox(optionsPanel, "Multilength",
         new OnClickListener() {
@@ -301,14 +286,11 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
   private GestureSet mGestureLibrary;
   private GestureSet mLowResolutionLibrary;
   private TouchView mTouchView;
-  // Stroke set from user touch event
-  private StrokeSet mTouchStrokeSet;
   // Stroke set after registering / smoothing / normalizing
   private StrokeSet mNormalizedStrokeSet;
   private TextView mConsole;
   private LinearLayout mControlView;
   private EditText mNameWidget;
-  private CheckBox mSmoothingCheckBox;
   private CheckBox mMultiLengthCheckBox;
   private GesturePanel mGesturePanel;
 
