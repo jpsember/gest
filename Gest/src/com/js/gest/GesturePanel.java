@@ -262,6 +262,15 @@ public class GesturePanel extends View {
   };
 
   /**
+   * Act as if user entered a particular stroke set
+   */
+  public void setEnteredStrokeSet(StrokeSet set) {
+    set.freeze();
+    getListener().strokeSetExtended(set);
+    performMatch(set);
+  }
+
+  /**
    * TouchListener for the GesturePanel
    */
   private class OurTouchListener implements OnTouchListener {
@@ -309,9 +318,7 @@ public class GesturePanel extends View {
           || actionMasked == MotionEvent.ACTION_POINTER_UP) {
         mTouchStrokeSet.stopStroke(activeId);
         if (!mTouchStrokeSet.areStrokesActive()) {
-          mTouchStrokeSet.freeze();
-          listener.strokeSetExtended(mTouchStrokeSet);
-          performMatch(mTouchStrokeSet);
+          setEnteredStrokeSet(mTouchStrokeSet);
         }
       }
     }

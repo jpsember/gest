@@ -67,6 +67,8 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
     }
     smoothedSet = smoothedSet.fitToRect(null);
     mNormalizedStrokeSet = smoothedSet.normalize();
+    if (mTouchView != null)
+      mTouchView.setDisplayStrokeSet(mNormalizedStrokeSet);
 
     performMatch();
   }
@@ -96,17 +98,24 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
     buildConsole(auxContainer);
 
     mainContainer.addView(auxContainer, layoutParams(mainContainer, 1));
+    mTouchView = new TouchView(this, new TouchView.Listener() {
+      @Override
+      public void receivedStrokeSet(StrokeSet set) {
+        mGesturePanel.setEnteredStrokeSet(set);
+      }
+    });
+    mainContainer.addView(mTouchView, layoutParams(mainContainer, 2f));
 
     LinearLayout pair = null;
     pair = linearLayout(this, true);
     mainContainer.addView(pair, layoutParams(mainContainer, 1.5f));
 
-    GesturePanel gesturePanel = new GesturePanel(this);
-    gesturePanel.setListener(this);
-    gesturePanel.setGestures(mGestureLibrary);
+    mGesturePanel = new GesturePanel(this);
+    mGesturePanel.setListener(this);
+    mGesturePanel.setGestures(mGestureLibrary);
 
     LinearLayout.LayoutParams p = layoutParams(pair, 1f);
-    pair.addView(gesturePanel, p);
+    pair.addView(mGesturePanel, p);
 
     return mainContainer;
   }
@@ -296,6 +305,7 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
 
   private GestureSet mGestureLibrary;
   private GestureSet mLowResolutionLibrary;
+  private TouchView mTouchView;
   // Stroke set from user touch event
   private StrokeSet mTouchStrokeSet;
   // Stroke set after registering / smoothing / normalizing
@@ -305,4 +315,6 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
   private EditText mNameWidget;
   private CheckBox mSmoothingCheckBox;
   private CheckBox mMultiLengthCheckBox;
+  private GesturePanel mGesturePanel;
+
 }
