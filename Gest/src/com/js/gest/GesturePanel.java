@@ -76,7 +76,7 @@ public class GesturePanel extends View {
   private void onDrawAux(Canvas canvas) {
     Rect r = getActiveBounds();
     Paint paint = new Paint();
-    paint.setColor(0x40808080);
+    paint.setColor(0xffe0e0e0);
     paint.setStrokeWidth(1.2f);
     fillRoundedRect(canvas, r, 16.0f, paint);
     drawStrokeSet(canvas);

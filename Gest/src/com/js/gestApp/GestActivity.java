@@ -248,6 +248,8 @@ public class GestActivity extends MyActivity {
     GestureSet library = mGestureLibrary;
     StrokeSet source = strokeSet;
     source = source.normalize(library.strokeLength());
+    // Save this as the normalized stroke set, i.e., for saving
+    mNormalizedStrokeSet = source;
     String result = performMatchWithLibrary(source, library);
     sb.append(result);
     setConsoleText(sb.toString());
