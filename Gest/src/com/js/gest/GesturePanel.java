@@ -197,10 +197,6 @@ public class GesturePanel extends View {
     }
   }
 
-  private Listener getListener() {
-    return mListener;
-  }
-
   private void performMatch(StrokeSet userStrokeSet) {
     if (mStrokeSetCollection == null) {
       warning("no stroke collection defined");
@@ -233,17 +229,22 @@ public class GesturePanel extends View {
   }
 
   public static interface Listener {
-    /**
-     * For development purposes only: called when the gesture being constructed
-     * by the user has been changed. If it is frozen, it is complete
-     */
-    void strokeSetExtended(StrokeSet strokeSet);
 
     /**
      * In normal use, this is the only method that has to do anything; the
      * client should handle the recognized gesture
      */
     void processGesture(String gestureName);
+
+    /**
+     * For development purposes only: called when stroke set has been received
+     * from user, but before any matching has occurred
+     * 
+     * @param set
+     *          a frozen, normalized stroke set
+     */
+    void processStrokeSet(StrokeSet set);
+
   }
 
   /**
@@ -252,11 +253,11 @@ public class GesturePanel extends View {
    */
   private static Listener DO_NOTHING_LISTENER = new Listener() {
     @Override
-    public void strokeSetExtended(StrokeSet strokeSet) {
+    public void processGesture(String gestureName) {
     }
 
     @Override
-    public void processGesture(String gestureName) {
+    public void processStrokeSet(StrokeSet set) {
       warning("No GesturePanel Listener defined");
     }
   };
@@ -266,7 +267,7 @@ public class GesturePanel extends View {
    */
   public void setEnteredStrokeSet(StrokeSet set) {
     set.freeze();
-    getListener().strokeSetExtended(set);
+    mListener.processStrokeSet(set);
     performMatch(set);
   }
 
@@ -310,9 +311,6 @@ public class GesturePanel extends View {
         Point pt = flipVertically(new Point(mCoord.x, mCoord.y));
         mTouchStrokeSet.addPoint(eventTime, ptrId, pt);
       }
-
-      GesturePanel.Listener listener = getListener();
-      listener.strokeSetExtended(mTouchStrokeSet);
 
       if (actionMasked == MotionEvent.ACTION_UP
           || actionMasked == MotionEvent.ACTION_POINTER_UP) {

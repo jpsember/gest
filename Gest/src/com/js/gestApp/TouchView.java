@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.js.gest.GesturePanel;
 import com.js.gest.Stroke;
 import com.js.gest.StrokeSet;
 import com.js.basic.Point;
@@ -21,10 +20,10 @@ import static com.js.basic.Tools.*;
  */
 public class TouchView extends View {
 
-  public TouchView(Context context, GesturePanel gesturePanel) {
+  public TouchView(Context context, Listener listener) {
     super(context);
     doNothing();
-    mGesturePanel = gesturePanel;
+    mListener = listener;
     setBackgroundColor(Color.BLUE);
     mRenderer = new StrokeRenderer();
     setOnTouchListener(new OnTouchListener() {
@@ -48,14 +47,18 @@ public class TouchView extends View {
     });
   }
 
+  /**
+   * Render the display stroke set, or if it's null, the touch stroke set; if
+   * both are null, do nothing
+   */
   private void onDrawAux() {
-    if (mTouchStrokeSet != null) {
-      StrokeSet set = mTouchStrokeSet;
-      Rect r = new Rect(0, 0, getWidth(), getHeight());
-      if (mDisplayStrokeSet != null)
-        set = mDisplayStrokeSet;
-      mRenderer.drawStrokeSet(set, r, true);
-    }
+    StrokeSet set = mDisplayStrokeSet;
+    if (set == null)
+      set = mTouchStrokeSet;
+    if (set == null)
+      return;
+    Rect r = new Rect(0, 0, getWidth(), getHeight());
+    mRenderer.drawStrokeSet(set, r, true);
   }
 
   @Override
@@ -95,16 +98,12 @@ public class TouchView extends View {
   private void processGestureEvent(MotionEvent event) {
     int actionMasked = event.getActionMasked();
 
-    if (actionMasked != MotionEvent.ACTION_DOWN
-        && actionMasked != MotionEvent.ACTION_POINTER_DOWN
-        && actionMasked != MotionEvent.ACTION_MOVE
-        && actionMasked != MotionEvent.ACTION_POINTER_UP
-        && actionMasked != MotionEvent.ACTION_UP)
-      return;
+    unimp("deal with issue #17 here");
 
     if (actionMasked == MotionEvent.ACTION_DOWN) {
       mStartEventTimeMillis = event.getEventTime();
       mTouchStrokeSet = new StrokeSet();
+      // Clear any old display stroke set, so we render the touch one instead
       setDisplayStrokeSet(null);
     }
 
@@ -124,7 +123,7 @@ public class TouchView extends View {
       mTouchStrokeSet.stopStroke(activeId);
       if (!mTouchStrokeSet.areStrokesActive()) {
         mTouchStrokeSet.freeze();
-        mGesturePanel.setEnteredStrokeSet(mTouchStrokeSet);
+        mListener.processStrokeSet(mTouchStrokeSet);
       }
     }
     invalidate();
@@ -182,11 +181,15 @@ public class TouchView extends View {
 
   }
 
+  public interface Listener {
+    void processStrokeSet(StrokeSet set);
+  }
+
   // Stroke set from user touch event
   private StrokeSet mTouchStrokeSet;
   private long mStartEventTimeMillis;
   private boolean mReceivingGesture;
-  private GesturePanel mGesturePanel;
   private StrokeSet mDisplayStrokeSet;
   private StrokeRenderer mRenderer;
+  private Listener mListener;
 }

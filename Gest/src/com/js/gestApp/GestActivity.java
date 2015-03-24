@@ -28,7 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import static com.js.basic.Tools.*;
 
-public class GestActivity extends MyActivity implements GesturePanel.Listener {
+public class GestActivity extends MyActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -51,26 +51,6 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
     setContentView(buildContentView());
   }
 
-  @Override
-  public void strokeSetExtended(StrokeSet set) {
-    if (set == null)
-      return;
-    if (!set.isFrozen())
-      return;
-
-    set = set.fitToRect(null);
-    mNormalizedStrokeSet = set.normalize();
-    if (mTouchView != null)
-      mTouchView.setDisplayStrokeSet(mNormalizedStrokeSet);
-
-    performMatch();
-  }
-
-  @Override
-  public void processGesture(String gestureName) {
-    pr("recognized gesture " + gestureName);
-  }
-
   private void buildConsole(LinearLayout container) {
     TextView tv = new TextView(this);
     tv.setBackgroundColor(Color.LTGRAY);
@@ -91,11 +71,27 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
     buildConsole(auxContainer);
 
     mGesturePanel = new GesturePanel(this);
-    mGesturePanel.setListener(this);
+    mGesturePanel.setListener(new GesturePanel.Listener() {
+      @Override
+      public void processGesture(String gestureName) {
+      }
+
+      @Override
+      public void processStrokeSet(StrokeSet set) {
+        mTouchView.setDisplayStrokeSet(set);
+        performMatch(set);
+      }
+    });
     mGesturePanel.setGestures(mGestureLibrary);
 
     mainContainer.addView(auxContainer, layoutParams(mainContainer, 1));
-    mTouchView = new TouchView(this, mGesturePanel);
+    mTouchView = new TouchView(this, new TouchView.Listener() {
+      @Override
+      public void processStrokeSet(StrokeSet set) {
+        mNormalizedStrokeSet = set.normalize();
+        mGesturePanel.setEnteredStrokeSet(set);
+      }
+    });
     mainContainer.addView(mTouchView, layoutParams(mainContainer, 2f));
 
     LinearLayout pair = null;
@@ -249,7 +245,7 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
     return sb.toString();
   }
 
-  private void performMatch() {
+  private void performMatch(StrokeSet strokeSet) {
     if (mMultiLengthCheckBox.isChecked()) {
       if (mLowResolutionLibrary == null) {
         mLowResolutionLibrary = mGestureLibrary
@@ -266,7 +262,7 @@ public class GestActivity extends MyActivity implements GesturePanel.Listener {
       GestureSet library = (pass == 0) ? mGestureLibrary
           : mLowResolutionLibrary;
       sb.append("Length " + library.strokeLength() + ":\n");
-      StrokeSet source = mNormalizedStrokeSet;
+      StrokeSet source = strokeSet;
       source = source.normalize(library.strokeLength());
       String result = performMatchWithLibrary(source, library);
       sb.append(result);
