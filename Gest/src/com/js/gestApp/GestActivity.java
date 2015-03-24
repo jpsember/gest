@@ -78,8 +78,12 @@ public class GestActivity extends MyActivity {
 
       @Override
       public void processStrokeSet(StrokeSet set) {
+        // Have the TouchView display this stroke set
         mTouchView.setDisplayStrokeSet(set);
-        // Scale the stroke set to fit the standard rectangle 
+
+        // Perform a match operation with this stroke set, and display the
+        // results in the console view.
+        // Scale the stroke set to fit the standard rectangle
         set = set.fitToRect(null);
         performMatch(set);
       }
@@ -90,7 +94,10 @@ public class GestActivity extends MyActivity {
     mTouchView = new TouchView(this, new TouchView.Listener() {
       @Override
       public void processStrokeSet(StrokeSet set) {
-        mNormalizedStrokeSet = set.normalize();
+        // When we receive a stroke set from the Touch view, send it to the
+        // GesturePanel; our listener above will cause it to be displayed in the
+        // TouchView again (after scaling & normalizing), then will attempt a
+        // match
         mGesturePanel.setEnteredStrokeSet(set);
       }
     });
@@ -163,18 +170,12 @@ public class GestActivity extends MyActivity {
     ctrlView.addView(name, layoutParams(ctrlView, 1f));
     mNameWidget = name;
 
-    LinearLayout optionsPanel = linearLayout(this, true);
-    ctrlView.addView(optionsPanel, layoutParams(ctrlView, 0));
-
-    mMultiLengthCheckBox = addCheckBox(optionsPanel, "Multilength",
-        new OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            if (!((CheckBox) v).isChecked()) {
-              mLowResolutionLibrary = null;
-            }
-          }
-        });
+    // Re-enable this if any checkboxes become necessary
+    if (false) {
+      LinearLayout optionsPanel = linearLayout(this, true);
+      ctrlView.addView(optionsPanel, layoutParams(ctrlView, 0));
+      addCheckBox(optionsPanel, "Unused", null);
+    }
   }
 
   private String dumpStrokeSet(StrokeSet set) {
@@ -189,18 +190,13 @@ public class GestActivity extends MyActivity {
     return json;
   }
 
-  // Length of strokes normalized for small version within multilength library
-  private static final int SMALL_STROKE_SET_LENGTH = 10;
-
   private void addGestureToLibrary(StrokeSet set) {
     set.assertFrozen();
     mGestureLibrary.add(set);
-    mLowResolutionLibrary = null;
   }
 
   private View buildContentView() {
     LinearLayout contentView = linearLayout(this, true);
-
     contentView.addView(buildPrimaryViews(), layoutParams(contentView, 1));
 
     buildControlView();
@@ -248,27 +244,12 @@ public class GestActivity extends MyActivity {
   }
 
   private void performMatch(StrokeSet strokeSet) {
-    if (mMultiLengthCheckBox.isChecked()) {
-      if (mLowResolutionLibrary == null) {
-        mLowResolutionLibrary = mGestureLibrary
-            .buildWithStrokeLength(SMALL_STROKE_SET_LENGTH);
-      }
-    }
-
     StringBuilder sb = new StringBuilder();
-    for (int pass = 0; pass < 2; pass++) {
-      if (pass == 1 && !mMultiLengthCheckBox.isChecked())
-        continue;
-      if (pass == 1)
-        sb.append("\n");
-      GestureSet library = (pass == 0) ? mGestureLibrary
-          : mLowResolutionLibrary;
-      sb.append("Length " + library.strokeLength() + ":\n");
-      StrokeSet source = strokeSet;
-      source = source.normalize(library.strokeLength());
-      String result = performMatchWithLibrary(source, library);
-      sb.append(result);
-    }
+    GestureSet library = mGestureLibrary;
+    StrokeSet source = strokeSet;
+    source = source.normalize(library.strokeLength());
+    String result = performMatchWithLibrary(source, library);
+    sb.append(result);
     setConsoleText(sb.toString());
   }
 
@@ -282,14 +263,12 @@ public class GestActivity extends MyActivity {
   }
 
   private GestureSet mGestureLibrary;
-  private GestureSet mLowResolutionLibrary;
   private TouchView mTouchView;
-  // Stroke set after registering / smoothing / normalizing
+  // Stroke set after scaling / normalizing
   private StrokeSet mNormalizedStrokeSet;
   private TextView mConsole;
   private LinearLayout mControlView;
   private EditText mNameWidget;
-  private CheckBox mMultiLengthCheckBox;
   private GesturePanel mGesturePanel;
 
 }
