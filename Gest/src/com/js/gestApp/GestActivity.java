@@ -79,6 +79,8 @@ public class GestActivity extends MyActivity {
       @Override
       public void processStrokeSet(StrokeSet set) {
         mTouchView.setDisplayStrokeSet(set);
+        // Scale the stroke set to fit the standard rectangle 
+        set = set.fitToRect(null);
         performMatch(set);
       }
     });
