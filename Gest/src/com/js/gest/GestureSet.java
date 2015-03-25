@@ -139,16 +139,17 @@ public class GestureSet {
             + d((int) (100 * mMatcher.strokeMatcher().cellsExaminedRatio())));
       }
 
-      removeExtraneousAliasFromResults(results);
-
-      // Throw out all but top three
-      while (results.size() > 3)
+      // Throw out all but top k results
+      while (results.size() > param.maxResults())
         results.pollLast();
     }
 
     if (param.alignmentAngle() != 0) {
       processAlignmentAngleOption(inputSet, param, results);
     }
+
+    if (param.performAliasCutoff())
+      removeExtraneousAliasFromResults(results);
 
     if (results.isEmpty())
       return null;
@@ -205,10 +206,9 @@ public class GestureSet {
         if (results.isEmpty() || results.first().cost() > rotatedMatch.cost())
           pr(" ====== rotated version improved best result: " + rotatedMatch);
         results.add(rotatedMatch);
-        removeExtraneousAliasFromResults(results);
 
-        // Throw out all but top three
-        while (results.size() > 3)
+        // Throw out all but top k results
+        while (results.size() > param.maxResults())
           results.pollLast();
       }
 

@@ -241,17 +241,18 @@ public class GestActivity extends MyActivity {
   }
 
   private void runSamplesExperiment() {
-    GestureSet sampleSet = readSamples();
-    ArrayList<String> names = sortedGestureNames(sampleSet);
+    GestureSet sampledGestures = readSamples();
+    ArrayList<String> names = sortedGestureNames(sampledGestures);
     for (String name : names) {
       String name1 = rootName(name);
-      StrokeSet set = sampleSet.get(name);
+      StrokeSet sampleStrokeSet = sampledGestures.get(name);
       List<Match> results = new ArrayList();
       MatcherParameters p = new MatcherParameters();
       p.setAlignmentAngle(MyMath.M_DEG * 15, 1);
       p.setPerformAliasCutoff(false);
+      p.setMaxResults(20);
       mGestureLibrary.setTraceStatus(false);
-      mGestureLibrary.findMatch(set, p, results);
+      mGestureLibrary.findMatch(sampleStrokeSet, p, results);
 
       Match result = null;
       if (!results.isEmpty())
@@ -272,6 +273,9 @@ public class GestActivity extends MyActivity {
         continue;
       }
       pr("  mismatch!  " + name2);
+      mGesturePanel.setDisplayedGesture(result.strokeSet().name(), false);
+      mTouchView.setDisplayStrokeSet(sampleStrokeSet);
+     
     }
 
   }

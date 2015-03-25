@@ -14,6 +14,7 @@ public class MatcherParameters extends Freezable.Mutable {
     setWindowSize(Math
         .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .20f));
     setPerformAliasCutoff(true);
+    setMaxResults(3);
   }
 
   /**
@@ -47,6 +48,15 @@ public class MatcherParameters extends Freezable.Mutable {
     return mWindowSize;
   }
 
+  public void setMaxResults(int maxResults) {
+    mutate();
+    mMaxResults = maxResults;
+  }
+
+  public int maxResults() {
+    return mMaxResults;
+  }
+
   public void setAlignmentAngle(float angle, int numberOfSteps) {
     mutate();
     mAlignmentAngle = angle;
@@ -68,6 +78,7 @@ public class MatcherParameters extends Freezable.Mutable {
     m.setWindowSize(windowSize());
     m.setAlignmentAngle(alignmentAngle(), alignmentAngleSteps());
     m.mFlags = mFlags;
+    m.setMaxResults(maxResults());
     return m;
   }
 
@@ -96,4 +107,5 @@ public class MatcherParameters extends Freezable.Mutable {
   private float mAlignmentAngle;
   private int mAlignmentAngleSteps;
   private int mFlags;
+  private int mMaxResults;
 }
