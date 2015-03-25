@@ -18,7 +18,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -33,16 +32,6 @@ public class GestActivity extends MyActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
-    if (false) {
-      warning("building experimental content view");
-      requestWindowFeature(Window.FEATURE_NO_TITLE);
-      // Remove notification bar
-      this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-          WindowManager.LayoutParams.FLAG_FULLSCREEN);
-      setContentView(LayoutExperiments.buildExperimentalContentView(this));
-      return;
-    }
 
     // To address issue #6:
     getWindow().setSoftInputMode(
