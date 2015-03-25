@@ -247,7 +247,11 @@ public class GestActivity extends MyActivity {
       String name1 = rootName(name);
       StrokeSet set = sampleSet.get(name);
       List<Match> results = new ArrayList();
-      mGestureLibrary.findMatch(set, null, results);
+      MatcherParameters p = new MatcherParameters();
+      p.setAlignmentAngle(MyMath.M_DEG * 15, 1);
+      p.setPerformAliasCutoff(false);
+      mGestureLibrary.setTraceStatus(false);
+      mGestureLibrary.findMatch(set, p, results);
 
       Match result = null;
       if (!results.isEmpty())
