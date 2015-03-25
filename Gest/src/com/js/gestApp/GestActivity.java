@@ -1,6 +1,7 @@
 package com.js.gestApp;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 
@@ -70,6 +71,11 @@ public class GestActivity extends MyActivity {
         // Have the TouchView display this stroke set
         mTouchView.setDisplayStrokeSet(set);
 
+        if (mAddSamplesCheckBox.isChecked()) {
+          mSamples.add(set);
+          return;
+        }
+
         // Perform a match operation with this stroke set, and display the
         // results in the console view.
         // Scale the stroke set to fit the standard rectangle
@@ -110,10 +116,11 @@ public class GestActivity extends MyActivity {
     mConsole.setText(text);
   }
 
-  private void addButton(String label, OnClickListener listener) {
+  private void addButton(LinearLayout container, String label,
+      OnClickListener listener) {
     Button b = new Button(this);
     b.setText(label);
-    mControlView.addView(b, layoutParams(mControlView, 0));
+    container.addView(b, layoutParams(container, 0));
     if (listener != null)
       b.setOnClickListener(listener);
   }
@@ -128,16 +135,20 @@ public class GestActivity extends MyActivity {
     return checkBox;
   }
 
-  private void buildControlView() {
+  private LinearLayout buildControlView() {
     LinearLayout ctrlView = linearLayout(this, false);
-    mControlView = ctrlView;
 
-    addButton("Save", new OnClickListener() {
+    addButton(ctrlView, "Save", new OnClickListener() {
       @Override
       public void onClick(View v) {
         String name = mNameWidget.getText().toString().trim();
         if (name.isEmpty())
           return;
+        if (mAddSamplesCheckBox.isChecked()) {
+          dumpSamples(name);
+          return;
+        }
+
         if (mNormalizedStrokeSet == null)
           return;
         StrokeSet set = mutableCopyOf(mNormalizedStrokeSet);
@@ -149,6 +160,7 @@ public class GestActivity extends MyActivity {
         setConsoleText("Storing:\n\n" + json);
         mNameWidget.setText("");
       }
+
     });
 
     EditText name = new EditText(this);
@@ -159,24 +171,56 @@ public class GestActivity extends MyActivity {
     ctrlView.addView(name, layoutParams(ctrlView, 1f));
     mNameWidget = name;
 
-    // Re-enable this if any checkboxes become necessary
-    if (false) {
-      LinearLayout optionsPanel = linearLayout(this, true);
-      ctrlView.addView(optionsPanel, layoutParams(ctrlView, 0));
-      addCheckBox(optionsPanel, "Unused", null);
-    }
+    addButton(ctrlView, "Run", new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        runSamplesExperiment();
+      }
+    });
+    LinearLayout optionsPanel = linearLayout(this, true);
+    ctrlView.addView(optionsPanel, layoutParams(ctrlView, 0));
+    mAddSamplesCheckBox = addCheckBox(optionsPanel, "Record",
+        new OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            if (mAddSamplesCheckBox.isChecked()) {
+              mSamples.clear();
+            }
+          }
+        });
+    addButton(optionsPanel, "Pop", new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        if (mSamples.isEmpty())
+          return;
+        pop(mSamples);
+      }
+    });
+    return ctrlView;
   }
 
   private String dumpStrokeSet(StrokeSet set) {
     String json = null;
-    set = set.normalize(12);
+    set = set.normalize(0);
     try {
       json = set.toJSON();
-      pr("\n" + json);
+      pr(json);
     } catch (JSONException e) {
       die(e);
     }
     return json;
+  }
+
+  private void dumpSamples(String name) {
+    for (StrokeSet s : mSamples) {
+      s = mutable(s);
+      s.setName(name);
+      dumpStrokeSet(s);
+    }
+  }
+
+  private void runSamplesExperiment() {
+    unimp();
   }
 
   private void addGestureToLibrary(StrokeSet set) {
@@ -187,9 +231,7 @@ public class GestActivity extends MyActivity {
   private View buildContentView() {
     LinearLayout contentView = linearLayout(this, true);
     contentView.addView(buildPrimaryViews(), layoutParams(contentView, 1));
-
-    buildControlView();
-    contentView.addView(mControlView);
+    contentView.addView(buildControlView());
     return contentView;
   }
 
@@ -258,8 +300,8 @@ public class GestActivity extends MyActivity {
   // Stroke set after scaling / normalizing
   private StrokeSet mNormalizedStrokeSet;
   private TextView mConsole;
-  private LinearLayout mControlView;
   private EditText mNameWidget;
   private GesturePanel mGesturePanel;
-
+  private CheckBox mAddSamplesCheckBox;
+  private List<StrokeSet> mSamples = new ArrayList();
 }

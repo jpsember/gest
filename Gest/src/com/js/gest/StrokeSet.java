@@ -172,7 +172,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
         sb.append(',');
       sb.append(get(i).toJSONArray());
     }
-    sb.append("]}\n");
+    sb.append("]}");
     return sb.toString();
   }
 
