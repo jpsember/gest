@@ -2,10 +2,12 @@ package com.js.gest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.json.JSONException;
@@ -30,6 +32,13 @@ public class GestureSet {
     InputStream stream = klass.getResourceAsStream(filename);
     String json = Files.readString(stream);
     return GestureSet.parseJSON(json);
+  }
+
+  /**
+   * Get the set of gesture names
+   */
+  public Set<String> getNames() {
+    return Collections.unmodifiableSet(mEntriesMap.keySet());
   }
 
   /**

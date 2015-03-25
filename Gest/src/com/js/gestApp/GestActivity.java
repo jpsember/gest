@@ -1,11 +1,13 @@
 package com.js.gestApp;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONException;
 
 import com.js.android.MyActivity;
+import com.js.basic.MyMath;
 
 import static com.js.android.UITools.*;
 import com.js.gest.MatcherParameters;
@@ -212,15 +214,69 @@ public class GestActivity extends MyActivity {
   }
 
   private void dumpSamples(String name) {
+    int suffix = MyMath.myMod((int) System.currentTimeMillis(), 10000) + 100000;
     for (StrokeSet s : mSamples) {
       s = mutable(s);
-      s.setName(name);
+      s.setName(name + "_" + suffix);
+      suffix++;
       dumpStrokeSet(s);
     }
   }
 
+  private GestureSet readSamples() {
+    GestureSet sampleSet = null;
+    try {
+      sampleSet = GestureSet.readFromClassResource(getClass(), "samples.json");
+    } catch (Exception e) {
+      die(e);
+    }
+    return sampleSet;
+  }
+
+  private ArrayList<String> sortedGestureNames(GestureSet gestures) {
+    ArrayList<String> names = new ArrayList();
+    names.addAll(gestures.getNames());
+    Collections.sort(names);
+    return names;
+  }
+
   private void runSamplesExperiment() {
-    unimp();
+    GestureSet sampleSet = readSamples();
+    ArrayList<String> names = sortedGestureNames(sampleSet);
+    for (String name : names) {
+      String name1 = rootName(name);
+      StrokeSet set = sampleSet.get(name);
+      List<Match> results = new ArrayList();
+      mGestureLibrary.findMatch(set, null, results);
+
+      Match result = null;
+      if (!results.isEmpty())
+        result = results.get(0);
+      boolean success = false;
+      String name2 = null;
+      if (result != null) {
+        name2 = result.strokeSet().name();
+        if (name1.equals(name2))
+          success = true;
+      }
+
+      pr(" " + name);
+      if (success)
+        continue;
+      if (result == null) {
+        pr("  no match found");
+        continue;
+      }
+      pr("  mismatch!  " + name2);
+    }
+
+  }
+
+  private String rootName(String name) {
+    int suffixStart = name.indexOf("_");
+    if (suffixStart < 0)
+      throw new IllegalArgumentException("no root found: " + name);
+    return name.substring(0, suffixStart);
   }
 
   private void addGestureToLibrary(StrokeSet set) {
