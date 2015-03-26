@@ -14,7 +14,7 @@ public class MatcherParameters extends Freezable.Mutable {
     setWindowSize(Math
         .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .20f));
     setPerformAliasCutoff(true);
-    //setAlignmentAngle(MyMath.M_DEG * 20, 1);
+    // setAlignmentAngle(MyMath.M_DEG * 20, 1);
     setMaxResults(3);
     setFeaturePointPenalty(10);
   }

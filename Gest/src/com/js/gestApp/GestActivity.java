@@ -74,7 +74,7 @@ public class GestActivity extends MyActivity {
         mTouchView.setDisplayStrokeSet(set);
 
         if (mAddSamplesCheckBox.isChecked()) {
-          mSamples.add(set);
+          mSamples.add(frozen(set));
           return;
         }
 
@@ -204,6 +204,7 @@ public class GestActivity extends MyActivity {
   private String dumpStrokeSet(StrokeSet set) {
     String json = null;
     set = set.normalize(0);
+    set = frozen(set);
     try {
       json = set.toJSON();
       pr(json);
@@ -245,7 +246,7 @@ public class GestActivity extends MyActivity {
     GestureSet sampledGestures = readSamples();
     ArrayList<String> names = sortedGestureNames(sampledGestures);
     String prevRootName = "";
-    int problemIndex = 0;
+    int totalProblems = 0;
     for (String name : names) {
       String name1 = rootName(name);
       if (!name1.equals(prevRootName)) {
@@ -254,10 +255,14 @@ public class GestActivity extends MyActivity {
       }
       StrokeSet sampleStrokeSet = sampledGestures.get(name);
       List<Match> results = new ArrayList();
+
       MatcherParameters p = new MatcherParameters();
-      p.setAlignmentAngle(MyMath.M_DEG * 15, 1);
-      p.setPerformAliasCutoff(false);
-      p.setMaxResults(20);
+
+      // p.setAlignmentAngle(MyMath.M_DEG * 15, 1);
+      // p.setPerformAliasCutoff(false);
+      // p.setMaxResults(6);
+      // p.setFeaturePointPenalty(0);
+
       mGestureLibrary.setTraceStatus(false);
       mGestureLibrary.findMatch(sampleStrokeSet, p, results);
 
@@ -280,14 +285,18 @@ public class GestActivity extends MyActivity {
         continue;
       }
       pr("         Matched with: " + name2);
-      if (problemIndex == mMatchProblemIndex) {
+      if (totalProblems == mMatchProblemIndex) {
+        // pr("                                         (displaying)");
+        setConsoleText("*** Problem:\n " + name + "\n   ...matched...\n "
+            + name2);
         mGesturePanel.setDisplayedGesture(result.strokeSet().name(), false);
         mTouchView.setDisplayStrokeSet(sampleStrokeSet);
       }
-      problemIndex++;
+      totalProblems++;
     }
-    if (problemIndex != 0)
-      mMatchProblemIndex = (1 + mMatchProblemIndex) % problemIndex;
+    pr("Total problems found: " + totalProblems + "\n");
+    if (totalProblems != 0)
+      mMatchProblemIndex = (1 + mMatchProblemIndex) % totalProblems;
   }
 
   private String rootName(String name) {

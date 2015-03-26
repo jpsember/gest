@@ -10,7 +10,7 @@ import com.js.basic.Point;
 class FeaturePointList {
 
   private static final float FEATURE_LENGTH_MIN = StrokeSet.STANDARD_WIDTH * .05f;
-  private static final float FEATURE_ANGLE_MIN = MyMath.M_DEG * 80.0f;
+  private static final float FEATURE_ANGLE_MIN = MyMath.M_DEG * 70.0f;
 
   /**
    * Construct a FeaturePointList for a stroke
