@@ -175,13 +175,14 @@ public class TouchView extends View {
           mCanvas.drawLine(px, py, x, y, mPaintFill);
         px = x;
         py = y;
-        if (StrokeSet.SHOW_FEATURE_POINTS) {
-          if (s.get(i).isFeaturePoint()) {
-            mCanvas.drawCircle(px, py, 8, mPaintOutline);
+        if (detailed) {
+          if (StrokeSet.SHOW_FEATURE_POINTS) {
+            if (s.get(i).isFeaturePoint()) {
+              mCanvas.drawCircle(px, py, 25, mPaintOutline);
+            }
           }
-        } else {
           if (detailed) {
-            mCanvas.drawCircle(px, py, 8, mPaintOutline);
+            mCanvas.drawCircle(px, py, 5, mPaintOutline);
           }
         }
       }

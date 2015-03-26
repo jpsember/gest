@@ -14,7 +14,9 @@ public class MatcherParameters extends Freezable.Mutable {
     setWindowSize(Math
         .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .20f));
     setPerformAliasCutoff(true);
+    //setAlignmentAngle(MyMath.M_DEG * 20, 1);
     setMaxResults(3);
+    setFeaturePointPenalty(10);
   }
 
   /**
@@ -79,7 +81,13 @@ public class MatcherParameters extends Freezable.Mutable {
     m.setAlignmentAngle(alignmentAngle(), alignmentAngleSteps());
     m.mFlags = mFlags;
     m.setMaxResults(maxResults());
+    m.setFeaturePointPenalty(featurePointPenalty());
     return m;
+  }
+
+  public void setFeaturePointPenalty(float featurePointPenalty) {
+    mutate();
+    mFeaturePointPenalty = featurePointPenalty;
   }
 
   @Override
@@ -102,10 +110,16 @@ public class MatcherParameters extends Freezable.Mutable {
     return 0 != (mFlags & flag);
   }
 
+  public float featurePointPenalty() {
+    return mFeaturePointPenalty;
+  }
+
   private int mWindowSize;
   private float mMaximumCostRatio;
   private float mAlignmentAngle;
   private int mAlignmentAngleSteps;
   private int mFlags;
   private int mMaxResults;
+  private float mFeaturePointPenalty;
+
 }
