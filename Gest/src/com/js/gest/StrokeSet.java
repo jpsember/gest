@@ -29,6 +29,8 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
   static final String KEY_STROKES = "strokes";
   static final String KEY_UNUSED = "unused";
   static final String KEY_DIRECTED = "directed";
+  
+  public static final boolean SHOW_FEATURE_POINTS = true;
 
   public StrokeSet() {
   }
@@ -42,6 +44,10 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
    */
   public StrokeSet normalize() {
     return normalize(0);
+  }
+
+  public StrokeSet determineFeaturePoints() {
+    return StrokeNormalizer.determineFeaturePoints(this);
   }
 
   /**
