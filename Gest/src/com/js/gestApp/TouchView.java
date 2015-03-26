@@ -71,12 +71,6 @@ public class TouchView extends View {
   public void setDisplayStrokeSet(StrokeSet set) {
     if (set != mDisplayStrokeSet) {
       if (set != null) {
-        if (StrokeSet.SHOW_FEATURE_POINTS) {
-          set = set.normalize();
-          set = set.determineFeaturePoints();
-          set.freeze();
-        }
-
         // Scale to fit the TouchView
         Rect rect = new Rect(0, 0, getWidth(), getHeight());
         float inset = rect.minDim() * .2f;
@@ -176,8 +170,8 @@ public class TouchView extends View {
         px = x;
         py = y;
         if (detailed) {
-          if (StrokeSet.SHOW_FEATURE_POINTS) {
-            if (s.get(i).isFeaturePoint()) {
+          if (StrokeSet.SHOW_FEATURE_POINTS && s.isFrozen()) {
+            if (s.isFeaturePoint(i)) {
               mCanvas.drawCircle(px, py, 25, mPaintOutline);
             }
           }

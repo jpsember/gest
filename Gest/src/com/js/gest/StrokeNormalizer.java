@@ -68,46 +68,6 @@ class StrokeNormalizer {
     return mNormalizedStrokeSet;
   }
 
-  public static StrokeSet determineFeaturePoints(StrokeSet set) {
-    set = mutable(set);
-    for (Stroke s : set) {
-      determineFeaturePoints(s);
-    }
-    return set;
-  }
-
-  private static void determineFeaturePoints(Stroke s) {
-    final float FEATURE_LENGTH_MIN = StrokeSet.STANDARD_WIDTH * .05f;
-    final float FEATURE_ANGLE_MIN = MyMath.M_DEG * 70.0f;
-
-    float previousAngle = 0;
-    boolean previousAngleDefined = false;
-    DataPoint dpPrev0 = null;
-    for (int i = 0; i < s.size(); i++) {
-      DataPoint dp = s.get(i);
-      dp.setFeaturePoint(false);
-
-      DataPoint dpPrev = dpPrev0;
-      dpPrev0 = dp;
-      if (dpPrev == null)
-        continue;
-
-      float distance = MyMath.distanceBetween(dpPrev.getPoint(), dp.getPoint());
-      if (distance < FEATURE_LENGTH_MIN)
-        continue;
-      float angle = MyMath
-          .polarAngleOfSegment(dpPrev.getPoint(), dp.getPoint());
-      if (previousAngleDefined) {
-        float angleDiff = Math
-            .abs(MyMath.normalizeAngle(angle - previousAngle));
-        if (angleDiff >= FEATURE_ANGLE_MIN)
-          dpPrev.setFeaturePoint(true);
-      }
-      previousAngle = angle;
-      previousAngleDefined = true;
-    }
-  }
-
   /**
    * Construct a normalized version of a stroke
    * 

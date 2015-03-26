@@ -92,7 +92,6 @@ class GestureSetParser {
       ParseEntry parseEntry = mNamedSets.get(name);
       StrokeSet entry = parseEntry.strokeSet();
       entry = normalizeStrokeSet(entry);
-      entry = entry.determineFeaturePoints();
       entry.freeze();
       collection.add(entry);
     }

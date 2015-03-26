@@ -63,6 +63,14 @@ public class Stroke extends Freezable.Mutable implements
     addPoint(point.getTime(), point.getPoint());
   }
 
+  @Override
+  public void freeze() {
+    if (isFrozen())
+      return;
+    super.freeze();
+    mFeaturePoints = FeaturePointList.constructFor(this);
+  }
+
   /**
    * Add a new point to this (mutable) stroke
    * 
@@ -151,7 +159,6 @@ public class Stroke extends Freezable.Mutable implements
 
     public DataPoint(DataPoint source) {
       this(source.mTime, source.mPoint);
-      mFeatureFlag = source.mFeatureFlag;
     }
 
     public Point getPoint() {
@@ -162,18 +169,9 @@ public class Stroke extends Freezable.Mutable implements
       return mTime;
     }
 
-    public boolean isFeaturePoint() {
-      return mFeatureFlag;
-    }
-
-    public void setFeaturePoint(boolean f) {
-      mFeatureFlag = f;
-    }
-
     @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
-      sb.append(isFeaturePoint() ? " !" : "  ");
       sb.append(d(getTime()));
       sb.append(getPoint());
       return sb.toString();
@@ -181,10 +179,15 @@ public class Stroke extends Freezable.Mutable implements
 
     private Point mPoint;
     private float mTime;
-    private boolean mFeatureFlag;
+  }
+
+  public boolean isFeaturePoint(int pointIndex) {
+    assertFrozen();
+    return mFeaturePoints.contains(pointIndex);
   }
 
   private ArrayList<DataPoint> mPoints;
   private float mStartTime;
+  private FeaturePointList mFeaturePoints;
 
 }

@@ -212,7 +212,7 @@ public class StrokeMatcher {
     Point posB = elemB.getPoint();
     mActualCellsExamined++;
     float dist = MyMath.squaredDistanceBetween(posA, posB);
-    if (elemA.isFeaturePoint() != elemB.isFeaturePoint())
+    if (mStrokeA.isFeaturePoint(aIndex) != mStrokeB.isFeaturePoint(bIndex))
       dist = dist + mFeaturePointPenalty;
     dist *= mCostNormalizationFactor;
     return dist;

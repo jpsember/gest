@@ -110,14 +110,19 @@ public class GesturePanel extends View {
     paint.setStrokeWidth(8f);
 
     for (Stroke s : scaledSet) {
+      FeaturePointList fp = null;
+      if (StrokeSet.SHOW_FEATURE_POINTS) {
+        fp = FeaturePointList.constructFor(s);
+      }
+
       Path path = mPath;
       path.reset();
       Point ptPrev1 = null;
       Point ptPrev2 = null;
       for (int i = 0; i < s.size(); i++) {
         Point pt = flipVertically(s.getPoint(i));
-        if (StrokeSet.SHOW_FEATURE_POINTS) {
-          if (s.get(i).isFeaturePoint()) {
+        if (fp != null) {
+          if (fp.contains(i)) {
             canvas.drawCircle(pt.x, pt.y, 8.0f, paint);
           }
         }
@@ -272,7 +277,6 @@ public class GesturePanel extends View {
    * Act as if user entered a particular stroke set
    */
   public void setEnteredStrokeSet(StrokeSet set) {
-    set = StrokeNormalizer.determineFeaturePoints(set);
     set.freeze();
     mListener.processStrokeSet(set);
     performMatch(set);

@@ -46,10 +46,6 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
     return normalize(0);
   }
 
-  public StrokeSet determineFeaturePoints() {
-    return StrokeNormalizer.determineFeaturePoints(this);
-  }
-
   /**
    * Normalize a stroke set to have arbitrary length
    * 
