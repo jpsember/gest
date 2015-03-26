@@ -194,17 +194,10 @@ public class GestureSet {
 
     for (Match originalMatch : originalResults) {
       StrokeSet gesture = originalMatch.strokeSet();
-      // pr(" trying rotated version of "+gesture.name()+": "+originalMatch);
       for (StrokeSet rotatedSet : rotatedSets) {
         mMatcher.setArguments(gesture, rotatedSet, param);
         setMaximumCost(gesture);
         Match rotatedMatch = new Match(gesture, mMatcher.cost());
-        // pr("  rotated version of " + gesture.name() + " produced " +
-        // rotatedMatch);
-        // if (rotatedMatch.cost() < originalMatch.cost())
-        // pr("  --------------- better result: "+rotatedMatch);
-        if (results.isEmpty() || results.first().cost() > rotatedMatch.cost())
-          pr(" ====== rotated version improved best result: " + rotatedMatch);
         results.add(rotatedMatch);
 
         // Throw out all but top k results

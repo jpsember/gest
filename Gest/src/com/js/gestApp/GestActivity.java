@@ -241,10 +241,17 @@ public class GestActivity extends MyActivity {
   }
 
   private void runSamplesExperiment() {
+    pr("\nRunning Samples Experiment");
     GestureSet sampledGestures = readSamples();
     ArrayList<String> names = sortedGestureNames(sampledGestures);
+    String prevRootName = "";
+    int problemIndex = 0;
     for (String name : names) {
       String name1 = rootName(name);
+      if (!name1.equals(prevRootName)) {
+        prevRootName = name1;
+        pr("Samples: " + name1);
+      }
       StrokeSet sampleStrokeSet = sampledGestures.get(name);
       List<Match> results = new ArrayList();
       MatcherParameters p = new MatcherParameters();
@@ -265,19 +272,22 @@ public class GestActivity extends MyActivity {
           success = true;
       }
 
-      pr(" " + name);
       if (success)
         continue;
+      pr(" *** Problem matching: " + name);
       if (result == null) {
         pr("  no match found");
         continue;
       }
-      pr("  mismatch!  " + name2);
-      mGesturePanel.setDisplayedGesture(result.strokeSet().name(), false);
-      mTouchView.setDisplayStrokeSet(sampleStrokeSet);
-     
+      pr("         Matched with: " + name2);
+      if (problemIndex == mMatchProblemIndex) {
+        mGesturePanel.setDisplayedGesture(result.strokeSet().name(), false);
+        mTouchView.setDisplayStrokeSet(sampleStrokeSet);
+      }
+      problemIndex++;
     }
-
+    if (problemIndex != 0)
+      mMatchProblemIndex = (1 + mMatchProblemIndex) % problemIndex;
   }
 
   private String rootName(String name) {
@@ -368,4 +378,5 @@ public class GestActivity extends MyActivity {
   private GesturePanel mGesturePanel;
   private CheckBox mAddSamplesCheckBox;
   private List<StrokeSet> mSamples = new ArrayList();
+  private int mMatchProblemIndex;
 }
