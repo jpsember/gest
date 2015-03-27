@@ -110,23 +110,12 @@ public class GesturePanel extends View {
     paint.setStrokeWidth(8f);
 
     for (Stroke s : scaledSet) {
-      FeaturePointList fp = null;
-      if (StrokeSet.SHOW_FEATURE_POINTS) {
-        fp = FeaturePointList.constructFor(s);
-      }
-
       Path path = mPath;
       path.reset();
       Point ptPrev1 = null;
       Point ptPrev2 = null;
       for (int i = 0; i < s.size(); i++) {
         Point pt = flipVertically(s.getPoint(i));
-        if (fp != null) {
-          if (fp.contains(i)) {
-            canvas.drawCircle(pt.x, pt.y, 8.0f, paint);
-          }
-        }
-
         if (i == 0) {
           path.moveTo(pt.x, pt.y);
         } else if (i < s.size() - 1) {

@@ -10,7 +10,7 @@ import static com.js.basic.Tools.*;
 
 class StrokeNormalizer {
 
-  public static final int DEFAULT_DESIRED_STROKE_LENGTH = 24;
+  public static final int DEFAULT_DESIRED_STROKE_LENGTH = 16;
 
   /**
    * Normalize a stroke set to default length

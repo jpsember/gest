@@ -116,7 +116,7 @@ public class Stroke extends Freezable.Mutable implements
     s.freeze();
     return s;
   }
-
+ 
   public Iterator<DataPoint> iterator() {
     return mPoints.iterator();
   }
