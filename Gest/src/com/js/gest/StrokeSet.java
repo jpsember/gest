@@ -16,6 +16,7 @@ import com.js.basic.Point;
 import com.js.basic.Rect;
 import com.js.gest.Stroke.DataPoint;
 
+import static com.js.basic.MyMath.*;
 import static com.js.basic.Tools.*;
 
 /**
@@ -29,7 +30,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
   static final String KEY_STROKES = "strokes";
   static final String KEY_UNUSED = "unused";
   static final String KEY_DIRECTED = "directed";
-  
+
   public static final boolean SHOW_FEATURE_POINTS = true;
 
   public StrokeSet() {
@@ -274,6 +275,18 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
     }
     transformedSet.freeze();
     return transformedSet;
+  }
+
+  public static Matrix buildRotateSkewTransform(float rotationAngle,
+      float skewMax) {
+    Matrix matrix = new Matrix();
+
+    float origin = StrokeSet.STANDARD_WIDTH * .5f;
+    matrix.setTranslate(-origin, -origin);
+    matrix.postSkew(skewMax, 0);
+    matrix.postRotate(rotationAngle / M_DEG);
+    matrix.postTranslate(origin, origin);
+    return matrix;
   }
 
   public String name() {

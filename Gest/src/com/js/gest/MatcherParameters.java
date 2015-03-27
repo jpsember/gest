@@ -74,25 +74,25 @@ public class MatcherParameters extends Freezable.Mutable {
   }
 
   public boolean hasSkewOption() {
-    return mSkewAngle != 0;
+    return mSkewXMax != 0;
   }
 
   public int alignmentAngleSteps() {
     return mAlignmentAngleSteps;
   }
 
-  public void setSkewAngle(float angle, int numberOfSteps) {
+  public void setSkewMax(float skewXMax, int numberOfSteps) {
     mutate();
-    mSkewAngle = angle;
-    mSkewAngleSteps = numberOfSteps;
+    mSkewXMax = skewXMax;
+    mSkewSteps = numberOfSteps;
   }
 
-  public float skewAngle() {
-    return mSkewAngle;
+  public float skewXMax() {
+    return mSkewXMax;
   }
 
-  public int skewAngleSteps() {
-    return mSkewAngleSteps;
+  public int skewSteps() {
+    return mSkewSteps;
   }
 
   @Override
@@ -101,7 +101,7 @@ public class MatcherParameters extends Freezable.Mutable {
     m.setMaximumCostRatio(maximumCostRatio());
     m.setWindowSize(windowSize());
     m.setAlignmentAngle(alignmentAngle(), alignmentAngleSteps());
-    m.setSkewAngle(skewAngle(), skewAngleSteps());
+    m.setSkewMax(skewXMax(), skewSteps());
     m.mFlags = mFlags;
     m.setMaxResults(maxResults());
     m.setFeaturePointPenalty(featurePointPenalty());
@@ -111,6 +111,14 @@ public class MatcherParameters extends Freezable.Mutable {
   public void setFeaturePointPenalty(float featurePointPenalty) {
     mutate();
     mFeaturePointPenalty = featurePointPenalty;
+  }
+
+  public boolean hasFeaturePoints() {
+    return mFeaturePointPenalty != 0;
+  }
+
+  public float featurePointPenalty() {
+    return mFeaturePointPenalty;
   }
 
   @Override
@@ -133,16 +141,12 @@ public class MatcherParameters extends Freezable.Mutable {
     return 0 != (mFlags & flag);
   }
 
-  public float featurePointPenalty() {
-    return mFeaturePointPenalty;
-  }
-
   private int mWindowSize;
   private float mMaximumCostRatio;
   private float mAlignmentAngle;
   private int mAlignmentAngleSteps;
-  private float mSkewAngle;
-  private int mSkewAngleSteps;
+  private float mSkewXMax;
+  private int mSkewSteps;
   private int mFlags;
   private int mMaxResults;
   private float mFeaturePointPenalty;

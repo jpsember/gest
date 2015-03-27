@@ -7,9 +7,9 @@ import java.util.List;
 import org.json.JSONException;
 
 import com.js.android.MyActivity;
-import com.js.basic.MyMath;
 
 import static com.js.android.UITools.*;
+import static com.js.basic.MyMath.*;
 import com.js.gest.MatcherParameters;
 import com.js.gest.StrokeSet;
 import com.js.gest.GestureSet;
@@ -18,6 +18,7 @@ import com.js.gest.GesturePanel;
 
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
@@ -70,6 +71,12 @@ public class GestActivity extends MyActivity {
 
       @Override
       public void processStrokeSet(StrokeSet set) {
+        if (false) {
+          warning("testing matrix");
+          Matrix m = StrokeSet.buildRotateSkewTransform(0, .3f);
+          set = set.applyTransform(m);
+        }
+
         // Have the TouchView display this stroke set
         mTouchView.setDisplayStrokeSet(set);
 
@@ -215,7 +222,7 @@ public class GestActivity extends MyActivity {
   }
 
   private void dumpSamples(String name) {
-    int suffix = MyMath.myMod((int) System.currentTimeMillis(), 10000) + 100000;
+    int suffix = myMod((int) System.currentTimeMillis(), 10000) + 100000;
     for (StrokeSet s : mSamples) {
       s = mutable(s);
       s.setName(name + "_" + suffix);
@@ -258,10 +265,11 @@ public class GestActivity extends MyActivity {
 
       MatcherParameters p = new MatcherParameters();
 
-      // p.setAlignmentAngle(MyMath.M_DEG * 15, 1);
+      p.setSkewMax(.3f, 2);
+      // p.setAlignmentAngle(M_DEG * 15, 1);
       // p.setPerformAliasCutoff(false);
       // p.setMaxResults(6);
-      // p.setFeaturePointPenalty(0);
+      p.setFeaturePointPenalty(0);
 
       mGestureLibrary.setTraceStatus(false);
       mGestureLibrary.findMatch(sampleStrokeSet, p, results);

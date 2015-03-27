@@ -84,8 +84,10 @@ public class StrokeMatcher {
       int tableCells = mTableSize * mTableSize;
       mTable = new float[tableCells];
       mCostNormalizationFactor = 1.0f / (2 * mTableSize);
-      mFeaturePointPenalty = StrokeSet.STANDARD_WIDTH
-          * mParameters.featurePointPenalty();
+      if (mParameters.hasFeaturePoints()) {
+        mFeaturePointPenalty = StrokeSet.STANDARD_WIDTH
+            * mParameters.featurePointPenalty();
+      }
     }
     if (mWindowSize != mParameters.windowSize()) {
       mWindowSize = mParameters.windowSize();
