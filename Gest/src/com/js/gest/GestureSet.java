@@ -144,8 +144,8 @@ public class GestureSet {
         results.pollLast();
     }
 
-    if (param.alignmentAngle() != 0) {
-      processAlignmentAngleOption(inputSet, param, results);
+    if (param.hasRotateOption() || param.hasSkewOption()) {
+      processRotateAndSkewOptions(inputSet, param, results);
     }
 
     if (param.performAliasCutoff())
@@ -164,8 +164,9 @@ public class GestureSet {
     return results.first();
   }
 
-  private void processAlignmentAngleOption(StrokeSet inputSet,
+  private void processRotateAndSkewOptions(StrokeSet inputSet,
       MatcherParameters param, TreeSet<Match> results) {
+    unimp("skew not yet implemented");
 
     // Determine which rotation angles we want to examine
     ArrayList<Float> angles = new ArrayList();

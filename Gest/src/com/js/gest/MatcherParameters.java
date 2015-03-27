@@ -69,8 +69,30 @@ public class MatcherParameters extends Freezable.Mutable {
     return mAlignmentAngle;
   }
 
+  public boolean hasRotateOption() {
+    return mAlignmentAngle != 0;
+  }
+
+  public boolean hasSkewOption() {
+    return mSkewAngle != 0;
+  }
+
   public int alignmentAngleSteps() {
     return mAlignmentAngleSteps;
+  }
+
+  public void setSkewAngle(float angle, int numberOfSteps) {
+    mutate();
+    mSkewAngle = angle;
+    mSkewAngleSteps = numberOfSteps;
+  }
+
+  public float skewAngle() {
+    return mSkewAngle;
+  }
+
+  public int skewAngleSteps() {
+    return mSkewAngleSteps;
   }
 
   @Override
@@ -79,6 +101,7 @@ public class MatcherParameters extends Freezable.Mutable {
     m.setMaximumCostRatio(maximumCostRatio());
     m.setWindowSize(windowSize());
     m.setAlignmentAngle(alignmentAngle(), alignmentAngleSteps());
+    m.setSkewAngle(skewAngle(), skewAngleSteps());
     m.mFlags = mFlags;
     m.setMaxResults(maxResults());
     m.setFeaturePointPenalty(featurePointPenalty());
@@ -118,6 +141,8 @@ public class MatcherParameters extends Freezable.Mutable {
   private float mMaximumCostRatio;
   private float mAlignmentAngle;
   private int mAlignmentAngleSteps;
+  private float mSkewAngle;
+  private int mSkewAngleSteps;
   private int mFlags;
   private int mMaxResults;
   private float mFeaturePointPenalty;
