@@ -280,7 +280,7 @@ public class GestActivity extends MyActivity {
       boolean success = false;
       String name2 = null;
       if (result != null) {
-        name2 = result.strokeSet().name();
+        name2 = result.strokeSet().aliasName();
         if (name1.equals(name2))
           success = true;
       }

@@ -338,7 +338,7 @@ public class StrokeSet extends Freezable.Mutable implements Iterable<Stroke> {
    * Get the name of the stroke set this one is an alias of; returns our name if
    * we are not an alias
    */
-  String aliasName() {
+  public String aliasName() {
     if (mAliasName == null)
       return mName;
     return mAliasName;
