@@ -265,7 +265,7 @@ public class GestActivity extends MyActivity {
 
       MatcherParameters p = new MatcherParameters();
 
-      p.setSkewMax(.3f, 2);
+      p.setSkewMax(.2f, 1);
       // p.setAlignmentAngle(M_DEG * 15, 1);
       // p.setPerformAliasCutoff(false);
       // p.setMaxResults(6);
