@@ -263,13 +263,8 @@ public class GestActivity extends MyActivity {
       StrokeSet sampleStrokeSet = sampledGestures.get(name);
       List<Match> results = new ArrayList();
 
+      // Just use the default parameters
       MatcherParameters p = new MatcherParameters();
-
-      p.setSkewMax(.2f, 1);
-      // p.setAlignmentAngle(M_DEG * 15, 1);
-      // p.setPerformAliasCutoff(false);
-      // p.setMaxResults(6);
-      p.setFeaturePointPenalty(0);
 
       mGestureLibrary.setTraceStatus(false);
       mGestureLibrary.findMatch(sampleStrokeSet, p, results);
@@ -361,6 +356,9 @@ public class GestActivity extends MyActivity {
       sb.append((i == 0 && goodFit) ? "***" : "   ");
       sb.append(m);
       sb.append("\n");
+      // Don't display any others if we have a good fit
+      if (goodFit)
+        break;
     }
     return sb.toString();
   }
