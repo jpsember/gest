@@ -328,7 +328,7 @@ public class GestActivity extends MyActivity {
 
   private String performMatchWithLibrary(StrokeSet sourceSet, GestureSet library) {
 
-    library.setTraceStatus(true);
+//    library.setTraceStatus(true);
 
     MatcherParameters p = new MatcherParameters();
 

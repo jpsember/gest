@@ -22,13 +22,25 @@ import android.view.View;
 public class GesturePanel extends View {
 
   private static final float PADDING = 8.0f;
+  private static final String INTERNAL_NAME_UNKNOWN = "**unknown**";
 
   /**
    * Constructor
    */
   public GesturePanel(Context context) {
     super(context);
-    this.setOnTouchListener(new OurTouchListener());
+    mMatcherParameters = new MatcherParameters();
+    setOnTouchListener(new OurTouchListener());
+    loadInternalGestureSet();
+  }
+
+  private void loadInternalGestureSet() {
+    try {
+      mInternalGestures = GestureSet.readFromClassResource(getClass(),
+          "internal_gestures.json");
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to load internal gestures file", e);
+    }
   }
 
   public void setListener(Listener listener) {
@@ -106,7 +118,11 @@ public class GesturePanel extends View {
 
     Paint paint = new Paint();
     paint.setStyle(Paint.Style.STROKE);
-    paint.setColor(0xffa0a0a0);
+    int color = 0xffa0a0a0;
+    if (mDisplayedStrokeSet.aliasName().equals(INTERNAL_NAME_UNKNOWN))
+      color = 0xffff4040;
+
+    paint.setColor(color);
     paint.setStrokeWidth(8f);
 
     for (Stroke s : scaledSet) {
@@ -172,40 +188,57 @@ public class GesturePanel extends View {
     return rect;
   }
 
-  private void setGesture(StrokeSet strokeSet) {
-    final float ERASE_GESTURE_DELAY = 1.2f;
-
-    if (mDisplayedStrokeSet == strokeSet)
-      return;
-    mUniqueGestureNumber++;
-    mDisplayedStrokeSet = strokeSet;
-    invalidate();
-
-    // If we've set a gesture, set timer to erase it after a second or two
-    if (strokeSet != null) {
-      // Don't erase a more recently plotted gesture!
-      // Make sure this task corresponds to the unique instance we
-      // want to erase.
-      final int gestureToErase = mUniqueGestureNumber;
-      mHandler.postDelayed(new Runnable() {
-        public void run() {
-          if (mUniqueGestureNumber == gestureToErase) {
-            setGesture(null);
-          }
+  private void displayGestureWithDelay(final StrokeSet gestureToDisplay,
+      float delay) {
+    final int originalState = mGestureState;
+    mHandler.postDelayed(new Runnable() {
+      public void run() {
+        if (mGestureState != originalState) {
+          return;
         }
-      }, (long) (ERASE_GESTURE_DELAY * 1000));
+        mDisplayedStrokeSet = gestureToDisplay;
+        invalidate();
+      }
+    }, (long) (delay * 1000));
+  }
+
+  private void setGesture(StrokeSet strokeSet) {
+    // Let CURR = current gesture, NEW = requested gesture.
+    // We increment the gesture state; this effectively cancels any pending
+    // display events.
+
+    final float GESTURE_DELAY_LONG = 1.2f;
+    final float GESTURE_DELAY_SHORT = .14f;
+
+    mGestureState++;
+    if (mDisplayedStrokeSet == null) {
+      if (strokeSet != null) {
+        // Showing a gesture, none currently showing
+        displayGestureWithDelay(strokeSet, 0);
+        displayGestureWithDelay(null, GESTURE_DELAY_LONG);
+      }
+    } else {
+      if (strokeSet != null) {
+        // Replacing one gesture with another (possibly the same one)
+        displayGestureWithDelay(null, 0);
+        displayGestureWithDelay(strokeSet, GESTURE_DELAY_SHORT);
+        displayGestureWithDelay(null, GESTURE_DELAY_SHORT + GESTURE_DELAY_LONG);
+      } else {
+        // Removing an existing gesture
+        displayGestureWithDelay(null, 0);
+      }
     }
   }
 
-  private void performMatch(StrokeSet userStrokeSet) {
+  private boolean performMatch(StrokeSet userStrokeSet) {
     if (mStrokeSetCollection == null) {
       warning("no stroke collection defined");
-      return;
+      return false;
     }
     if (userStrokeSet.isTap()) {
       if (mListener != null)
         mListener.processGesture(GestureSet.GESTURE_TAP);
-      return;
+      return false;
     }
 
     mMatch = null;
@@ -216,16 +249,17 @@ public class GesturePanel extends View {
     ArrayList<GestureSet.Match> matches = new ArrayList();
     Match match = mStrokeSetCollection.findMatch(set, null, matches);
     if (match == null)
-      return;
+      return false;
     // If the match cost is significantly less than the second best, use it
     if (matches.size() >= 2) {
       Match match2 = matches.get(1);
-      if (match.cost() * 1.5f > match2.cost())
-        return;
+      if (match.cost() * mMatcherParameters.maximumCostRatio() > match2.cost())
+        return false;
     }
     mMatch = match;
     mListener.processGesture(mMatch.strokeSet().aliasName());
     setDisplayedGesture(mMatch.strokeSet().name(), true);
+    return true;
   }
 
   public static interface Listener {
@@ -268,7 +302,8 @@ public class GesturePanel extends View {
   public void setEnteredStrokeSet(StrokeSet set) {
     set.freeze();
     mListener.processStrokeSet(set);
-    performMatch(set);
+    if (!performMatch(set))
+      setGesture(mInternalGestures.get(INTERNAL_NAME_UNKNOWN));
   }
 
   /**
@@ -332,7 +367,9 @@ public class GesturePanel extends View {
   private StrokeSet mDisplayedStrokeSet;
   private Map<String, StrokeSet> mScaledStrokeSets = new HashMap();
   private Handler mHandler = new Handler();
-  private int mUniqueGestureNumber;
+  private int mGestureState;
   private GestureSet mStrokeSetCollection;
   private Match mMatch;
+  private GestureSet mInternalGestures;
+  private MatcherParameters mMatcherParameters;
 }
