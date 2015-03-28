@@ -7,13 +7,11 @@ import com.js.basic.Freezable;
 public class MatcherParameters extends Freezable.Mutable {
 
   public static final MatcherParameters DEFAULT = frozen(new MatcherParameters());
-  private static final int FLAG_ALIASCUTOFF = 1 << 0;
 
   public MatcherParameters() {
     setMaximumCostRatio(1.3f);
     setWindowSize(Math
         .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .20f));
-    setPerformAliasCutoff(true);
     // setSkewMax(.2f, 1);
     // setAlignmentAngle(MyMath.M_DEG * 20, 1);
     setMaxResults(3);
@@ -27,14 +25,6 @@ public class MatcherParameters extends Freezable.Mutable {
    */
   public float maximumCostRatio() {
     return mMaximumCostRatio;
-  }
-
-  public void setPerformAliasCutoff(boolean state) {
-    setFlag(FLAG_ALIASCUTOFF, state);
-  }
-
-  public boolean performAliasCutoff() {
-    return hasFlag(FLAG_ALIASCUTOFF);
   }
 
   public void setMaximumCostRatio(float ratio) {
@@ -130,7 +120,7 @@ public class MatcherParameters extends Freezable.Mutable {
     return sb.toString();
   }
 
-  private void setFlag(int flag, boolean state) {
+  /* private */void setFlag(int flag, boolean state) {
     mutate();
     if (!state)
       mFlags &= ~flag;
@@ -138,7 +128,7 @@ public class MatcherParameters extends Freezable.Mutable {
       mFlags |= flag;
   }
 
-  private boolean hasFlag(int flag) {
+  /* private */boolean hasFlag(int flag) {
     return 0 != (mFlags & flag);
   }
 

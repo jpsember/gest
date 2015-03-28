@@ -114,9 +114,6 @@ public class GestureSet {
     TreeSet<Match> results = new TreeSet();
     mMaximumCost = StrokeMatcher.INFINITE_COST;
 
-    if (param.performAliasCutoff())
-      prepareAliasLowCostMap();
-
     for (String gestureName : mEntriesMap.keySet()) {
       StrokeSet gesture = mEntriesMap.get(gestureName);
       if (gesture.size() != inputSet.size())
@@ -126,9 +123,6 @@ public class GestureSet {
       setMaximumCost(gesture);
       Match match = new Match(gesture, mMatcher.cost());
       results.add(match);
-
-      if (param.performAliasCutoff())
-        updateAliasLowCostMap(gesture);
 
       // Update the cutoff value to be some small multiple of the smallest (raw)
       // cost yet seen.
@@ -264,36 +258,7 @@ public class GestureSet {
    */
   private void setMaximumCost(StrokeSet gesture) {
     float maximumCost = mMaximumCost;
-    if (mParam.performAliasCutoff()) {
-      // If an alias of this gesture was previously examined, use that cost as a
-      // hard upper bound (i.e. without a maximumCostRatio multiplier)
-      Float aliasMinCost = mAliasLowCostMap.get(gesture.aliasName());
-      if (aliasMinCost != null)
-        maximumCost = Math.min(mMaximumCost, aliasMinCost);
-    }
     mMatcher.setMaximumCost(maximumCost);
-  }
-
-  private void prepareAliasLowCostMap() {
-    mAliasLowCostMap.clear();
-  }
-
-  /**
-   * Update the alias low cost map according to match that has just occurred
-   */
-  private void updateAliasLowCostMap(StrokeSet gesture) {
-    float currentCost = mMatcher.cost();
-    if (currentCost >= StrokeMatcher.INFINITE_COST)
-      return;
-    Float currentLowCost = mAliasLowCostMap.get(gesture.aliasName());
-    if (currentLowCost == null || currentLowCost > currentCost) {
-      if (mTrace) {
-        if (currentLowCost != null)
-          pr(" updating low cost for alias " + gesture.aliasName() + " to "
-              + currentCost);
-      }
-      mAliasLowCostMap.put(gesture.aliasName(), currentCost);
-    }
   }
 
   /**
@@ -367,9 +332,5 @@ public class GestureSet {
   // Current upper bound for match
   private float mMaximumCost;
 
-  // Map to record the lowest costs found for any alias of a
-  // particular gesture (so we use that cost as an upper bound for subsequent
-  // comparisons)
-  private Map<String, Float> mAliasLowCostMap = new HashMap();
   private StrokeSetMatcher mMatcher;
 }
