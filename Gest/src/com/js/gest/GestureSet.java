@@ -112,7 +112,7 @@ public class GestureSet {
     if (resultsList != null)
       resultsList.clear();
     TreeSet<Match> results = new TreeSet();
-    mMaximumCost = StrokeMatcher.INFINITE_COST;
+    mMatcher.setMaximumCost(StrokeMatcher.INFINITE_COST);
 
     for (String gestureName : mEntriesMap.keySet()) {
       StrokeSet gesture = mEntriesMap.get(gestureName);
@@ -120,7 +120,6 @@ public class GestureSet {
         continue;
 
       mMatcher.setArguments(gesture, inputSet, param);
-      setMaximumCost(gesture);
       Match match = new Match(gesture, mMatcher.cost());
       results.add(match);
 
@@ -130,11 +129,11 @@ public class GestureSet {
       // is the sum of the costs of the individual strokes.
       float newLimit = mMatcher.cost() / inputSet.size();
       newLimit *= param.maximumCostRatio();
-      mMaximumCost = Math.min(newLimit, mMaximumCost);
+      mMatcher.setMaximumCost(Math.min(newLimit, mMatcher.getMaximumCost()));
       if (mTrace && mMatcher.cost() < 20000) {
         pr(" gesture: " + d(gestureName, "15p") + " cost:"
-            + dumpCost(mMatcher.cost()) + " max:" + dumpCost(mMaximumCost)
-            + "\n" + mStats);
+            + dumpCost(mMatcher.cost()) + " max:"
+            + dumpCost(mMatcher.getMaximumCost()) + "\n" + mStats);
       }
 
       trimResultsSet(results);
@@ -208,7 +207,6 @@ public class GestureSet {
       StrokeSet gesture = originalMatch.strokeSet();
       for (StrokeSet rotatedSet : transformedSets) {
         mMatcher.setArguments(gesture, rotatedSet, param);
-        setMaximumCost(gesture);
         Match rotatedMatch = new Match(gesture, mMatcher.cost());
         results.add(rotatedMatch);
 
@@ -248,17 +246,6 @@ public class GestureSet {
     if (m1.strokeSet().aliasName().equals(m2.strokeSet().aliasName())) {
       sortedMatchSet.remove(m2);
     }
-  }
-
-  /**
-   * Set the maximum cost bound prior to matching
-   * 
-   * @param gesture
-   *          candidate gesture
-   */
-  private void setMaximumCost(StrokeSet gesture) {
-    float maximumCost = mMaximumCost;
-    mMatcher.setMaximumCost(maximumCost);
   }
 
   /**
@@ -328,9 +315,5 @@ public class GestureSet {
   private boolean mTrace;
   private MatcherParameters mParam;
   private AlgorithmStats mStats;
-
-  // Current upper bound for match
-  private float mMaximumCost;
-
   private StrokeSetMatcher mMatcher;
 }

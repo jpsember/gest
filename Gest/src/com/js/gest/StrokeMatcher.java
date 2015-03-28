@@ -47,7 +47,6 @@ public class StrokeMatcher {
     if (mParameters.windowSize() <= 0)
       throw new IllegalArgumentException("bad window size");
     prepareTable();
-    setMaximumCost(INFINITE_COST);
     mCostCalculated = false;
   }
 
@@ -57,6 +56,10 @@ public class StrokeMatcher {
    */
   public void setMaximumCost(float maximumCost) {
     mMaximumCost = maximumCost;
+  }
+
+  public float getMaximumCost() {
+    return mMaximumCost;
   }
 
   /**
