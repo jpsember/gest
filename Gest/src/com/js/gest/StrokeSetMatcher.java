@@ -10,8 +10,7 @@ import com.js.basic.Point;
 class StrokeSetMatcher {
 
   public StrokeSetMatcher(AlgorithmStats stats) {
-    mStats = stats;
-    mStrokeMatcher = new StrokeMatcher(mStats);
+    mStrokeMatcher = new StrokeMatcher(stats);
   }
 
   public void setArguments(StrokeSet a, StrokeSet b, MatcherParameters param) {
@@ -139,7 +138,6 @@ class StrokeSetMatcher {
     }
   }
 
-  private AlgorithmStats mStats;
   private StrokeMatcher mStrokeMatcher;
   private StrokeSet mStrokeA;
   private StrokeSet mStrokeB;

@@ -105,6 +105,7 @@ public class GestureSet {
       List<Match> resultsList) {
     if (mTrace)
       pr("GestureSet findMatch");
+    mStats.incrementExecutionCount();
     if (param == null)
       param = MatcherParameters.DEFAULT;
     mParam = param;
@@ -139,8 +140,7 @@ public class GestureSet {
       if (mTrace && mMatcher.cost() < 20000) {
         pr(" gesture: " + d(gestureName, "15p") + " cost:"
             + dumpCost(mMatcher.cost()) + " max:" + dumpCost(mMaximumCost)
-            + " cells %:"
-            + d((int) (100 * mMatcher.strokeMatcher().cellsExaminedRatio())));
+            + "\n" + mStats);
       }
 
       // Throw out all but top k results

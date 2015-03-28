@@ -71,16 +71,6 @@ public class StrokeMatcher {
     return mCost;
   }
 
-  /**
-   * For diagnostic / test purposes, calculate the ratio of actual cells
-   * examined to the potential total cells examined by this matcher
-   */
-  public float cellsExaminedRatio() {
-    if (mTotalCellCount == 0)
-      return 0;
-    return ((float) mActualCellsExamined) / mTotalCellCount;
-  }
-
   private void prepareTable() {
     if (mTableSize != mStrokeA.size()) {
       mWindowSize = -1;
@@ -126,8 +116,8 @@ public class StrokeMatcher {
    * where possible moves are from (x-1,y), (x-1,y-1), or (x,y-1).
    */
   private void performAlgorithm() {
-    mTotalCellCount += mMaxCellsExamined;
-
+    mStats.adjustTotalCellCount(mMaxCellsExamined);
+   
     // Multiply bottom left cost by 2, for symmetric weighting, since it
     // conceptually represents advancement to the first point in both A and B
     float startCost = comparePoints(0, 0) * 2;
@@ -216,7 +206,7 @@ public class StrokeMatcher {
     DataPoint elemB = mStrokeB.get(bIndex);
     Point posA = elemA.getPoint();
     Point posB = elemB.getPoint();
-    mActualCellsExamined++;
+    mStats.incrementCellsExamined();
     float dist = MyMath.squaredDistanceBetween(posA, posB);
     if (mFeaturePointPenalty != 0) {
       if (mStrokeA.isFeaturePoint(aIndex) != mStrokeB.isFeaturePoint(bIndex))
@@ -238,8 +228,6 @@ public class StrokeMatcher {
   private float mCostNormalizationFactor;
   private float mMaximumCost;
   private float mFeaturePointPenalty;
-  private int mActualCellsExamined;
-  private int mTotalCellCount;
   private int mWindowSize;
   private int mMaxCellsExamined;
   private AlgorithmStats mStats;
