@@ -25,6 +25,12 @@ public class AlgorithmStats {
     mExecutions++;
   }
 
+  public void clear() {
+    mActualCellsExamined = 0;
+    mTotalCellCount = 0;
+    mExecutions = 0;
+  }
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();

@@ -241,6 +241,8 @@ public class GesturePanel extends View {
       return false;
     }
 
+    mStrokeSetCollection.getStats().clear();
+
     mMatch = null;
     StrokeSet set = userStrokeSet;
     set = set.fitToRect(null);
@@ -248,8 +250,11 @@ public class GesturePanel extends View {
 
     ArrayList<GestureSet.Match> matches = new ArrayList();
     Match match = mStrokeSetCollection.findMatch(set, null, matches);
+    pr("GesturePanel finding match;\n"+mStrokeSetCollection.getStats());
+
     if (match == null)
       return false;
+
     // If the match cost is significantly less than the second best, use it
     if (matches.size() >= 2) {
       Match match2 = matches.get(1);

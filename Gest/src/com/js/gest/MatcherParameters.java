@@ -6,15 +6,18 @@ import com.js.basic.Freezable;
 
 public class MatcherParameters extends Freezable.Mutable {
 
+  private static final int FLAG_RANDOM_TEST_ORDER = (1 << 0);
+
   public static final MatcherParameters DEFAULT = frozen(new MatcherParameters());
 
   public MatcherParameters() {
     setMaximumCostRatio(1.3f);
     setWindowSize(Math
         .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .20f));
+    setRandomTestOrder(true);
+    setMaxResults(3);
     // setSkewMax(.2f, 1);
     // setAlignmentAngle(MyMath.M_DEG * 20, 1);
-    setMaxResults(3);
   }
 
   /**
@@ -88,11 +91,12 @@ public class MatcherParameters extends Freezable.Mutable {
   @Override
   public Freezable getMutableCopy() {
     MatcherParameters m = new MatcherParameters();
+    m.mFlags = mFlags;
+    m.mRandomSeed = mRandomSeed;
     m.setMaximumCostRatio(maximumCostRatio());
     m.setWindowSize(windowSize());
     m.setAlignmentAngle(alignmentAngle(), alignmentAngleSteps());
     m.setSkewMax(skewXMax(), skewSteps());
-    m.mFlags = mFlags;
     m.setMaxResults(maxResults());
     return m;
   }
@@ -105,7 +109,24 @@ public class MatcherParameters extends Freezable.Mutable {
     return sb.toString();
   }
 
-  /* private */void setFlag(int flag, boolean state) {
+  public void setRandomTestOrder(boolean state) {
+    setFlag(FLAG_RANDOM_TEST_ORDER, state);
+  }
+
+  public boolean hasRandomTestOrder() {
+    return hasFlag(FLAG_RANDOM_TEST_ORDER);
+  }
+
+  public void setRandomSeed(int seed) {
+    mutate();
+    mRandomSeed = seed;
+  }
+
+  public int randomSeed() {
+    return mRandomSeed;
+  }
+
+  private void setFlag(int flag, boolean state) {
     mutate();
     if (!state)
       mFlags &= ~flag;
@@ -113,7 +134,7 @@ public class MatcherParameters extends Freezable.Mutable {
       mFlags |= flag;
   }
 
-  /* private */boolean hasFlag(int flag) {
+  private boolean hasFlag(int flag) {
     return 0 != (mFlags & flag);
   }
 
@@ -125,5 +146,5 @@ public class MatcherParameters extends Freezable.Mutable {
   private int mSkewSteps;
   private int mFlags;
   private int mMaxResults;
-
+  private int mRandomSeed;
 }

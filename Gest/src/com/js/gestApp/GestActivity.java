@@ -250,6 +250,7 @@ public class GestActivity extends MyActivity {
 
   private void runSamplesExperiment() {
     pr("\nRunning Samples Experiment");
+    mGestureLibrary.getStats().clear();
     GestureSet sampledGestures = readSamples();
     ArrayList<String> names = sortedGestureNames(sampledGestures);
     String prevRootName = "";
@@ -265,6 +266,11 @@ public class GestActivity extends MyActivity {
 
       // Just use the default parameters
       MatcherParameters p = new MatcherParameters();
+      if (true) {
+        p.setRandomTestOrder(true);
+        p.setRandomSeed(mRandomSeed + 1965);
+        mRandomSeed++;
+      }
 
       mGestureLibrary.setTraceStatus(false);
       mGestureLibrary.findMatch(sampleStrokeSet, p, results);
@@ -299,7 +305,7 @@ public class GestActivity extends MyActivity {
     }
     pr("Number of samples: " + sampledGestures.getNames().size());
     pr(mGestureLibrary.getStats());
-    
+
     pr("Total problems found: " + totalProblems + "\n");
     if (totalProblems != 0)
       mMatchProblemIndex = (1 + mMatchProblemIndex) % totalProblems;
@@ -397,4 +403,5 @@ public class GestActivity extends MyActivity {
   private CheckBox mAddSamplesCheckBox;
   private List<StrokeSet> mSamples = new ArrayList();
   private int mMatchProblemIndex;
+  private int mRandomSeed;
 }

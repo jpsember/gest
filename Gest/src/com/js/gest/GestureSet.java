@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -114,7 +115,12 @@ public class GestureSet {
     TreeSet<Match> results = new TreeSet();
     mMatcher.setMaximumCost(StrokeMatcher.INFINITE_COST);
 
-    for (String gestureName : mEntriesMap.keySet()) {
+    ArrayList<String> gestureNamesList = new ArrayList(mEntriesMap.keySet());
+    if (mParam.hasRandomTestOrder()) {
+      permuteArrayRandomly(gestureNamesList);
+    }
+
+    for (String gestureName : gestureNamesList) {
       StrokeSet gesture = mEntriesMap.get(gestureName);
       if (gesture.size() != inputSet.size())
         continue;
@@ -154,6 +160,23 @@ public class GestureSet {
     }
 
     return results.first();
+  }
+
+  private void permuteArrayRandomly(ArrayList array) {
+    int seed = mParam.randomSeed();
+    Random random;
+    if (seed == 0)
+      random = new Random();
+    else
+      random = new Random(seed);
+
+    int size = array.size();
+    for (int i = 0; i < size; i++) {
+      int j = random.nextInt(size - i) + i;
+      Object swap = array.get(i);
+      array.set(i, array.get(j));
+      array.set(j, swap);
+    }
   }
 
   public AlgorithmStats getStats() {
