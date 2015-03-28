@@ -250,7 +250,6 @@ public class GesturePanel extends View {
 
     ArrayList<GestureSet.Match> matches = new ArrayList();
     Match match = mStrokeSetCollection.findMatch(set, null, matches);
-    pr("GesturePanel finding match;\n"+mStrokeSetCollection.getStats());
 
     if (match == null)
       return false;

@@ -115,6 +115,7 @@ public class StrokeMatcher {
    * where possible moves are from (x-1,y), (x-1,y-1), or (x,y-1).
    */
   private void performAlgorithm() {
+    mStats.incrementExecutionCount();
     mStats.adjustTotalCellCount(mMaxCellsExamined);
 
     // Multiply bottom left cost by 2, for symmetric weighting, since it

@@ -18,7 +18,6 @@ import com.js.gest.GesturePanel;
 
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
@@ -72,9 +71,8 @@ public class GestActivity extends MyActivity {
       @Override
       public void processStrokeSet(StrokeSet set) {
         if (false) {
-          warning("testing matrix");
-          Matrix m = StrokeSet.buildRotateSkewTransform(0, .3f);
-          set = set.applyTransform(m);
+          warning("skipping");
+          return;
         }
 
         // Have the TouchView display this stroke set
@@ -251,6 +249,7 @@ public class GestActivity extends MyActivity {
   private void runSamplesExperiment() {
     pr("\nRunning Samples Experiment");
     mGestureLibrary.getStats().clear();
+    mGestureLibrary.setTraceStatus(false);
     GestureSet sampledGestures = readSamples();
     ArrayList<String> names = sortedGestureNames(sampledGestures);
     String prevRootName = "";
@@ -272,7 +271,6 @@ public class GestActivity extends MyActivity {
         mRandomSeed++;
       }
 
-      mGestureLibrary.setTraceStatus(false);
       mGestureLibrary.findMatch(sampleStrokeSet, p, results);
 
       Match result = null;
@@ -309,6 +307,7 @@ public class GestActivity extends MyActivity {
     pr("Total problems found: " + totalProblems + "\n");
     if (totalProblems != 0)
       mMatchProblemIndex = (1 + mMatchProblemIndex) % totalProblems;
+    mGestureLibrary.setTraceStatus(true);
   }
 
   private String rootName(String name) {
@@ -388,6 +387,7 @@ public class GestActivity extends MyActivity {
     try {
       mGestureLibrary = GestureSet.readFromClassResource(getClass(),
           "basic_gestures.json");
+      mGestureLibrary.setTraceStatus(true);
     } catch (Exception e) {
       die(e);
     }

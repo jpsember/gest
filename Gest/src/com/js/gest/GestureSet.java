@@ -24,9 +24,12 @@ public class GestureSet {
 
   public static final String GESTURE_TAP = "*tap*";
 
+  private static final int MAX_RECENT_GESTURES = 5;
+
   public GestureSet() {
     mStats = new AlgorithmStats();
     mMatcher = new StrokeSetMatcher(mStats);
+    mRecentGestureList = new ArrayList();
   }
 
   public static GestureSet parseJSON(String script) throws JSONException {
@@ -105,8 +108,7 @@ public class GestureSet {
   public Match findMatch(StrokeSet inputSet, MatcherParameters param,
       List<Match> resultsList) {
     if (mTrace)
-      pr("GestureSet findMatch");
-    mStats.incrementExecutionCount();
+      pr("GestureSet findMatch; recent gestures "+d(mRecentGestureList));
     if (param == null)
       param = MatcherParameters.DEFAULT;
     mParam = param;
@@ -120,6 +122,8 @@ public class GestureSet {
       permuteArrayRandomly(gestureNamesList);
     }
 
+    processRecentGestureList(gestureNamesList);
+
     for (String gestureName : gestureNamesList) {
       StrokeSet gesture = mEntriesMap.get(gestureName);
       if (gesture.size() != inputSet.size())
@@ -128,7 +132,7 @@ public class GestureSet {
       mMatcher.setArguments(gesture, inputSet, param);
       Match match = new Match(gesture, mMatcher.cost());
       results.add(match);
-
+      
       // Update the cutoff value to be some small multiple of the smallest (raw)
       // cost yet seen.
       // Scale the raw cost by the number of strokes since the cost of the set
@@ -158,8 +162,34 @@ public class GestureSet {
     if (resultsList != null) {
       resultsList.addAll(results);
     }
+    Match result = results.first();
+    updateRecentGestureList(result.strokeSet().name());
+    return result;
+  }
 
-    return results.first();
+  /**
+   * Add a gesture name to the recent gesture list
+   */
+  private void updateRecentGestureList(String name) {
+    mRecentGestureList.remove(name);
+    mRecentGestureList.add(0, name);
+    while (mRecentGestureList.size() > MAX_RECENT_GESTURES)
+      pop(mRecentGestureList);
+  }
+
+  /**
+   * Modify gesture match order to place any recently-used names first
+   */
+  private void processRecentGestureList(ArrayList<String> namesList) {
+    ArrayList<String> mod = new ArrayList();
+    mod.addAll(mRecentGestureList);
+    for (String name : namesList) {
+      if (mRecentGestureList.contains(name))
+        continue;
+      mod.add(name);
+    }
+    namesList.clear();
+    namesList.addAll(mod);
   }
 
   private void permuteArrayRandomly(ArrayList array) {
@@ -339,4 +369,5 @@ public class GestureSet {
   private MatcherParameters mParam;
   private AlgorithmStats mStats;
   private StrokeSetMatcher mMatcher;
+  private ArrayList<String> mRecentGestureList;
 }
