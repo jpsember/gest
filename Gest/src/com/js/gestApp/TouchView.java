@@ -20,8 +20,6 @@ import static com.js.basic.Tools.*;
  */
 public class TouchView extends View {
 
-  private static final boolean SHOW_FEATURE_POINTS = false;
-  
   public TouchView(Context context, Listener listener) {
     super(context);
     doNothing();
@@ -172,14 +170,7 @@ public class TouchView extends View {
         px = x;
         py = y;
         if (detailed) {
-          if (SHOW_FEATURE_POINTS && s.isFrozen()) {
-            if (s.isFeaturePoint(i)) {
-              mCanvas.drawCircle(px, py, 25, mPaintOutline);
-            }
-          }
-          if (detailed) {
-            mCanvas.drawCircle(px, py, 5, mPaintOutline);
-          }
+          mCanvas.drawCircle(px, py, 5, mPaintOutline);
         }
       }
     }

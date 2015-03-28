@@ -81,10 +81,6 @@ public class StrokeMatcher {
       int tableCells = mTableSize * mTableSize;
       mTable = new float[tableCells];
       mCostNormalizationFactor = 1.0f / (2 * mTableSize);
-      if (mParameters.hasFeaturePoints()) {
-        mFeaturePointPenalty = StrokeSet.STANDARD_WIDTH
-            * mParameters.featurePointPenalty();
-      }
     }
     if (mWindowSize != mParameters.windowSize()) {
       mWindowSize = mParameters.windowSize();
@@ -120,7 +116,7 @@ public class StrokeMatcher {
    */
   private void performAlgorithm() {
     mStats.adjustTotalCellCount(mMaxCellsExamined);
-   
+
     // Multiply bottom left cost by 2, for symmetric weighting, since it
     // conceptually represents advancement to the first point in both A and B
     float startCost = comparePoints(0, 0) * 2;
@@ -211,10 +207,6 @@ public class StrokeMatcher {
     Point posB = elemB.getPoint();
     mStats.incrementCellsExamined();
     float dist = MyMath.squaredDistanceBetween(posA, posB);
-    if (mFeaturePointPenalty != 0) {
-      if (mStrokeA.isFeaturePoint(aIndex) != mStrokeB.isFeaturePoint(bIndex))
-        dist = dist + mFeaturePointPenalty;
-    }
     dist *= mCostNormalizationFactor;
     return dist;
   }
@@ -230,7 +222,6 @@ public class StrokeMatcher {
   // of entire path is normalized
   private float mCostNormalizationFactor;
   private float mMaximumCost;
-  private float mFeaturePointPenalty;
   private int mWindowSize;
   private int mMaxCellsExamined;
   private AlgorithmStats mStats;
