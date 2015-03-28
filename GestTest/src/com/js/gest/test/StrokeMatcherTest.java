@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.js.basic.Point;
+import com.js.gest.AlgorithmStats;
 import com.js.gest.MatcherParameters;
 import com.js.gest.Stroke;
 import com.js.gest.StrokeMatcher;
@@ -39,7 +40,7 @@ public class StrokeMatcherTest extends MyTestCase {
     Stroke stroke1 = buildStroke(str1);
     Stroke stroke2 = buildStroke(str2);
 
-    StrokeMatcher m = new StrokeMatcher();
+    StrokeMatcher m = new StrokeMatcher(new AlgorithmStats());
     m.setArguments(stroke1, stroke2, null);
     assertEqualsFloat(expectedSimilarity, m.cost());
   }

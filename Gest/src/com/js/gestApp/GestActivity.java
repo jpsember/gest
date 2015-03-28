@@ -297,6 +297,9 @@ public class GestActivity extends MyActivity {
       }
       totalProblems++;
     }
+    pr("Number of samples: " + sampledGestures.getNames().size());
+    pr(mGestureLibrary.getStats());
+    
     pr("Total problems found: " + totalProblems + "\n");
     if (totalProblems != 0)
       mMatchProblemIndex = (1 + mMatchProblemIndex) % totalProblems;

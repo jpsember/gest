@@ -23,6 +23,11 @@ public class GestureSet {
 
   public static final String GESTURE_TAP = "*tap*";
 
+  public GestureSet() {
+    mStats = new AlgorithmStats();
+    mMatcher = new StrokeSetMatcher(mStats);
+  }
+
   public static GestureSet parseJSON(String script) throws JSONException {
     GestureSetParser p = new GestureSetParser();
     GestureSet collection = new GestureSet();
@@ -161,6 +166,10 @@ public class GestureSet {
     }
 
     return results.first();
+  }
+
+  public AlgorithmStats getStats() {
+    return mStats;
   }
 
   /**
@@ -346,6 +355,7 @@ public class GestureSet {
   private int mStrokeLength;
   private boolean mTrace;
   private MatcherParameters mParam;
+  private AlgorithmStats mStats;
 
   // Current upper bound for match
   private float mMaximumCost;
@@ -354,5 +364,5 @@ public class GestureSet {
   // particular gesture (so we use that cost as an upper bound for subsequent
   // comparisons)
   private Map<String, Float> mAliasLowCostMap = new HashMap();
-  private StrokeSetMatcher mMatcher = new StrokeSetMatcher();
+  private StrokeSetMatcher mMatcher;
 }

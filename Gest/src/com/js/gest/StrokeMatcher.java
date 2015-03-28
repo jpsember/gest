@@ -17,6 +17,10 @@ import com.js.gest.Stroke.DataPoint;
  */
 public class StrokeMatcher {
 
+  public StrokeMatcher(AlgorithmStats stats) {
+    mStats = stats;
+  }
+
   /**
    * A value representing 'infinite' cost. It should not be so large that it
    * can't be safely doubled or tripled without overflowing
@@ -238,4 +242,5 @@ public class StrokeMatcher {
   private int mTotalCellCount;
   private int mWindowSize;
   private int mMaxCellsExamined;
+  private AlgorithmStats mStats;
 }

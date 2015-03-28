@@ -9,6 +9,11 @@ import com.js.basic.Point;
 
 class StrokeSetMatcher {
 
+  public StrokeSetMatcher(AlgorithmStats stats) {
+    mStats = stats;
+    mStrokeMatcher = new StrokeMatcher(mStats);
+  }
+
   public void setArguments(StrokeSet a, StrokeSet b, MatcherParameters param) {
     mSimilarityFound = false;
     mStrokeA = frozen(a);
@@ -134,7 +139,8 @@ class StrokeSetMatcher {
     }
   }
 
-  private StrokeMatcher mStrokeMatcher = new StrokeMatcher();
+  private AlgorithmStats mStats;
+  private StrokeMatcher mStrokeMatcher;
   private StrokeSet mStrokeA;
   private StrokeSet mStrokeB;
   private float mMaximumCost = StrokeMatcher.INFINITE_COST;
