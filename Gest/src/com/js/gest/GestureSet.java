@@ -238,12 +238,12 @@ public class GestureSet {
    * @param sortedMatchSet
    */
   private void removeExtraneousAliasFromResults(TreeSet<Match> sortedMatchSet) {
-    if (sortedMatchSet.size() < 2)
-      return;
-    Iterator<Match> iter = sortedMatchSet.iterator();
-    Match m1 = iter.next();
-    Match m2 = iter.next();
-    if (m1.strokeSet().aliasName().equals(m2.strokeSet().aliasName())) {
+    while (sortedMatchSet.size() >= 2) {
+      Iterator<Match> iter = sortedMatchSet.iterator();
+      Match m1 = iter.next();
+      Match m2 = iter.next();
+      if (!m1.strokeSet().aliasName().equals(m2.strokeSet().aliasName()))
+        break;
       sortedMatchSet.remove(m2);
     }
   }
