@@ -143,17 +143,12 @@ public class GestureSet {
             + "\n" + mStats);
       }
 
-      // Throw out all but top k results
-      while (results.size() > param.maxResults())
-        results.pollLast();
+      trimResultsSet(results);
     }
 
     if (param.hasRotateOption() || param.hasSkewOption()) {
       processRotateAndSkewOptions(inputSet, param, results);
     }
-
-    if (param.performAliasCutoff())
-      removeExtraneousAliasFromResults(results);
 
     if (results.isEmpty())
       return null;
@@ -223,13 +218,25 @@ public class GestureSet {
         Match rotatedMatch = new Match(gesture, mMatcher.cost());
         results.add(rotatedMatch);
 
-        // Throw out all but top k results
-        while (results.size() > param.maxResults())
-          results.pollLast();
+        trimResultsSet(results);
       }
 
     }
 
+  }
+
+  /**
+   * Trim a sorted list of matches:
+   * 
+   * 1) while second best result is an alias of the first, remove it
+   * 
+   * 2) trim list size to maximum length
+   */
+  private void trimResultsSet(TreeSet<Match> results) {
+    removeExtraneousAliasFromResults(results);
+    // Throw out all but top k results
+    while (results.size() > mParam.maxResults())
+      results.pollLast();
   }
 
   /**
