@@ -108,7 +108,7 @@ public class GestureSet {
   public Match findMatch(StrokeSet inputSet, MatcherParameters param,
       List<Match> resultsList) {
     if (mTrace)
-      pr("GestureSet findMatch; recent gestures "+d(mRecentGestureList));
+      pr("GestureSet findMatch; recent gestures " + d(mRecentGestureList));
     if (param == null)
       param = MatcherParameters.DEFAULT;
     mParam = param;
@@ -122,7 +122,8 @@ public class GestureSet {
       permuteArrayRandomly(gestureNamesList);
     }
 
-    processRecentGestureList(gestureNamesList);
+    if (mParam.hasRecentGesturesList())
+      processRecentGestureList(gestureNamesList);
 
     for (String gestureName : gestureNamesList) {
       StrokeSet gesture = mEntriesMap.get(gestureName);
@@ -132,7 +133,7 @@ public class GestureSet {
       mMatcher.setArguments(gesture, inputSet, param);
       Match match = new Match(gesture, mMatcher.cost());
       results.add(match);
-      
+
       // Update the cutoff value to be some small multiple of the smallest (raw)
       // cost yet seen.
       // Scale the raw cost by the number of strokes since the cost of the set
@@ -163,7 +164,8 @@ public class GestureSet {
       resultsList.addAll(results);
     }
     Match result = results.first();
-    updateRecentGestureList(result.strokeSet().name());
+    if (param.hasRecentGesturesList())
+      updateRecentGestureList(result.strokeSet().name());
     return result;
   }
 

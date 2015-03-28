@@ -263,10 +263,11 @@ public class GestActivity extends MyActivity {
       StrokeSet sampleStrokeSet = sampledGestures.get(name);
       List<Match> results = new ArrayList();
 
-      // Just use the default parameters
       MatcherParameters p = new MatcherParameters();
+
       if (true) {
-        p.setRandomTestOrder(true);
+        // Ensure deterministic behaviour (from start of application run) by
+        // giving it a consistent sequence of seeds
         p.setRandomSeed(mRandomSeed + 1965);
         mRandomSeed++;
       }

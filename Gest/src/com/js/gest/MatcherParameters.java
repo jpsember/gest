@@ -7,6 +7,7 @@ import com.js.basic.Freezable;
 public class MatcherParameters extends Freezable.Mutable {
 
   private static final int FLAG_RANDOM_TEST_ORDER = (1 << 0);
+  private static final int FLAG_RECENT_GESTURES_SET = (1 << 1);
 
   public static final MatcherParameters DEFAULT = frozen(new MatcherParameters());
 
@@ -15,6 +16,7 @@ public class MatcherParameters extends Freezable.Mutable {
     setWindowSize(Math
         .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .20f));
     setRandomTestOrder(true);
+    setRecentGesturesList(true);
     setMaxResults(3);
     // setSkewMax(.2f, 1);
     // setAlignmentAngle(MyMath.M_DEG * 20, 1);
@@ -115,6 +117,14 @@ public class MatcherParameters extends Freezable.Mutable {
 
   public boolean hasRandomTestOrder() {
     return hasFlag(FLAG_RANDOM_TEST_ORDER);
+  }
+
+  public void setRecentGesturesList(boolean state) {
+    setFlag(FLAG_RECENT_GESTURES_SET, state);
+  }
+
+  public boolean hasRecentGesturesList() {
+    return hasFlag(FLAG_RECENT_GESTURES_SET);
   }
 
   public void setRandomSeed(int seed) {
