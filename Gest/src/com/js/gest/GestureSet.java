@@ -17,19 +17,20 @@ import org.json.JSONException;
 import android.graphics.Matrix;
 
 import com.js.basic.Files;
+import com.js.basic.MyMath;
 
 import static com.js.basic.Tools.*;
+import java.util.Comparator;
 
 public class GestureSet {
 
   public static final String GESTURE_TAP = "*tap*";
 
-  private static final int MAX_RECENT_GESTURES = 5;
+  private Random mRandom;
 
   public GestureSet() {
     mStats = new AlgorithmStats();
     mMatcher = new StrokeSetMatcher(mStats);
-    mRecentGestureList = new ArrayList();
   }
 
   public static GestureSet parseJSON(String script) throws JSONException {
@@ -108,7 +109,7 @@ public class GestureSet {
   public Match findMatch(StrokeSet inputSet, MatcherParameters param,
       List<Match> resultsList) {
     if (mTrace)
-      pr("GestureSet findMatch; recent gestures " + d(mRecentGestureList));
+      pr("GestureSet findMatch");
     if (param == null)
       param = MatcherParameters.DEFAULT;
     mParam = param;
@@ -117,16 +118,9 @@ public class GestureSet {
     TreeSet<Match> results = new TreeSet();
     mMatcher.setMaximumCost(StrokeMatcher.INFINITE_COST);
 
-    ArrayList<String> gestureNamesList = new ArrayList(mEntriesMap.keySet());
-    if (mParam.hasRandomTestOrder()) {
-      permuteArrayRandomly(gestureNamesList);
-    }
-
-    if (mParam.hasRecentGesturesList())
-      processRecentGestureList(gestureNamesList);
-
-    for (String gestureName : gestureNamesList) {
-      StrokeSet gesture = mEntriesMap.get(gestureName);
+    prepareSortedGestureSet();
+    for (SortEntry gestureEntry : mSortedGestureSet) {
+      StrokeSet gesture = gestureEntry.strokeSet();
       if (gesture.size() != inputSet.size())
         continue;
 
@@ -142,7 +136,7 @@ public class GestureSet {
       newLimit *= param.maximumCostRatio();
       mMatcher.setMaximumCost(Math.min(newLimit, mMatcher.getMaximumCost()));
       if (mTrace && mMatcher.cost() < 20000) {
-        pr(" gesture: " + d(gestureName, "15p") + " cost:"
+        pr(" gesture: " + d(gesture.name(), "15p") + " cost:"
             + dumpCost(mMatcher.cost()) + " max:"
             + dumpCost(mMatcher.getMaximumCost()) + "\n" + mStats);
       }
@@ -165,50 +159,49 @@ public class GestureSet {
     }
     Match result = results.first();
     if (param.hasRecentGesturesList())
-      updateRecentGestureList(result.strokeSet().name());
+      moveGestureToHeadOfList(result.strokeSet().name());
     return result;
   }
 
-  /**
-   * Add a gesture name to the recent gesture list
-   */
-  private void updateRecentGestureList(String name) {
-    mRecentGestureList.remove(name);
-    mRecentGestureList.add(0, name);
-    while (mRecentGestureList.size() > MAX_RECENT_GESTURES)
-      pop(mRecentGestureList);
+  private void prepareSortedGestureSet() {
+    if (mSortedGestureSet != null)
+      return;
+    mSortedGestureSet = new TreeSet(SortEntry.COMPARATOR);
+    Random random = getRandom();
+    for (StrokeSet strokeSet : mEntriesMap.values()) {
+      SortEntry entry = new SortEntry(strokeSet);
+      entry.setValue(random.nextFloat());
+      mSortedGestureSet.add(entry);
+    }
   }
 
-  /**
-   * Modify gesture match order to place any recently-used names first
-   */
-  private void processRecentGestureList(ArrayList<String> namesList) {
-    ArrayList<String> mod = new ArrayList();
-    mod.addAll(mRecentGestureList);
-    for (String name : namesList) {
-      if (mRecentGestureList.contains(name))
-        continue;
-      mod.add(name);
+  private SortEntry findSortedEntry(String gestureName) {
+    for (SortEntry entry : mSortedGestureSet) {
+      if (entry.strokeSet().name().equals(gestureName)) {
+        return entry;
+      }
     }
-    namesList.clear();
-    namesList.addAll(mod);
+    throw new IllegalArgumentException("gesture not found: " + gestureName);
   }
 
-  private void permuteArrayRandomly(ArrayList array) {
-    int seed = mParam.randomSeed();
-    Random random;
-    if (seed == 0)
-      random = new Random();
-    else
-      random = new Random(seed);
+  private void moveGestureToHeadOfList(String name) {
+    SortEntry entry = findSortedEntry(name);
+    // Remove existing entry, and re-insert with higher index
+    mSortedGestureSet.remove(entry);
+    mUniqueIndex++;
+    entry.setValue(MyMath.myMod(entry.value(), 1) + mUniqueIndex);
+    mSortedGestureSet.add(entry);
+  }
 
-    int size = array.size();
-    for (int i = 0; i < size; i++) {
-      int j = random.nextInt(size - i) + i;
-      Object swap = array.get(i);
-      array.set(i, array.get(j));
-      array.set(j, swap);
+  private Random getRandom() {
+    if (mRandom == null) {
+      int seed = mParam.randomSeed();
+      if (seed == 0)
+        mRandom = new Random();
+      else
+        mRandom = new Random(seed);
     }
+    return mRandom;
   }
 
   public AlgorithmStats getStats() {
@@ -365,11 +358,54 @@ public class GestureSet {
     return library;
   }
 
+  /**
+   * Entries for sorting StrokeSets by most-recently-used order
+   */
+  private static class SortEntry {
+
+    public static final Comparator COMPARATOR = new Comparator() {
+      @Override
+      public int compare(Object a, Object b) {
+        SortEntry aEnt = (SortEntry) a;
+        SortEntry bEnt = (SortEntry) b;
+        int diff = (int) Math.signum(bEnt.mValue - aEnt.mValue);
+        if (diff == 0)
+          diff = aEnt.strokeSet().name().compareTo(bEnt.strokeSet().name());
+        return diff;
+      }
+    };
+
+    public SortEntry(StrokeSet strokeSet) {
+      mStrokeSet = strokeSet;
+    }
+
+    public StrokeSet strokeSet() {
+      return mStrokeSet;
+    }
+
+    /**
+     * The values are positive floats, whose fractional parts are random, and
+     * whose integer parts are unique and are higher for the more
+     * recently-recognized gestures
+     */
+    public void setValue(float value) {
+      mValue = value;
+    }
+
+    public float value() {
+      return mValue;
+    }
+
+    private float mValue;
+    private StrokeSet mStrokeSet;
+  }
+
   private Map<String, StrokeSet> mEntriesMap = new HashMap();
   private int mStrokeLength;
   private boolean mTrace;
   private MatcherParameters mParam;
   private AlgorithmStats mStats;
   private StrokeSetMatcher mMatcher;
-  private ArrayList<String> mRecentGestureList;
+  private TreeSet<SortEntry> mSortedGestureSet;
+  private int mUniqueIndex;
 }
