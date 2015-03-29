@@ -77,7 +77,7 @@ public class GestureSet {
     return mStrokeLength;
   }
 
-  public void add(StrokeSet set) {
+  private void add(StrokeSet set) {
     set = frozen(set);
     set.assertNamed();
     // If the library is currently empty, set its length to the length of this
@@ -87,9 +87,8 @@ public class GestureSet {
     }
 
     // Construct a SortEntry for this gesture, and add it to the sorted set, and
-    // the name map. Any existing entry for this name will be replaced
-    SortEntry entry = new SortEntry(set);
-    entry.setValue(mRandom.nextFloat());
+    // the name map
+    SortEntry entry = new SortEntry(set, mRandom.nextFloat());
     mSortedGestureSet.add(entry);
     mEntriesMap.put(set.name(), entry);
   }
@@ -344,8 +343,9 @@ public class GestureSet {
       }
     };
 
-    public SortEntry(StrokeSet strokeSet) {
+    public SortEntry(StrokeSet strokeSet, float value) {
       mStrokeSet = strokeSet;
+      mValue = value;
     }
 
     public StrokeSet strokeSet() {

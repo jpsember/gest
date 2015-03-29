@@ -145,14 +145,18 @@ public class GestActivity extends MyActivity {
   private LinearLayout buildControlView() {
     LinearLayout ctrlView = linearLayout(this, false);
 
-    addButton(ctrlView, "Save", new OnClickListener() {
+    addButton(ctrlView, "JSON", new OnClickListener() {
       @Override
       public void onClick(View v) {
         String name = mNameWidget.getText().toString().trim();
-        if (name.isEmpty())
-          return;
         if (mAddSamplesCheckBox.isChecked()) {
+          if (name.isEmpty()) {
+            setConsoleText("Please give samples a name.");
+            return;
+          }
+          setConsoleText("Dumping samples...");
           dumpSamples(name);
+          mNameWidget.setText("");
           return;
         }
 
@@ -161,11 +165,9 @@ public class GestActivity extends MyActivity {
         StrokeSet set = mutableCopyOf(mNormalizedStrokeSet);
         set.setName(name);
         set.freeze();
-        addGestureToLibrary(set);
         String json = dumpStrokeSet(set);
         clearRegisteredSet();
-        setConsoleText("Storing:\n\n" + json);
-        mNameWidget.setText("");
+        setConsoleText("JSON:\n\n" + json);
       }
 
     });
@@ -309,11 +311,6 @@ public class GestActivity extends MyActivity {
     if (suffixStart < 0)
       throw new IllegalArgumentException("no root found: " + name);
     return name.substring(0, suffixStart);
-  }
-
-  private void addGestureToLibrary(StrokeSet set) {
-    set.assertFrozen();
-    mGestureLibrary.add(set);
   }
 
   private View buildContentView() {
