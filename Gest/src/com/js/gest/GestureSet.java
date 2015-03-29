@@ -2,7 +2,6 @@ package com.js.gest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,8 +12,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.json.JSONException;
-
-import android.graphics.Matrix;
 
 import com.js.basic.Files;
 import com.js.basic.MyMath;
@@ -144,10 +141,6 @@ public class GestureSet {
       trimResultsSet(results, param.maxResults());
     }
 
-    if (param.hasRotateOption() || param.hasSkewOption()) {
-      processRotateAndSkewOptions(inputSet, param, results);
-    }
-
     if (results.isEmpty())
       return null;
 
@@ -170,63 +163,6 @@ public class GestureSet {
 
   public AlgorithmStats getStats() {
     return mStats;
-  }
-
-  /**
-   * Build a sequence of values from -m...0...m
-   * 
-   * @param maxValue
-   *          m
-   * @param steps
-   *          the number of values to appear to each side of zero
-   * @return an array of 1+2*steps values, with the middle value equal to 0
-   */
-  private static float[] buildParameterSteps(float maxValue, int steps) {
-    int totalValues = steps * 2 + 1;
-    float[] values = new float[totalValues];
-    float interval = maxValue / steps;
-    for (int i = 0; i < totalValues; i++)
-      values[i] = (i - steps) * interval;
-    // Avoid precision problem by setting middle value to 0 explicitly
-    values[steps] = 0;
-    return values;
-  }
-
-  private void processRotateAndSkewOptions(StrokeSet inputSet,
-      MatcherParameters param, TreeSet<Match> results) {
-
-    // Construct rotated and skewed versions of the input set
-    ArrayList<StrokeSet> transformedSets = new ArrayList();
-    float[] skewFactors = buildParameterSteps(param.skewXMax(),
-        param.skewSteps());
-    float[] rotAngles = buildParameterSteps(param.alignmentAngle(),
-        param.alignmentAngleSteps());
-
-    Matrix matrix = new Matrix();
-    for (float skewFactor : skewFactors) {
-      for (float rotAngle : rotAngles) {
-        if (skewFactor == 0 && rotAngle == 0)
-          continue;
-        matrix = StrokeSet.buildRotateSkewTransform(rotAngle, skewFactor);
-        transformedSets.add(inputSet.applyTransform(matrix));
-      }
-    }
-
-    ArrayList<Match> originalResults = new ArrayList();
-    originalResults.addAll(results);
-
-    for (Match originalMatch : originalResults) {
-      StrokeSet gesture = originalMatch.strokeSet();
-      for (StrokeSet rotatedSet : transformedSets) {
-        mMatcher.setArguments(gesture, rotatedSet, param);
-        Match rotatedMatch = new Match(gesture, mMatcher.cost());
-        results.add(rotatedMatch);
-
-        trimResultsSet(results, param.maxResults());
-      }
-
-    }
-
   }
 
   /**

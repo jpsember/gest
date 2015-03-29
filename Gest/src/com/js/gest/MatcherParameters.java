@@ -13,8 +13,6 @@ public class MatcherParameters extends Freezable.Mutable {
     setWindowSize(Math
         .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .20f));
     setMaxResults(3);
-    // setSkewMax(.2f, 1);
-    // setAlignmentAngle(MyMath.M_DEG * 20, 1);
   }
 
   /**
@@ -49,50 +47,12 @@ public class MatcherParameters extends Freezable.Mutable {
     return mMaxResults;
   }
 
-  public void setAlignmentAngle(float angle, int numberOfSteps) {
-    mutate();
-    mAlignmentAngle = angle;
-    mAlignmentAngleSteps = numberOfSteps;
-  }
-
-  public float alignmentAngle() {
-    return mAlignmentAngle;
-  }
-
-  public boolean hasRotateOption() {
-    return mAlignmentAngle != 0;
-  }
-
-  public boolean hasSkewOption() {
-    return mSkewXMax != 0;
-  }
-
-  public int alignmentAngleSteps() {
-    return mAlignmentAngleSteps;
-  }
-
-  public void setSkewMax(float skewXMax, int numberOfSteps) {
-    mutate();
-    mSkewXMax = skewXMax;
-    mSkewSteps = numberOfSteps;
-  }
-
-  public float skewXMax() {
-    return mSkewXMax;
-  }
-
-  public int skewSteps() {
-    return mSkewSteps;
-  }
-
   @Override
   public Freezable getMutableCopy() {
     MatcherParameters m = new MatcherParameters();
     m.mFlags = mFlags;
     m.setMaximumCostRatio(maximumCostRatio());
     m.setWindowSize(windowSize());
-    m.setAlignmentAngle(alignmentAngle(), alignmentAngleSteps());
-    m.setSkewMax(skewXMax(), skewSteps());
     m.setMaxResults(maxResults());
     return m;
   }
@@ -119,10 +79,6 @@ public class MatcherParameters extends Freezable.Mutable {
 
   private int mWindowSize;
   private float mMaximumCostRatio;
-  private float mAlignmentAngle;
-  private int mAlignmentAngleSteps;
-  private float mSkewXMax;
-  private int mSkewSteps;
   private int mFlags;
   private int mMaxResults;
 }
