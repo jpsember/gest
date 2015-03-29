@@ -265,13 +265,6 @@ public class GestActivity extends MyActivity {
 
       MatcherParameters p = new MatcherParameters();
 
-      if (true) {
-        // Ensure deterministic behaviour (from start of application run) by
-        // giving it a consistent sequence of seeds
-        p.setRandomSeed(mRandomSeed + 1965);
-        mRandomSeed++;
-      }
-
       mGestureLibrary.findMatch(sampleStrokeSet, p, results);
 
       Match result = null;
@@ -404,5 +397,4 @@ public class GestActivity extends MyActivity {
   private CheckBox mAddSamplesCheckBox;
   private List<StrokeSet> mSamples = new ArrayList();
   private int mMatchProblemIndex;
-  private int mRandomSeed;
 }

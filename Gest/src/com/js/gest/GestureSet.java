@@ -160,8 +160,7 @@ public class GestureSet {
       resultsList.addAll(results);
     }
     Match result = results.first();
-    if (param.hasRecentGesturesList())
-      moveGestureToHeadOfList(result.strokeSet().name());
+    moveGestureToHeadOfList(result.strokeSet().name());
     return result;
   }
 
