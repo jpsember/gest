@@ -111,7 +111,7 @@ public class GestureSet {
     if (resultsList != null)
       resultsList.clear();
     TreeSet<Match> results = new TreeSet();
-    mMatcher.setMaximumCost(param.maxCost());
+    mMatcher.setMaximumCost(param.maxCost() * inputSet.size());
 
     Set<SortEntry> sortedGestureSet = new TreeSet(SortEntry.COMPARATOR);
     sortedGestureSet.addAll(mEntriesMap.values());
