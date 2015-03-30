@@ -256,6 +256,7 @@ public class GestActivity extends MyActivity {
     ArrayList<String> names = sortedGestureNames(sampledGestures);
     String prevRootName = "";
     int totalProblems = 0;
+    float maxCost = 0;
     for (String name : names) {
       String name1 = rootName(name);
       if (!name1.equals(prevRootName)) {
@@ -280,8 +281,10 @@ public class GestActivity extends MyActivity {
           success = true;
       }
 
-      if (success)
+      if (success) {
+        maxCost = Math.max(maxCost, result.cost());
         continue;
+      }
       pr(" *** Problem matching: " + name);
       if (result == null) {
         pr("  no match found");
@@ -289,7 +292,6 @@ public class GestActivity extends MyActivity {
       }
       pr("         Matched with: " + name2);
       if (totalProblems == mMatchProblemIndex) {
-        // pr("                                         (displaying)");
         setConsoleText("*** Problem:\n " + name + "\n   ...matched...\n "
             + name2);
         mGesturePanel.setDisplayedGesture(result.strokeSet().name(), false);
@@ -299,6 +301,7 @@ public class GestActivity extends MyActivity {
     }
     pr("Number of samples: " + sampledGestures.getNames().size());
     pr(mGestureLibrary.getStats());
+    pr("Maximum cost: " + d(maxCost));
 
     pr("Total problems found: " + totalProblems + "\n");
     if (totalProblems != 0)

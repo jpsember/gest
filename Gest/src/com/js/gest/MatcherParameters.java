@@ -12,6 +12,7 @@ public class MatcherParameters extends Freezable.Mutable {
     setMaximumCostRatio(1.3f);
     setWindowSize(Math
         .round(StrokeNormalizer.DEFAULT_DESIRED_STROKE_LENGTH * .20f));
+    setMaxCost(3000);
     setMaxResults(3);
   }
 
@@ -27,6 +28,15 @@ public class MatcherParameters extends Freezable.Mutable {
   public void setMaximumCostRatio(float ratio) {
     mutate();
     mMaximumCostRatio = ratio;
+  }
+
+  public void setMaxCost(float maxCost) {
+    mutate();
+    mMaxCost = maxCost;
+  }
+
+  public float maxCost() {
+    return mMaxCost;
   }
 
   public void setWindowSize(int windowSize) {
@@ -54,6 +64,7 @@ public class MatcherParameters extends Freezable.Mutable {
     m.setMaximumCostRatio(maximumCostRatio());
     m.setWindowSize(windowSize());
     m.setMaxResults(maxResults());
+    m.setMaxCost(maxCost());
     return m;
   }
 
@@ -81,4 +92,5 @@ public class MatcherParameters extends Freezable.Mutable {
   private float mMaximumCostRatio;
   private int mFlags;
   private int mMaxResults;
+  private float mMaxCost;
 }
